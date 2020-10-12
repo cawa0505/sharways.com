@@ -24,7 +24,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('backup-database')->dailyAt('01:00');
-        $schedule->command('queue:work-and-exit --tries=3')->everyMinute()->withoutOverlapping();
+        $schedule->command('test-cron-job')->everyFiveMinutes();
+        $schedule->command('queue:work --stop-when-empty')->everyMinute();
     }
 
     /**

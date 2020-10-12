@@ -111,12 +111,9 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         data() {
             return {
                 accountTransferForm: new Form({
@@ -156,7 +153,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.accountTransferForm.upload_token = uuid();
+                this.accountTransferForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
         },
@@ -186,13 +183,12 @@
                     this.store();
             },
             store(){
-                this.accountTransferForm.date_of_account_transfer = helper.toDate(this.accountTransferForm.date_of_account_transfer);
                 let loader = this.$loading.show();
                 this.accountTransferForm.post('/api/account/transfer')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.accountTransferForm.upload_token = uuid();
+                        this.accountTransferForm.upload_token = this.$uuid.v4();
                         this.selected_from_account = null;
                         this.selected_to_account = null;
                         this.selected_payment_method = null;
@@ -234,7 +230,6 @@
                     });
             },
             update(){
-                this.accountTransferForm.date_of_account_transfer = helper.toDate(this.accountTransferForm.date_of_account_transfer);
                 let loader = this.$loading.show();
                 this.accountTransferForm.patch('/api/account/transfer/'+this.uuid)
                     .then(response => {

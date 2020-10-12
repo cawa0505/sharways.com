@@ -1,14 +1,11 @@
 /node_modules
-/storage
-/vendor
+!/vendor/
+/vendor/*
+!/vendor/mint/
 /.idea
 /.vagrant
 ./composer.lock
-/public/css
-/public/js
-/public/fonts
 /public/hot
-/public/mix-manifest.json
 /public/storage
 composer.lock
 package-lock.json

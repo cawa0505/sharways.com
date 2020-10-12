@@ -111,13 +111,11 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import lessonPlanForm from './form'
     import lessonPlanDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { lessonPlanForm,datepicker,lessonPlanDetail,vSelect},
+        components : { lessonPlanForm,lessonPlanDetail},
         data() {
             return {
                 lesson_plans: {

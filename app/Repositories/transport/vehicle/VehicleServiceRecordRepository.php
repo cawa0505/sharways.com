@@ -2,16 +2,18 @@
 namespace App\Repositories\Transport\Vehicle;
 
 use Illuminate\Support\Str;
-use App\Models\Transport\Vehicle\VehicleServiceRecord;
 use App\Repositories\Upload\UploadRepository;
 use Illuminate\Validation\ValidationException;
+use App\Models\Transport\Vehicle\VehicleServiceRecord;
 use App\Repositories\Transport\Vehicle\VehicleRepository;
+use App\Repositories\Configuration\Transport\Vehicle\VehicleServiceCenterRepository;
 
 class VehicleServiceRecordRepository
 {
     protected $vehicle_service_record;
     protected $upload;
     protected $vehicle;
+    protected $vehicle_service_center;
     protected $module = 'vehicle_service_record';
 
     /**
@@ -22,11 +24,13 @@ class VehicleServiceRecordRepository
     public function __construct(
         VehicleServiceRecord $vehicle_service_record,
         UploadRepository $upload,
-        VehicleRepository $vehicle
+        VehicleRepository $vehicle,
+        VehicleServiceCenterRepository $vehicle_service_center
     ) {
         $this->vehicle_service_record = $vehicle_service_record;
         $this->upload = $upload;
         $this->vehicle = $vehicle;
+        $this->vehicle_service_center = $vehicle_service_center;
     }
 
     /**
@@ -98,10 +102,12 @@ class VehicleServiceRecordRepository
         $sort_by                    = gv($params, 'sort_by', 'date_of_service');
         $order                      = gv($params, 'order', 'desc');
         $vehicle_id                 = gv($params, 'vehicle_id');
+        $vehicle_service_center_id  = gv($params, 'vehicle_service_center_id');
         $date_of_service_start_date = gv($params, 'date_of_service_start_date');
         $date_of_service_end_date   = gv($params, 'date_of_service_end_date');
 
         $vehicle_id = is_array($vehicle_id) ? $vehicle_id : ($vehicle_id ? explode(',', $vehicle_id) : []);
+        $vehicle_service_center_id = is_array($vehicle_service_center_id) ? $vehicle_service_center_id : ($vehicle_service_center_id ? explode(',', $vehicle_service_center_id) : []);
 
         $query = $this->vehicle_service_record->info()->dateOfServiceBetween([
             'start_date' => $date_of_service_start_date,
@@ -110,6 +116,10 @@ class VehicleServiceRecordRepository
 
         if (count($vehicle_id)) {
             $query->whereIn('vehicle_id', $vehicle_id);
+        }
+
+        if (count($vehicle_service_center_id)) {
+            $query->whereIn('vehicle_service_center_id', $vehicle_service_center_id);
         }
 
         return $query->orderBy($sort_by, $order);
@@ -151,8 +161,9 @@ class VehicleServiceRecordRepository
     public function getPreRequisite()
     {
         $vehicles = $this->vehicle->selectAllActive();
+        $vehicle_service_centers = $this->vehicle_service_center->selectAll();
 
-        return compact('vehicles');
+        return compact('vehicles','vehicle_service_centers');
     }
 
     /**
@@ -178,8 +189,9 @@ class VehicleServiceRecordRepository
     public function getFilters()
     {
         $vehicles = $this->vehicle->selectAll();
+        $vehicle_service_centers = $this->vehicle_service_center->selectAll();
 
-        return compact('vehicles');
+        return compact('vehicles','vehicle_service_centers');
     }
 
     /**
@@ -197,15 +209,22 @@ class VehicleServiceRecordRepository
             throw ValidationException::withMessages(['vehicle_id' => trans('transport.could_not_find_vehicle')]);
         }
 
+        $vehicle_service_center_id  = gv($params, 'vehicle_service_center_id');
+
+        if ($vehicle_service_center_id) {
+            $vehicle_service_center = $this->vehicle_service_center->findOrFail($vehicle_service_center_id);
+        }
+
         $formatted = [
-            'vehicle_id'      => gv($params, 'vehicle_id'),
-            'date_of_service' => gv($params, 'date_of_service'),
-            'amount'          => currency(gv($params, 'amount', 0)),
-            'log'             => currency(gv($params, 'log', 0)),
-            'next_due_date'   => gv($params, 'next_due_date'),
-            'next_due_log'    => null,
-            'employee_id'     => null,
-            'description'     => gv($params, 'description')
+            'vehicle_id'                => gv($params, 'vehicle_id'),
+            'vehicle_service_center_id' => gv($params, 'vehicle_service_center_id'),
+            'date_of_service'           => toDate(gv($params, 'date_of_service')),
+            'amount'                    => currency(gv($params, 'amount', 0)),
+            'log'                       => currency(gv($params, 'log', 0)),
+            'next_due_date'             => toDate(gv($params, 'next_due_date')),
+            'next_due_log'              => null,
+            'employee_id'               => null,
+            'description'               => gv($params, 'description')
         ];
 
         if (! $vehicle_service_record_id) {
@@ -262,7 +281,7 @@ class VehicleServiceRecordRepository
     {
         $vehicle_service_record = $this->findOrFail($id);
 
-        if ($this->vehicle_service_record->filterByVehicleId($vehicle_service_record->vehicle_id)->where('date_of_service', '>', $vehicle_service_record->date_of_service)->count()) {
+        if ($this->vehicle_service_record->filterByVehicleId($vehicle_service_record->vehicle_id)->where('date_of_service', '>', toDate($vehicle_service_record->date_of_service))->count()) {
             throw ValidationException::withMessages(['message' => trans('transport.intermediate_service_record_cannot_be_deleted')]);
         }
 

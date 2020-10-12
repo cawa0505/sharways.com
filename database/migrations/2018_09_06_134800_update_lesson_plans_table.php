@@ -34,7 +34,7 @@ class UpdateLessonPlansTable extends Migration
             $table->dropColumn('uuid');
             $table->string('topic')->nullable()->change();
             $table->dropColumn('upload_token');
-            $table->integer('batch_id')->unsigned()->nullable()->after('id');
+            $table->bigInteger('batch_id')->unsigned()->nullable()->after('id');
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
         });
     }

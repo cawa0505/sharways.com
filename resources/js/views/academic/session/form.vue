@@ -29,6 +29,17 @@
                     <show-error :form-name="academicSessionForm" prop-name="description"></show-error>
                 </div>
             </div>
+            <div class="col-12 col-sm-3">
+                <div class="form-group">
+                    <label for="">{{trans('academic.transfer_certificate_format')}}</label>
+                    <v-select label="name" v-model="selected_transfer_certificate_format" name="transfer_certificate_format" id="transfer_certificate_format" :options="transfer_certificate_formats" :placeholder="trans('academic.select_transfer_certificate_format')" @select="onTransferCertificateFormatSelect" @close="academicSessionForm.errors.clear('transfer_certificate_format')" @remove="academicSessionForm.transfer_certificate_format = ''">
+                        <div class="multiselect__option" slot="afterList" v-if="!transfer_certificate_formats.length">
+                            {{trans('general.no_option_found')}}
+                        </div>
+                    </v-select>
+                    <show-error :form-name="academicSessionForm" prop-name="transfer_certificate_format"></show-error>
+                </div>
+            </div>
         </div>
         <template v-if="!setupWizard">
             <div class="row">
@@ -53,9 +64,6 @@
 
 
 <script>
-    import switches from 'vue-switches'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
         props: {
             setupWizard: {
@@ -63,7 +71,7 @@
             },
             id: ''
         },
-        components: {switches,datepicker},
+        components: {},
         data() {
             return {
                 academicSessionForm: new Form({
@@ -71,8 +79,11 @@
                     description : '',
                     start_date: '',
                     end_date: '',
+                    transfer_certificate_format: '',
                     is_default: 0
-                })
+                }),
+                transfer_certificate_formats: [],
+                selected_transfer_certificate_format: null,
             };
         },
         mounted() {
@@ -81,8 +92,7 @@
                 this.$router.push('/dashboard');
             }
 
-            if(this.id)
-                this.get();
+            this.getPreRequisite();
         },
         methods: {
             proceed(){
@@ -91,10 +101,24 @@
                 else
                     this.store();
             },
+            getPreRequisite(){
+                let loader = this.$loading.show();
+                axios.get('/api/academic/session/pre-requisite')
+                    .then(response => {
+                        this.transfer_certificate_formats = response.transfer_certificate_formats;
+
+                        if(this.id)
+                            this.get();
+
+                        loader.hide();
+                    })
+                    .catch(error => {
+                        loader.hide();
+                        helper.showErrorMsg(error);
+                    })
+            },  
             store(){
                 let loader = this.$loading.show();
-                this.academicSessionForm.start_date = helper.toDate(this.academicSessionForm.start_date);
-                this.academicSessionForm.end_date = helper.toDate(this.academicSessionForm.end_date);
                 this.academicSessionForm.post('/api/academic/session')
                     .then(response => {
                         this.$store.dispatch('setAcademicSession',response.academic_sessions);
@@ -118,6 +142,14 @@
                         this.academicSessionForm.start_date = response.start_date;
                         this.academicSessionForm.end_date = response.end_date;
                         this.academicSessionForm.is_default = response.is_default;
+
+                        let transfer_certificate_format_id = response.options && response.options.hasOwnProperty("transfer_certificate_format") ? response.options.transfer_certificate_format : null;
+
+                        let transfer_certificate_format = this.transfer_certificate_formats.find(o => o.id == transfer_certificate_format_id);
+
+                        this.academicSessionForm.transfer_certificate_format = transfer_certificate_format_id;
+                        this.selected_transfer_certificate_format = transfer_certificate_format || null; 
+
                         loader.hide();
                     })
                     .catch(error => {
@@ -128,8 +160,6 @@
             },
             update(){
                 let loader = this.$loading.show();
-                this.academicSessionForm.start_date = helper.toDate(this.academicSessionForm.start_date);
-                this.academicSessionForm.end_date = helper.toDate(this.academicSessionForm.end_date);
                 this.academicSessionForm.patch('/api/academic/session/'+this.id)
                     .then(response => {
                         this.$store.dispatch('setConfig',{loaded: false});
@@ -141,6 +171,9 @@
                         loader.hide();
                         helper.showErrorMsg(error);
                     });
+            },
+            onTransferCertificateFormatSelect(selectedOption){
+                return this.academicSessionForm.transfer_certificate_format = selectedOption.id;
             }
         }
     }

@@ -14,18 +14,17 @@ class CreateStudentRecordsTable extends Migration
     public function up()
     {
         Schema::create('student_records', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('academic_session_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('academic_session_id')->unsigned()->nullable();
             $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('cascade');
-            $table->integer('admission_id')->unsigned()->nullable();
+            $table->bigInteger('admission_id')->unsigned()->nullable();
             $table->foreign('admission_id')->references('id')->on('admissions')->onDelete('cascade');
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
             $table->boolean('is_promoted')->default(0);
-            $table->integer('fee_allocation_id')->unsigned()->nullable();
+            $table->bigInteger('fee_allocation_id')->unsigned()->nullable();
             $table->foreign('fee_allocation_id')->references('id')->on('fee_allocations')->onDelete('cascade');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
             $table->string('roll_number',20)->nullable();
             $table->date('date_of_entry')->nullable();

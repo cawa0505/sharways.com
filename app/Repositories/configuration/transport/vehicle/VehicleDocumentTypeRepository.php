@@ -167,9 +167,10 @@ class VehicleDocumentTypeRepository
     private function formatParams($params, $vehicle_document_type_id = null)
     {
         $formatted = [
-            'name'            => gv($params, 'name'),
-            'has_expiry_date' => gbv($params, 'has_expiry_date'),
-            'description'     => gv($params, 'description')
+            'name'                  => gv($params, 'name'),
+            'has_expiry_date'       => gbv($params, 'has_expiry_date'),
+            'is_insurance_document' => gbv($params, 'is_insurance_document'),
+            'description'           => gv($params, 'description')
         ];
 
         $formatted['options'] = [];

@@ -183,6 +183,19 @@ class AcademicSessionRepository
     }
 
     /**
+     * Get academic session pre requisite.
+     *
+     * @return Array
+     */
+    public function getPreRequisite()
+    {
+        $data = getVar('data');
+        $transfer_certificate_formats = gv($data, 'transfer_certificate_formats', []);
+
+        return compact('transfer_certificate_formats');
+    }
+
+    /**
      * Import data
      *
      * @param array $params
@@ -458,8 +471,8 @@ class AcademicSessionRepository
             }
         }
 
-        $start_date = gv($params, 'start_date');
-        $end_date   = gv($params, 'end_date');
+        $start_date = toDate(gv($params, 'start_date'));
+        $end_date   = toDate(gv($params, 'end_date'));
 
         $overlapping_query = (! $academic_session_id) ? $this->academic_session : $this->academic_session->where('id', '!=', $academic_session_id);
 
@@ -479,12 +492,21 @@ class AcademicSessionRepository
             throw ValidationException::withMessages(['start_date' => trans('academic.session_overlapping')]);
         }
 
+        $transfer_certificate_format = gv($params, 'transfer_certificate_format');
+        $transfer_certificate_formats = gkv(gv(getVar('data'), 'transfer_certificate_formats', []), 'id');
+
+        if ($transfer_certificate_format && ! in_array($transfer_certificate_format, $transfer_certificate_formats)) {
+            throw ValidationException::withMessages(['transfer_certificate_format' => trans('general.invalid_input')]);
+        }
+
         $formatted = [
             'name'        => gv($params, 'name'),
             'description' => gv($params, 'description'),
-            'is_default'  => $is_default,
-            'options'     => []
+            'is_default'  => $is_default
         ];
+
+        $options['transfer_certificate_format'] = $transfer_certificate_format;
+        $formatted['options'] = $options;
 
         if (! $academic_session_id) {
             $formatted['start_date'] = $start_date;

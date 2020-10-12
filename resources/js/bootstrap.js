@@ -12,7 +12,10 @@ import axios from 'axios'
 import Form from './services/form'
 import helper from './services/helper'
 import VTooltip from 'v-tooltip'
+import VueMonthlyPicker from "vue-monthly-picker"
 import VuejsDialog from "vuejs-dialog"
+import VuejsDialogMixin from 'vuejs-dialog/dist/vuejs-dialog-mixin.min.js';
+import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 import Loading from 'vue-loading-overlay'
 import Vuebar from 'vuebar';
 import Notifications from 'vue-notification'
@@ -32,7 +35,17 @@ import fileUploadInput from './components/file-upload-input'
 import htmlEditor from './components/html-editor'
 import rightPanel from './components/right-panel'
 import helpButton from './components/help-button'
+import customField from './components/custom-field'
 import tourNotification from './components/tour-notification'
+import { Bar } from 'vue-chartjs'
+import switches from 'vue-switches'
+import vSelect from 'vue-multiselect'
+import datepicker from 'vuejs-datepicker'
+import draggable from 'vuedraggable'
+import UUID from 'vue-uuid';
+import VueFormWizard from 'vue-form-wizard'
+import VueCountdown from '@chenfengyuan/vue-countdown';
+import 'vue-form-wizard/dist/vue-form-wizard.min.css'
 
 window.toastr = require('toastr')
 window.moment = require('moment')
@@ -61,17 +74,31 @@ Vue.prototype.$last = function (item, list) {
 Vue.prototype.$first = function (item, list) {
   return item == list[0]
 };
+Number.prototype.format = function(n, x, s, c) {
+    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
+        num = this.toFixed(Math.max(0, ~~n));
 
+    return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
+};
+
+Vue.use(VueFormWizard)
 Vue.use(VTooltip);
 Vue.use(VuejsDialog);
 Vue.use(Loading);
 Vue.use(Vuebar);
 Vue.use(Notifications);
 Vue.use(VueCookie);
+Vue.use(UUID);
+Vue.component(VueCountdown.name, VueCountdown);
 Vue.component('show-tip',showTip);
+Vue.component('switches',switches);
+Vue.component('v-select',vSelect);
+Vue.component('draggable',draggable);
+Vue.component('datepicker',datepicker);
 Vue.component('pagination-record',paginationRecord);
 Vue.component('show-error',showError);
 Vue.component('module-info',moduleInfo);
+Vue.component('vue-monthly-picker',VueMonthlyPicker);
 Vue.component('sort-by',sortBy);
 Vue.component('timepicker',timepicker);
 Vue.component('date-range-picker',dateRangePicker);
@@ -80,6 +107,7 @@ Vue.component('currency-input',currencyInput);
 Vue.component('upload-image',uploadImage);
 Vue.component('file-upload-input',fileUploadInput);
 Vue.component('html-editor',htmlEditor);
+Vue.component('custom-field',customField);
 Vue.component('right-panel',rightPanel);
 Vue.component('help-button',helpButton);
 Vue.component('tour-notification',tourNotification);

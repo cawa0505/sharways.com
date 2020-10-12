@@ -101,10 +101,9 @@
 
 <script>
     import observationForm from './form'
-    import draggable from 'vuedraggable'
 
     export default {
-        components : { observationForm,draggable },
+        components : { observationForm },
         data() {
             return {
                 observations: {

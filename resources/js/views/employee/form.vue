@@ -119,11 +119,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
 	export default {
-        components: {vSelect, datepicker},
+        components: {},
 		data(){
 			return {
 				employeeForm: new Form({
@@ -171,8 +168,6 @@
             },
 			submit(){
                 let loader = this.$loading.show();
-                this.employeeForm.date_of_birth = moment(this.employeeForm.date_of_birth).format('YYYY-MM-DD');
-                this.employeeForm.date_of_joining = moment(this.employeeForm.date_of_joining).format('YYYY-MM-DD');
 				this.employeeForm.post('/api/employee')
 					.then(response => {
 						toastr.success(response.message);

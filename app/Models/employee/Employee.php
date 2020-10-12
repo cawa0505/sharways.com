@@ -2,6 +2,7 @@
 
 namespace App\Models\Employee;
 
+use App\Helper\Cal;
 use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
@@ -31,6 +32,7 @@ class Employee extends Model
                             'unique_identification_number',
                             'father_name',
                             'mother_name',
+                            'spouse_name',
                             'emergency_contact_name',
                             'emergency_contact_number',
                             'present_address_line_1',
@@ -47,14 +49,14 @@ class Employee extends Model
                             'permanent_country',
                             'options'
                         ];
-    protected $casts = ['options' => 'array'];
+    protected $casts = ['options' => 'array', 'date_of_birth' => 'date', 'date_of_anniversary' => 'date'];
     protected $primaryKey = 'id';
     protected $table = 'employees';
     protected static $logName = 'student';
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['updated_at'];
-    protected $appends = ['present_address','permanent_address'];
+    protected $appends = ['present_address','permanent_address','name', 'age', 'employee_code'];
     
     public function user()
     {
@@ -121,6 +123,11 @@ class Employee extends Model
         return $this->first_name.' '.($this->middle_name ? ($this->middle_name.' ') : '').$this->last_name;
     }
 
+    public function getAgeAttribute()
+    {
+        return $this->date_of_birth ? Cal::getAge($this->date_of_birth) : null;
+    }
+
     public function getNameWithCodeAttribute()
     {
         return $this->name.' ('.$this->employee_code.')';
@@ -128,20 +135,34 @@ class Employee extends Model
 
     public function getPresentAddressAttribute()
     {
-        $address = $this->present_address_line_1.' '.$this->present_address_line_2.' '.$this->present_city.' '.$this->present_state.' '.$this->present_zipcode.' '.$this->present_country;
+        $data= array(
+            $this->present_address_line_1,
+            $this->present_address_line_2,
+            $this->present_city,
+            $this->present_state,
+            $this->present_zipcode,
+            $this->present_country
+        );
 
-        return preg_replace('/\s+/', ' ',$address);
+        $data = array_filter($data);
+
+        return implode(', ', $data);
     }
 
     public function getPermanentAddressAttribute()
     {
-        if ($this->same_as_present_address) {
-            return $this->present_address;
-        }
+        $data= array(
+            $this->permanent_address_line_1,
+            $this->permanent_address_line_2,
+            $this->permanent_city,
+            $this->permanent_state,
+            $this->permanent_zipcode,
+            $this->permanent_country
+        );
 
-        $address = $this->permanent_address_line_1.' '.$this->permanent_address_line_2.' '.$this->permanent_city.' '.$this->permanent_state.' '.$this->permanent_zipcode.' '.$this->permanent_country;
+        $data = array_filter($data);
 
-        return preg_replace('/\s+/', ' ',$address);
+        return implode(', ', $data);
     }
 
     public function scopeInfo($q)
@@ -233,6 +254,15 @@ class Employee extends Model
         }
 
         return ($strict) ? $q->where('father_name', '=', $father_name) : $q->where('father_name', 'like', '%'.$father_name.'%');
+    }
+    
+    public function scopeFilterBySpouseName($q, $spouse_name, $strict = 0)
+    {
+        if (! $spouse_name) {
+            return $q;
+        }
+
+        return ($strict) ? $q->where('spouse_name', '=', $spouse_name) : $q->where('spouse_name', 'like', '%'.$spouse_name.'%');
     }
     
     public function scopeFilterByDOB($q, $date_of_birth)

@@ -14,8 +14,7 @@ class CreateIpFiltersTable extends Migration
     public function up()
     {
         Schema::create('ip_filters', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->ipAddress('start_ip')->nullable();
             $table->ipAddress('end_ip')->nullable();
             $table->text('description')->nullable();

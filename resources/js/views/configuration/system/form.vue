@@ -95,6 +95,17 @@
                             </div>
                             <div class="col-12 col-sm-4">
                                 <div class="form-group">
+                                    <label for="">{{trans('calendar.first_day_of_week')}}</label>
+                                    <select v-model="configForm.first_day_of_week" class="custom-select col-12" name="first_day_of_week" @change="configForm.errors.clear('first_day_of_week')">
+                                      <option v-for="option in systemConfigVariables.days" v-bind:value="option.value">
+                                        {{ option.text }}
+                                      </option>
+                                    </select>
+                                    <show-error :form-name="configForm" prop-name="first_day_of_week"></show-error>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <div class="form-group">
                                     <label for="">{{trans('configuration.currency')}}</label>
                                     <select v-model="configForm.currency" class="custom-select col-12" name="currency" @change="configForm.errors.clear('currency')">
                                       <option v-for="option in systemConfigVariables.currencies" v-bind:value="option.value">
@@ -120,6 +131,13 @@
                                     <label for="">{{trans('configuration.footer_credit')}}</label>
                                     <input class="form-control" type="text" v-model="configForm.footer_credit" name="footer_credit" :placeholder="trans('configuration.footer_credit')">
                                     <show-error :form-name="configForm" prop-name="footer_credit"></show-error>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">{{trans('configuration.biometric_auth_token')}}</label>
+                                    <input class="form-control" type="text" v-model="configForm.biometric_auth_token" name="biometric_auth_token" :placeholder="trans('configuration.biometric_auth_token')">
+                                    <show-error :form-name="configForm" prop-name="biometric_auth_token"></show-error>
                                 </div>
                             </div>
                         </div>
@@ -158,6 +176,32 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-sm-4">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.enable_online_registration')}}</label>
+                                    <div>
+                                        <switches class="" v-model="configForm.online_registration" theme="bootstrap" color="success"></switches>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.online_registration_header')}}</label>
+                                    <autosize-textarea row="1" class="form-control" v-model="configForm.online_registration_header" :placeholder="trans('configuration.online_registration_header')" rows="2" name="online_registration_header"></autosize-textarea>
+                                    <show-error :form-name="configForm" prop-name="online_registration_header"></show-error>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.online_registration_success_message')}}</label>
+                                    <autosize-textarea row="1" class="form-control" v-model="configForm.online_registration_success_message" :placeholder="trans('configuration.online_registration_success_message')" rows="2" name="online_registration_success_message"></autosize-textarea>
+                                    <show-error :form-name="configForm" prop-name="online_registration_success_message"></show-error>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-12 col-sm-4">
                                 <div class="form-group">
                                     <label for="">{{trans('utility.ip_filter')}}</label>
@@ -225,9 +269,6 @@
 </template>
 
 <script>
-
-    import switches from 'vue-switches'
-
     export default {
         props: {
             setupWizard: {
@@ -237,7 +278,7 @@
                 required: false
             }
         },
-        components : { switches },
+        components : { },
         data() {
             return {
                 configForm: new Form({
@@ -248,13 +289,16 @@
                     time_format: '',
                     notification_position: '',
                     timezone: '',
+                    first_day_of_week: '',
                     page_length: 10,
                     locale: '',
                     currency: '',
                     footer_credit: '',
+                    biometric_auth_token: '',
                     https: 0,
                     error_display: 0,
                     frontend_website: 0,
+                    online_registration: 0,
                     multilingual: 0,
                     ip_filter: 0,
                     email_log: 0,
@@ -263,6 +307,8 @@
                     backup: 0,
                     maintenance_mode: 0,
                     maintenance_mode_message: '',
+                    online_registration_header: '',
+                    online_registration_success_message: '',
                     config_type: ''
                 }, false),
                 systemConfigVariables: {
@@ -274,7 +320,8 @@
                     notification_positions: [],
                     timezones: [],
                     locales: [],
-                    currencies: []
+                    currencies: [],
+                    days: []
                 },
                 direction: '',
                 locale: '',
@@ -302,6 +349,7 @@
                         this.systemConfigVariables.sidebar = response.sidebar;
                         this.systemConfigVariables.date_formats = response.date_formats;
                         this.systemConfigVariables.time_formats = response.time_formats;
+                        this.systemConfigVariables.days = response.days;
                         this.systemConfigVariables.notification_positions = response.notification_positions;
                         this.systemConfigVariables.timezones = response.timezones;
                         this.systemConfigVariables.locales = response.locales;
@@ -331,6 +379,7 @@
                 this.configForm.https = (this.configForm.https) ? 1 : 0;
                 this.configForm.error_display = (this.configForm.error_display) ? 1 : 0;
                 this.configForm.frontend_website = (this.configForm.frontend_website) ? 1 : 0;
+                this.configForm.online_registration = (this.configForm.online_registration) ? 1 : 0;
                 this.configForm.multilingual = (this.configForm.multilingual) ? 1 : 0;
                 this.configForm.ip_filter = (this.configForm.ip_filter) ? 1 : 0;
                 this.configForm.email_log = (this.configForm.email_log) ? 1 : 0;

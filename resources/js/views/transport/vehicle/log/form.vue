@@ -47,11 +47,8 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         data() {
             return {
                 vehicleLogForm: new Form({
@@ -92,7 +89,6 @@
             },
             storeVehicleLog(){
                 let loader = this.$loading.show();
-                this.vehicleLogForm.date_of_log = moment(this.vehicleLogForm.date_of_log).format('YYYY-MM-DD');
                 this.vehicleLogForm.post('/api/vehicle/log')
                     .then(response => {
                         toastr.success(response.message);
@@ -123,7 +119,6 @@
             },
             updateVehicleLog(){
                 let loader = this.$loading.show();
-                this.vehicleLogForm.date_of_log = moment(this.vehicleLogForm.date_of_log).format('YYYY-MM-DD');
                 this.vehicleLogForm.patch('/api/vehicle/log/'+this.id)
                     .then(response => {
                         toastr.success(response.message);

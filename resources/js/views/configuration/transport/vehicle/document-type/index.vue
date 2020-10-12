@@ -44,6 +44,7 @@
                                     <th>{{trans('transport.vehicle_document_type_name')}}</th>
                                     <th>{{trans('transport.vehicle_document_type_description')}}</th>
                                     <th>{{trans('transport.has_expiry_date')}}</th>
+                                    <th>{{trans('transport.is_insurance_document')}}</th>
                                     <th class="table-option">{{trans('general.action')}}</th>
                                 </tr>
                             </thead>
@@ -53,6 +54,10 @@
                                     <td v-text="document_type.description"></td>
                                     <td>
                                         <i class="fas fa-check" v-if="document_type.has_expiry_date"></i>
+                                        <i class="fas fa-times" v-else></i>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-check" v-if="document_type.is_insurance_document"></i>
                                         <i class="fas fa-times" v-else></i>
                                     </td>
                                     <td class="table-option">

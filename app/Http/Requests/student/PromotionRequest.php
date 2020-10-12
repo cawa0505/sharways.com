@@ -25,7 +25,7 @@ class PromotionRequest extends FormRequest
     {
         return [
             'next_session_batch_id' => 'required',
-            'promotion_remarks' => 'optional|min:0'
+            'promotion_remarks' => 'required|min:20'
         ];
     }
 

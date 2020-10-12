@@ -28,21 +28,23 @@
 			            				<tr>
 			            					<th>{{trans('student.name')}}</th>
 			            					<th>{{trans('academic.batch')}}</th>
-			            					<th>{{trans('student.father_name')}}</th>
+			            					<th>{{trans('student.first_guardian_name')}}</th>
 			            					<th>{{trans('student.contact_number')}}</th>
 			            					<th class="table-option"></th>
 			            				</tr>
 			            			</thead>
 			            			<tbody>
-			            				<tr v-for="student in students.data">
-			            					<td>{{getStudentName(student)}}</td>
-			            					<td>{{getStudentBatch(student)}}</td>
-			            					<td>{{getStudentFatherName(student)}}</td>
-			            					<td>{{student.contact_number}}</td>
-			            					<td class="table-option">
-			            						<button type="button" class="btn btn-sm btn-info" @click="selectStudent(student)">{{trans('student.select_student')}}</button>
-			            					</td>
-			            				</tr>
+			            				<template v-for="student in students.data">
+				            				<tr v-for="student_record in student.student_records">
+				            					<td>{{getStudentName(student)}}</td>
+				            					<td>{{student_record.batch.course.name+' '+student_record.batch.name}}</td>
+				            					<td>{{student.parent.first_guardian_name}}</td>
+				            					<td>{{student.contact_number}}</td>
+				            					<td class="table-option">
+				            						<button type="button" class="btn btn-sm btn-info" @click="selectStudentRecord(student, student_record)">{{trans('student.select_student')}}</button>
+				            					</td>
+				            				</tr>
+				            			</template>
 			            			</tbody>
 			            		</table>
 			            	</div>
@@ -89,11 +91,11 @@
 			            </template>
 		            </div>
 
-	            	<div class="m-b-20" v-if="type == 'student' && selected_student">
+	            	<div class="m-b-20" v-if="type == 'student' && selected_student && selected_student_record">
 	            		<div class="row">
 	            			<div class="col-6">{{trans('student.name')+': '+getStudentName(selected_student)}}</div>
 	            			<div class="col-6">{{trans('student.father_name')+': '+getStudentFatherName(selected_student)}} <br /></div>
-	            			<div class="col-6">{{trans('academic.batch')+': '+getStudentBatch(selected_student)}}</div>
+	            			<div class="col-6">{{trans('academic.batch')+': '+selected_student_record.batch.course.name+' '+selected_student_record.batch.name}}</div>
 	            			<div class="col-6">{{trans('student.contact_number')+': '+selected_student.contact_number}}</div>
 	            		</div>
 	            	</div>
@@ -123,10 +125,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-
 	export default {
-		components: {vSelect},
+		components: {},
 		props: ['uuid'],
 		data() {
 			return {
@@ -142,6 +142,7 @@
 				certificate_template_details: [],
 				selected_certificate_template: null,
 				selected_student: null,
+				selected_student_record: null,
 				selected_employee: null,
 				studentFilter: {
 					name: '',
@@ -170,10 +171,6 @@
             },
             getStudentFatherName(student){
             	return student.parent.father_name;
-            },
-            getStudentBatch(student){
-            	let student_record = student.student_records[0];
-            	return student_record.batch.course.name+' '+student_record.batch.name;
             },
             getEmployeeName(employee){
                 return helper.getEmployeeName(employee);
@@ -244,9 +241,10 @@
 						helper.showErrorMsg(error);
 					})
 			},
-			selectStudent(student){
-				this.certificateForm.student_record_id = student.student_records[0].id;
+			selectStudentRecord(student, student_record){
+				this.certificateForm.student_record_id = student_record.id;
 				this.selected_student = student;
+				this.selected_student_record = student_record;
 				this.students = [];
 				this.studentFilter.name = '';
                 this.updateTemplate();
@@ -298,7 +296,7 @@
 			},
 			updateStudentRecord(body) {
 				let student = this.selected_student;
-            	let student_record = student.student_records[0];
+            	let student_record = this.selected_student_record;
             	let parent = student.parent;
 
             	if (! student_record || ! parent)
@@ -313,19 +311,16 @@
             		.replace("#MOTHER_NAME#", parent.mother_name)
             		.replace("#COURSE#", student_record.batch.course.name)
             		.replace("#BATCH#", student_record.batch.name)
-            		.replace("#RELIGION#", student.religion ? student.religion.name : '')
-            		.replace("#CASTE#", student.caste ? student.caste.name : '')
-            		.replace("#CATEGORY#", student.category ? student.category.name : '')
             		.replace("#SESSION#", helper.getDefaultAcademicSession().name)
             		.replace("#DATE_OF_BIRTH#", helper.formatDate(student.date_of_birth))
             		.replace("#ADMISSION_NUMBER#", helper.getAdmissionNumber(student_record.admission))
             		.replace("#DATE_OF_ADMISSION#", helper.formatDate(student_record.admission.date_of_admission))
             		.replace("#ROLL_NUMBER#", helper.getRollNumber(student_record))
-            		.replace("#PRESENT_ADDRESS#", student.present_address)
-            		.replace("#PERMANENT_ADDRESS#", student.permanent_address)
             		.replace("#CURRENT_DATE#", helper.defaultDate())
             		.replace("#CURRENT_TIME#", helper.defaultTime())
-            		.replace("#CURRENT_DATE_TIME#", helper.defaultDateTime());
+            		.replace("#CURRENT_DATE_TIME#", helper.defaultDateTime())
+            		.replace("#PRESENT_ADDRESS#", student.present_address)
+            		.replace("#PERMANENT_ADDRESS#", student.permanent_address);
 
 			},
 			updateEmployeeRecord(body) {
@@ -334,20 +329,17 @@
             	return body.replace("#NAME#", this.getEmployeeName(employee))
             		.replace("#FIRST_NAME#", employee.first_name)
             		.replace("#LAST_NAME#", employee.last_name)
-            		.replace("#RELIGION#", employee.religion ? employee.religion.name : '')
-            		.replace("#CASTE#", employee.caste ? employee.caste.name : '')
-            		.replace("#CATEGORY#", employee.category ? employee.category.name : '')
             		.replace("#FATHER_NAME#", employee.father_name)
             		.replace("#MOTHER_NAME#", employee.mother_name)
             		.replace("#DATE_OF_BIRTH#", helper.formatDate(employee.date_of_birth))
             		.replace("#EMPLOYEE_CODE#", this.getEmployeeCode(employee))
             		.replace("#DESIGNATION#", helper.getEmployeeDesignationOnDate(employee))
             		.replace("#DATE_OF_JOINING#", helper.getEmployeeDateOfJoining(employee))
-            		.replace("#PRESENT_ADDRESS#", employee.present_address)
-            		.replace("#PERMANENT_ADDRESS#", employee.permanent_address)
             		.replace("#CURRENT_DATE#", helper.defaultDate())
             		.replace("#CURRENT_TIME#", helper.defaultTime())
             		.replace("#CURRENT_DATE_TIME#", helper.defaultDateTime())
+            		.replace("#PRESENT_ADDRESS#", employee.present_address)
+            		.replace("#PERMANENT_ADDRESS#", employee.permanent_address);
 			},
 			updateCustomFields(body) {
 				this.certificateForm.custom_fields.forEach(custom_field => {
@@ -372,6 +364,7 @@
                         this.selected_certificate_template = null;
                         this.certificateForm.custom_fields = [];
                         this.selected_student = null;
+                        this.selected_student_record = null;
                         this.selected_employee = null;
                         this.$emit('completed');
                         loader.hide();

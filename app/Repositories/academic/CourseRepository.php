@@ -130,7 +130,24 @@ class CourseRepository
         $course = $this->course->info()->filterBySession()->filterById($id)->first();
 
         if (! $course) {
-            throw ValidationException::withMessages([$field => trans('academic.could_not_find_cousre')]);
+            throw ValidationException::withMessages([$field => trans('academic.could_not_find_course')]);
+        }
+
+        return $course;
+    }
+
+    /**
+     * Find course by session with given id or throw an error.
+     *
+     * @param integer $id
+     * @return Course
+     */
+    public function findOrFailBySessionId($id, $session_id, $field = 'message')
+    {
+        $course = $this->course->info()->filterBySession($session_id)->filterById($id)->first();
+
+        if (! $course) {
+            throw ValidationException::withMessages([$field => trans('academic.could_not_find_course')]);
         }
 
         return $course;
@@ -267,7 +284,7 @@ class CourseRepository
         }
 
         $registration_fee                   = gbv($params, 'enable_registration_fee');
-        $options['attendance_type']         = gv($params, 'attendance_type', config('config.default_attendance_type'));
+        // $options['attendance_type']         = gv($params, 'attendance_type', config('config.default_attendance_type'));
         $options['enable_registration']     = gbv($params, 'enable_registration');
         $options['enable_registration_fee'] = $registration_fee;
         $options['registration_fee']        = $registration_fee ? gv($params, 'registration_fee') : 0;

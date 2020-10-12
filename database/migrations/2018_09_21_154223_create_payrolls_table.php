@@ -14,12 +14,11 @@ class CreatePayrollsTable extends Migration
     public function up()
     {
         Schema::create('payrolls', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id','pr_employee_id_foreign')->references('id')->on('employees')->onDelete('cascade');
-            $table->integer('employee_salary_id')->unsigned()->nullable();
+            $table->bigInteger('employee_salary_id')->unsigned()->nullable();
             $table->foreign('employee_salary_id','pr_employee_salary_id_foreign')->references('id')->on('employee_salaries')->onDelete('cascade');
             $table->string('period',20)->nullable();
             $table->string('period_detail',20)->nullable();

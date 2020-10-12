@@ -14,13 +14,12 @@ class CreateDesignationsTable extends Migration
     public function up()
     {
         Schema::create('designations', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('employee_category_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('employee_category_id')->unsigned()->nullable();
             $table->foreign('employee_category_id')->references('id')->on('employee_categories')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->boolean('is_teaching_employee')->default(0);
-            $table->integer('top_designation_id')->unsigned()->nullable();
+            $table->bigInteger('top_designation_id')->unsigned()->nullable();
             $table->foreign('top_designation_id')->references('id')->on('designations')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->text('options')->nullable();

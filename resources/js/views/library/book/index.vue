@@ -18,6 +18,7 @@
                                 <i class="fas fa-ellipsis-h"></i> <span class="d-none d-sm-inline"></span>
                             </button>
                             <div :class="['dropdown-menu',getConfig('direction') == 'ltr' ? 'dropdown-menu-right' : '']" aria-labelledby="moreOption">
+                                <button class="dropdown-item custom-dropdown" v-if="hasPermission('edit-book')" @click="$router.push('/library/barcode')"><i class="fas fa-barcode"></i> {{trans('library.generate_barcode')}}</button>
                                 <button class="dropdown-item custom-dropdown" @click="print"><i class="fas fa-print"></i> {{trans('general.print')}}</button>
                                 <button class="dropdown-item custom-dropdown" @click="pdf"><i class="fas fa-file-pdf"></i> {{trans('general.generate_pdf')}}</button>
                             </div>
@@ -149,11 +150,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import bookForm from './form'
 
     export default {
-        components : { bookForm,vSelect },
+        components : { bookForm },
         data() {
             return {
                 books: {

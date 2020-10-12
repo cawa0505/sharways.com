@@ -238,10 +238,6 @@ class FeeAllocationRepository
         $fee_heads = $this->fee_head->getAll();
         $transport_fees = $this->transport_fee->selectAll();
         $late_fee_frequencies = getLateFeeFrequencies();
-        array_push($late_fee_frequencies, array(
-            'value' => 500,
-            'text' => trans('general.custom')
-        ));
 
         return compact('fee_groups', 'fee_heads', 'batches', 'late_fee_frequencies', 'transport_fees');
     }
@@ -490,7 +486,7 @@ class FeeAllocationRepository
             foreach ($installments as $index => $installment) {
                 $title    = gv($installment, 'title');
                 $uuid     = gv($installment, 'uuid');
-                $due_date = gv($installment, 'due_date') ? date('Y-m-d', strtotime(gv($installment, 'due_date'))) : null;
+                $due_date = gv($installment, 'due_date') ? toDate(gv($installment, 'due_date')) : null;
                 $transport_fee_id = gv($installment, 'transport_fee_id');
 
                 // Validate all transport ids

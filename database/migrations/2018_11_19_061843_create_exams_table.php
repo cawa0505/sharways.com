@@ -14,11 +14,10 @@ class CreateExamsTable extends Migration
     public function up()
     {
         Schema::create('exams', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('academic_session_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('academic_session_id')->unsigned()->nullable();
             $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('cascade');
-            $table->integer('exam_term_id')->unsigned()->nullable();
+            $table->bigInteger('exam_term_id')->unsigned()->nullable();
             $table->foreign('exam_term_id')->references('id')->on('exam_terms')->onDelete('set null');
             $table->string('name')->nullable();
             $table->integer('position')->default(0);

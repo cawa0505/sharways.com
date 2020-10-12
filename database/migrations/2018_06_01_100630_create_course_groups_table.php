@@ -14,10 +14,9 @@ class CreateCourseGroupsTable extends Migration
     public function up()
     {
         Schema::create('course_groups', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->integer('position')->default(0);
-            $table->integer('academic_session_id')->unsigned()->nullable();
+            $table->bigInteger('academic_session_id')->unsigned()->nullable();
             $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->text('description')->nullable();

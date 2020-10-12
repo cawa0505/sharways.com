@@ -70,11 +70,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components : { vSelect,datepicker },
+        components : {},
         props:['uuid'],
         data() {
             return {
@@ -144,7 +141,6 @@
             },
             store(){
                 let loader = this.$loading.show();
-                this.salaryStructureForm.date_effective = helper.toDate(this.salaryStructureForm.date_effective);
                 this.salaryStructureForm.post('/api/employee/payroll/salary')
                     .then(response => {
                         toastr.success(response.message);
@@ -188,7 +184,6 @@
             },
             update(){
                 let loader = this.$loading.show();
-                this.salaryStructureForm.date_effective = helper.toDate(this.salaryStructureForm.date_effective);
                 this.salaryStructureForm.patch('/api/employee/payroll/salary/'+this.uuid)
                     .then(response => {
                         toastr.success(response.message);

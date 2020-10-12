@@ -14,9 +14,8 @@ class CreateExamAssessmentDetailsTable extends Migration
     public function up()
     {
         Schema::create('exam_assessment_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('exam_assessment_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('exam_assessment_id')->unsigned()->nullable();
             $table->foreign('exam_assessment_id','ead_exam_assessment_id_foreign')->references('id')->on('exam_assessments')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('code')->nullable();

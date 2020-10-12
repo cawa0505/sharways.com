@@ -111,11 +111,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import feeInstallmentForm from './fee-installment-form'
 
     export default {
-        components : { vSelect,feeInstallmentForm },
+        components : { feeInstallmentForm },
         data() {
             return {
                 uuid:this.$route.params.uuid,

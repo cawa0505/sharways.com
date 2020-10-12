@@ -14,8 +14,7 @@ class CreateEmployeeAttendanceTypesTable extends Migration
     public function up()
     {
         Schema::create('employee_attendance_types', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('alias')->nullable();
             $table->string('type',50)->nullable();

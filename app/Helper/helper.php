@@ -37,7 +37,31 @@ function envu($data = array())
     return true;
 }
 
+function my_version_compare($ver1, $ver2, $operator = null)
+{
+    $p = '#(\.0+)+($|-)#';
+    $ver1 = preg_replace($p, '', $ver1);
+    $ver2 = preg_replace($p, '', $ver2);
+    return isset($operator) ?
+        version_compare($ver1, $ver2, $operator) :
+        version_compare($ver1, $ver2);
+}
+
+function getHostNameForCachePrefix()
+{
+    return isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+}
+
 //////////////////////////////////////////////////////////////////////// Date helper function starts
+
+function validateEmail($email)
+{
+    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return true;
+    }
+
+    return false;
+}
 
 /*
  *  Used to check whether date is valid or not
@@ -63,6 +87,18 @@ function dateDiff($date1, $date2)
     } else {
         return date_diff(date_create($date2), date_create($date1))->days;
     }
+}
+
+/*
+ *  Used to get date with start midnight time
+ *  @param
+ *  $date as timestamp or date variable
+ *  @return date with start midnight time
+ */
+
+function getDateTime($date)
+{
+    return date('Y-m-d', strtotime($date)).' 00:00:00';
 }
 
 /*
@@ -104,6 +140,8 @@ function getDateFormat()
         return 'd-M-Y';
     } elseif (config('config.date_format') === 'MMM-DD-YYYY') {
         return 'M-d-Y';
+    } elseif (config('config.date_format') === 'YYYY-MM-DD') {
+        return 'Y-m-d';
     } else {
         return 'd-m-Y';
     }
@@ -238,6 +276,23 @@ function randomString($length, $type = 'token')
     return $token;
 }
 
+/**
+ * Generate OTP
+ * @param  integer $n
+ * @return integer
+ */
+function generateOTP($n = 6) { 
+    $generator = "1357902468"; 
+  
+    $result = ""; 
+  
+    for ($i = 1; $i <= $n; $i++) { 
+        $result .= substr($generator, (rand()%(strlen($generator))), 1); 
+    } 
+  
+    return $result; 
+}
+
 /*
  *  Used to whether string contains unicode
  *  @param
@@ -289,6 +344,10 @@ function scriptStripper($string)
 
 function isInteger($input){
     return(ctype_digit(strval($input)));
+}
+
+function digitCount($number) {
+    return strlen((string)$number);
 }
 
 //////////////////////////////////////////////////////////////////////////////////// String helper function ends
@@ -388,6 +447,36 @@ function generateNormalSelectOptionValueOnly($data)
 function formatNumber($number, $decimal_place = 2)
 {
     return round($number, $decimal_place);
+}
+
+function formatSizeUnits($bytes)
+{
+    if ($bytes >= 1073741824)
+    {
+        $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+    }
+    elseif ($bytes >= 1048576)
+    {
+        $bytes = number_format($bytes / 1048576, 2) . ' MB';
+    }
+    elseif ($bytes >= 1024)
+    {
+        $bytes = number_format($bytes / 1024, 2) . ' KB';
+    }
+    elseif ($bytes > 1)
+    {
+        $bytes = $bytes . ' bytes';
+    }
+    elseif ($bytes == 1)
+    {
+        $bytes = $bytes . ' byte';
+    }
+    else
+    {
+        $bytes = '0 bytes';
+    }
+
+    return $bytes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////// IP helper function starts
@@ -529,7 +618,7 @@ function getClientIp()
 
 function isTestMode()
 {
-    if (env('APP_MODE') == 'test') {
+    if (config('app.mode') == 'test') {
         return true;
     } else {
         return false;
@@ -641,6 +730,10 @@ function currency($amount, $symbol = 0)
 {
     $currency = getDefaultCurrency();
 
+    if (! is_numeric($amount)) {
+        return;
+    }
+
     if (! $currency) {
         return round($amount, 2);
     }
@@ -656,6 +749,16 @@ function currency($amount, $symbol = 0)
 
     $amount = round($amount, $decimal_value);
 
+    // money format
+    $decimal = (floor( $amount ) != $amount) ? gv($currency, 'decimal_place') : 0;
+    if (gv($currency, 'format') == 'indian') {
+        $integer_part = moneyFormatIndia(floor($amount));
+        $decimal_part = ($decimal) ? ('.'.explode('.', $amount)[1]) : '';
+        $amount = $integer_part.$decimal_part;
+    } else {
+        $amount = number_format($amount, $decimal, '.', ',');
+    }
+
     if ($position === 'suffix') {
         return $amount.''.$currency_symbol;
     } else {
@@ -668,9 +771,37 @@ function gv($params, $key, $default = null)
     return (isset($params[$key]) && $params[$key]) ? $params[$key] : $default;
 }
 
+function gkv($data, $key)
+{
+    return array_map(function($item) use($key) {
+        return data_get($item, $key);
+    }, $data);
+}
+
 function gbv($params, $key)
 {
     return (isset($params[$key]) && $params[$key]) ? 1 : 0;
+}
+
+function gnv($params, $key, $default = null)
+{
+    return isset($params[$key]) ? $params[$key] : $default;
+}
+
+function mergeByKey($array1,$array2) {
+    $array1 = ! is_array($array1) ? [] : $array1;
+    $array2 = ! is_array($array2) ? [] : $array2;
+
+    $data = array();
+    $arrayAB = array_merge($array1,$array2);
+    foreach ($arrayAB as $value) {
+      $id = $value['id'];
+      if (!isset($data[$id])) {
+        $data[$id] = array();
+      }
+      $data[$id] = array_merge($data[$id],$value);
+    }
+    return array_values($data);
 }
 
 function dateBetweenSession($date)
@@ -679,7 +810,7 @@ function dateBetweenSession($date)
         return false;
     }
 
-    if ($date >= config('config.default_academic_session.start_date') && $date <= config('config.default_academic_session.end_date')) {
+    if (toDate($date) >= config('config.default_academic_session.start_date') && toDate($date) <= config('config.default_academic_session.end_date')) {
         return true;
     }
 
@@ -692,7 +823,7 @@ function dateLessThanSessionStart($date)
         return false;
     }
 
-    if ($date <= config('config.default_academic_session.start_date')) {
+    if (toDate($date) <= config('config.default_academic_session.start_date')) {
         return true;
     }
 
@@ -705,7 +836,7 @@ function dateLessThanSessionEnd($date)
         return false;
     }
 
-    if ($date <= config('config.default_academic_session.end_date')) {
+    if (toDate($date) <= config('config.default_academic_session.end_date')) {
         return true;
     }
 
@@ -718,7 +849,7 @@ function dateGreaterThanSessionStart($date)
         return false;
     }
 
-    if ($date >= config('config.default_academic_session.start_date')) {
+    if (toDate($date) >= config('config.default_academic_session.start_date')) {
         return true;
     }
 
@@ -731,11 +862,42 @@ function dateGreaterThanSessionEnd($date)
         return false;
     }
 
-    if ($date >= config('config.default_academic_session.end_date')) {
+    if (toDate($date) >= config('config.default_academic_session.end_date')) {
         return true;
     }
 
     return false;
+}
+
+function getDayInInteger($day)
+{
+    if ($day == 'monday') {
+        return 1;
+    } elseif ($day == 'tuesday') {
+        return 2;
+    } elseif ($day == 'wednesday') {
+        return 3;
+    } elseif ($day == 'thursday') {
+        return 4;
+    } elseif ($day == 'friday') {
+        return 5;
+    } elseif ($day == 'saturday') {
+        return 6;
+    } else {
+        return 0;
+    }
+}
+
+function getDaysInOrder()
+{
+    $list = getVar('list');
+    $days = $list['day'];
+
+    for ($i=0; $i < getDayInInteger(config('config.first_day_of_week')) ; $i++) {
+        array_push($days, array_shift($days));
+    }
+
+    return generateTranslatedSelectOption($days);
 }
 
 function getLateFeeFrequencies()
@@ -748,8 +910,7 @@ function getLateFeeFrequencies()
         ['value' => '60', 'text' => trans('finance.late_fee_frequency_bi_monthly')],
         ['value' => '90', 'text' => trans('finance.late_fee_frequency_quarterly')],
         ['value' => '180', 'text' => trans('finance.late_fee_frequency_bi_annually')],
-        ['value' => '365', 'text' => trans('finance.late_fee_frequency_annually')],
-        ['value' => '500', 'text' => trans('general.custom')]
+        ['value' => '365', 'text' => trans('finance.late_fee_frequency_annually')]
     ];
 }
 
@@ -799,8 +960,55 @@ function getLateFeeFrequenciesInDays($frequency)
     }
 }
 
+function getAuthUserBatchId()
+{
+    if (\Auth::user()->hasRole(config('system.default_role.student'))) {
+        return getAuthStudentBatch();
+    } else if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
+        return getAuthParentStudentsBatch();
+    } else {
+        return [];
+    }
+}
+
+function getAuthStudentBatch()
+{
+
+    $student = \App\Models\Student\Student::with('studentRecords')->filterById(\Auth::user()->Student->id)->first();
+
+    if (! $student) {
+        return [];
+    }
+
+    return $student->studentRecords->where('academic_session_id', config('config.default_academic_session.id'))->pluck('batch_id')->all();
+}
+
+function getAuthParentStudentsBatch()
+{
+    if (! \Auth::user()->hasRole(config('system.default_role.parent'))) {
+        return [];
+    }
+
+    $student_ids = \Auth::user()->Parent->Students->pluck('id')->all();
+    $students = \App\Models\Student\Student::with('studentRecords')->whereIn('id', $student_ids)->get();
+
+    if (! $students) {
+        return [];
+    }
+
+    $batch_id = array();
+    foreach ($students as $student) {
+        $student_records = $student->studentRecords->where('academic_session_id', config('config.default_academic_session.id'))->where('date_of_exit',null)->all();
+        foreach ($student_records as $student_record) {
+            $batch_id[] = $student_record->batch_id;
+        }
+    }
+
+    return $batch_id;
+}
+
 function getRollNumber($student_record){
-    if (! $student_record->roll_number) {
+    if ($student_record && ! $student_record->roll_number) {
         return;
     }
 
@@ -811,6 +1019,31 @@ function getRollNumber($student_record){
     }
     
     return $student_record->batch->getOption('roll_number_prefix').$roll_number;
+}
+
+function getStudentRecordForSession($student_records, $session_id, $data = null)
+{
+    $student_record = $student_records->where('academic_session_id', $session_id)->sortByDesc('date_of_entry')->first();
+
+    if (! $student_record) {
+        return null;
+    }
+
+    if ($data == 'batch') {
+        return $student_record->Batch->name;
+    } else if ($data == 'course') {
+        return $student_record->Batch->Course->name;
+    } else if ($data == 'batch_with_course') {
+        return $student_record->Batch->Course->name.' '.$student_record->Batch->name;
+    } else if ($data == 'date_of_entry') {
+        return showDate($student_record->date_of_entry);
+    } else if ($data == 'date_of_admission') {
+        return showDate($student_record->Admission->date_of_admission);
+    } else if ($data == 'admission_number') {
+        return $student_record->Admission->admission_number;
+    } else {
+        return $student_record;
+    }
 }
 
 function getStudentBatchOnDate($student, $date = null)
@@ -837,7 +1070,7 @@ function getEmployeeDesignation($employee, $date = null)
         $employee->load('employeeDesignations');
     }
 
-    return $employee->employeeDesignations->sortByDesc('date_effective')->firstWhere('date_effective', '<=', $date);
+    return $employee->employeeDesignations->sortByDesc('date_effective')->firstWhere('date_effective', '<=', getDateTime($date));
 }
 
 function getEmployeeDesignationId($employee, $date = null)
@@ -953,6 +1186,34 @@ function getLogo()
 function numberPadding($number, $length)
 {
     return str_pad($number, $length, '0', STR_PAD_LEFT);
+}
+
+function getCurrentVehicleInchargeEmployeeId($vehicle_incharges = array())
+{
+    $date = date('Y-m-d');
+    $vehicle_incharge = $vehicle_incharges->sortByDesc('date_effective')->filter(function ($vehicle_incharge) use ($date) {
+        return ($vehicle_incharge->date_effective <= $date);
+    })->first();
+
+    if ($vehicle_incharge) {
+        return $vehicle_incharge->employee_id;
+    }
+
+    return null;
+}
+
+function getCurrentVehicleIncharge($batch, $vehicle_incharges = array())
+{
+    $date = date('Y-m-d');
+    $vehicle_incharge = $vehicle_incharges->sortByDesc('date_effective')->filter(function ($vehicle_incharge) use ($date) {
+        return ($vehicle_incharge->date_effective <= $date);
+    })->first();
+
+    if ($vehicle_incharge) {
+        return $vehicle_incharge->Employee->name_with_code;
+    }
+
+    return '-';
 }
 
 function getCurrentClassTeacherEmployeeId($class_teachers = array())
@@ -1089,6 +1350,11 @@ function getPaymentGatewayHandlingFee($gateway, $amount) {
         return currency($amount * (config('config.'.$gateway.'_handling_fee') / 100));
 }
 
+function generateAdmitCardNumber($exam_schedule, $student)
+{
+    return strtoupper($exam_schedule->id.$student->id.substr($student->first_name, 0,2).substr($student->last_name, 0,2));
+}
+
 function beginTransaction() {
     \DB::beginTransaction();
 }
@@ -1117,8 +1383,112 @@ function searchByKey($data, $key, $value)
     return ($index === FALSE) ? [] : $data[$index];
 }
 
+function moreThanErrorMsg($data, $count = 2)
+{
+    $data = array_unique($data);
+    $error = implode(',', $data);
+    if (count($data) > $count) {
+        $error = implode(', ', array_slice($data,0,$count)).' '.trans('general.and_count_other', ['count' => count($data) - 2]);
+    }
+
+    return $error;
+}
+
+function dateToWord($date)
+{
+    $dates = [
+        1 => 'First',
+        2 => 'Second',
+        3 => 'Third',
+        4 => 'Fourth',
+        5 => 'Fifth',
+        6 => 'Sixth',
+        7 => 'Seventh',
+        8 => 'Eight',
+        9 => 'Ninth',
+        10 => 'Tenth',
+        11 => 'Eleventh',
+        12 => 'Twelfth',
+        13 => 'Thirteen',
+        14 => 'Fourteen',
+        15 => 'Fifteen',
+        16 => 'Sixteen',
+        17 => 'Seventeen',
+        18 => 'Eighteen',
+        19 => 'Ninteen',
+        20 => 'Twenty',
+        21 => 'Twenty First',
+        22 => 'First',
+        21 => 'Twenty First',
+        22 => 'Twenty Second',
+        23 => 'Twenty Third',
+        24 => 'Twenty Fourth',
+        25 => 'Twenty Fifth',
+        26 => 'Twenty Sixth',
+        27 => 'Twenty Seventh',
+        28 => 'Twenty Eight',
+        29 => 'Twenty Ninth',
+        30 => 'Thirty',
+        31 => 'Thirty First'
+    ];
+
+    $day = date('d', strtotime($date));
+    $month = date('F', strtotime($date));
+    $year = date('Y', strtotime($date));
+
+    return ucwords(gv($dates, $day).' '.$month.' '.numberToWord($year));
+}
+
+function numberToWord($num = false)
+{
+    $num = str_replace(array(',', ' '), '' , trim($num));
+    if(! $num) {
+        return false;
+    }
+    $num = (int) $num;
+    $words = array();
+    $list1 = array('', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven',
+        'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'
+    );
+    $list2 = array('', 'ten', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred');
+    $list3 = array('', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 'quintillion', 'sextillion', 'septillion',
+        'octillion', 'nonillion', 'decillion', 'undecillion', 'duodecillion', 'tredecillion', 'quattuordecillion',
+        'quindecillion', 'sexdecillion', 'septendecillion', 'octodecillion', 'novemdecillion', 'vigintillion'
+    );
+    $num_length = strlen($num);
+    $levels = (int) (($num_length + 2) / 3);
+    $max_length = $levels * 3;
+    $num = substr('00' . $num, -$max_length);
+    $num_levels = str_split($num, 3);
+    for ($i = 0; $i < count($num_levels); $i++) {
+        $levels--;
+        $hundreds = (int) ($num_levels[$i] / 100);
+        $hundreds = ($hundreds ? ' ' . $list1[$hundreds] . ' hundred' . ' ' : '');
+        $tens = (int) ($num_levels[$i] % 100);
+        $singles = '';
+        if ( $tens < 20 ) {
+            $tens = ($tens ? ' ' . $list1[$tens] . ' ' : '' );
+        } else {
+            $tens = (int)($tens / 10);
+            $tens = ' ' . $list2[$tens] . ' ';
+            $singles = (int) ($num_levels[$i] % 10);
+            $singles = ' ' . $list1[$singles] . ' ';
+        }
+        $words[] = $hundreds . $tens . $singles . ( ( $levels && ( int ) ( $num_levels[$i] ) ) ? ' ' . $list3[$levels] . ' ' : '' );
+    }
+    $commas = count($words);
+    if ($commas > 1) {
+        $commas = $commas - 1;
+    }
+    return ucwords(implode(' ', $words));
+}
+
 function currencyInWord(float $number)
 {
+    $currency = getDefaultCurrency();
+    $number_value = array_key_exists('number_value', $currency) ? $currency['number_value'] : 'Rupee';
+    $decimal_value = array_key_exists('decimal_value', $currency) ? $currency['decimal_value'] : 'Rupee';
+
     $decimal = round($number - ($no = floor($number)), 2) * 100;
     $hundred = null;
     $digits_length = strlen($no);
@@ -1146,12 +1516,113 @@ function currencyInWord(float $number)
         } else $str[] = null;
     }
     $Rupees = implode('', array_reverse($str));
-    $paise = ($decimal) ? "." . ($words[$decimal / 10] . " " . $words[$decimal % 10]) . ' Paise' : '';
-    return ucwords(($Rupees ? $Rupees . 'Rupees ' : '') . $paise);
+
+    $digits_length = strlen($decimal);
+    $dec = $decimal;
+
+    $i = 0;
+    $str = array();
+    while( $i < $digits_length ) {
+        $divider = ($i == 2) ? 10 : 100;
+        $number = floor($dec % $divider);
+        $dec = floor($dec / $divider);
+        $i += $divider == 10 ? 1 : 2;
+        if ($number) {
+            $plural = (($counter = count($str)) && $number > 9) ? 's' : null;
+            $hundred = ($counter == 1 && $str[0]) ? ' and ' : null;
+            $str [] = ($number < 21) ? $words[$number].' '. $digits[$counter]. $plural.' '.$hundred:$words[floor($number / 10) * 10].' '.$words[$number % 10]. ' '.$digits[$counter].$plural.' '.$hundred;
+        } else $str[] = null;
+    }
+    $paise = ($decimal) ? implode('', array_reverse($str)) . $decimal_value : '';
+
+    // $paise = ($decimal) ? ($words[floor($decimal / 10)] . " " . $words[$decimal % 10]) . ' Paise' : '';
+    return ucwords(($Rupees ? $Rupees . $number_value." " : '') . $paise);
 }
 
-function getTransportFee($student_fee_record) {
-    $transport_fee_detail = $student_fee_record->feeInstallment->transportFee->transportFeeDetails->firstWhere('transport_circle_id', $student_fee_record->transport_circle_id);
+function moneyFormatIndia($num){
+    $explrestunits = "" ;
+    if(strlen($num)>3){
+        $lastthree = substr($num, strlen($num)-3, strlen($num));
+        $restunits = substr($num, 0, strlen($num)-3); // extracts the last three digits
+        $restunits = (strlen($restunits)%2 == 1)?"0".$restunits:$restunits; // explodes the remaining digits in 2's formats, adds a zero in the beginning to maintain the 2's grouping.
+        $expunit = str_split($restunits, 2);
+        for($i=0; $i<sizeof($expunit); $i++){
+            // creates each of the 2's group and adds a comma to the end
+            if($i==0){
+                $explrestunits .= (int)$expunit[$i].","; // if is first value , convert into integer
+            }else{
+                $explrestunits .= $expunit[$i].",";
+            }
+        }
+        $thecash = $explrestunits.$lastthree;
+    } else {
+        $thecash = $num;
+    }
+    return $thecash; // writes the final format where $currency is the currency symbol.
+}
 
-    return $transport_fee_detail ? currency($transport_fee_detail->amount,1) : null;
+function getStudentAttendanceMethods()
+{
+    $data = getVar('data');
+    $student_attendance_methods = gv($data, 'student_attendance_methods', []);
+
+    $attendance_methods = array();
+    foreach ($student_attendance_methods as $student_attendance_method) {
+        $attendance_methods[] = array(
+            'text' => trans('student.attendance_method_'.$student_attendance_method),
+            'value' => $student_attendance_method
+        );
+    }
+
+    return $attendance_methods;
+}
+
+function getOnlineExamTypes()
+{
+    $data = getVar('data');
+    $online_exam_types = gv($data, 'online_exam_types', []);
+
+    $types = array();
+    foreach ($online_exam_types as $online_exam_type) {
+        $types[] = array(
+            'text' => trans('exam.online_exam_type_'.$online_exam_type),
+            'value' => $online_exam_type
+        );
+    }
+
+    return $types;
+}
+
+function getOnlineExamQuestionTypes()
+{
+    $data = getVar('data');
+    $online_exam_question_types = gv($data, 'online_exam_question_types', []);
+
+    $types = array();
+    foreach ($online_exam_question_types as $online_exam_question_type) {
+        $types[] = array(
+            'text' => trans('exam.online_exam_question_type_'.$online_exam_question_type),
+            'value' => $online_exam_question_type
+        );
+    }
+
+    return $types;
+}
+
+function getStudentAttendanceMoreThanOnceTypes()
+{
+    $data = array(
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.first')]), 'value' => 1),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.second')]), 'value' => 2),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.third')]), 'value' => 3),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.fourth')]), 'value' => 4),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.fifth')]), 'value' => 5),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.sixth')]), 'value' => 6),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.seventh')]), 'value' => 7),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.eight')]), 'value' => 8),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.ninth')]), 'value' => 9),
+        array('text' => trans('student.attendance_session_name', ['attribute' => trans('list.tenth')]), 'value' => 10)
+    );
+
+    return $data;
 }

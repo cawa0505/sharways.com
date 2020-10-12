@@ -46,7 +46,7 @@ class PasswordResetted extends Notification
         $url = url('/');
 
         return (new MailMessage)
-                    ->subject('Password Updated | '.env('APP_NAME'))
+                    ->subject('Password Updated | '.config('app.name'))
                     ->greeting('Hello '.$this->user->name)
                     ->line('Your password has been reset successfully!')
                     ->line('Click on the below link to continue login.')

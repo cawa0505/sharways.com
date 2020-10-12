@@ -14,18 +14,17 @@ class CreateBooksTable extends Migration
     public function up()
     {
         Schema::create('books', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
             $table->string('title')->nullable();
             $table->string('isbn_number')->nullable();
-            $table->integer('book_author_id')->unsigned()->nullable();
+            $table->bigInteger('book_author_id')->unsigned()->nullable();
             $table->foreign('book_author_id')->references('id')->on('book_authors')->onDelete('cascade');
-            $table->integer('book_publisher_id')->unsigned()->nullable();
+            $table->bigInteger('book_publisher_id')->unsigned()->nullable();
             $table->foreign('book_publisher_id')->references('id')->on('book_publishers')->onDelete('cascade');
-            $table->integer('book_topic_id')->unsigned()->nullable();
+            $table->bigInteger('book_topic_id')->unsigned()->nullable();
             $table->foreign('book_topic_id')->references('id')->on('book_topics')->onDelete('cascade');
-            $table->integer('book_language_id')->unsigned()->nullable();
+            $table->bigInteger('book_language_id')->unsigned()->nullable();
             $table->foreign('book_language_id')->references('id')->on('book_languages')->onDelete('cascade');
             $table->string('edition')->nullable();
             $table->string('type',20)->nullable();

@@ -82,11 +82,8 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         data() {
             return {
                 gradeForm: new Form({

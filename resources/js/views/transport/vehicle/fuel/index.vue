@@ -151,9 +151,9 @@
                                 </div>
                                 <div class="m-t-20" v-html="vehicle_fuel.description"></div>
                                 <div v-if="attachments.length">
-                                    <ul style="list-style: none;padding: 0;" class="m-t-10">
-                                        <li v-for="attachment in attachments">
-                                            <a :href="`/transport/vehicle/fuel/${vehicle_fuel.id}/attachment/${attachment.uuid}/download?token=${authToken}`"><i class="fas fa-paperclip"></i> {{attachment.user_filename}}</a>
+                                    <ul class="m-t-10 upload-file-list">
+                                        <li class="upload-file-list-item" v-for="attachment in attachments">
+                                            <a :href="`/transport/vehicle/fuel/${vehicle_fuel.id}/attachment/${attachment.uuid}/download?token=${authToken}`" class="no-link-color"><i :class="['file-icon', 'fas', 'fa-lg', attachment.file_info.icon]"></i> <span class="upload-file-list-item-size">{{attachment.file_info.size}}</span> {{attachment.user_filename}}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -176,12 +176,10 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-    import vSelect from 'vue-multiselect'
     import vehicleFuelForm from './form'
 
     export default {
-        components : { vehicleFuelForm,vSelect,switches },
+        components : { vehicleFuelForm},
         data() {
             return {
                 vehicle_fuels: {
@@ -254,12 +252,12 @@
             },
             getVehicleFuels(page){
                 let loader = this.$loading.show();
-                this.filter.date_of_fueling_start_date = helper.toDate(this.filter.date_of_fueling_start_date);
-                this.filter.date_of_fueling_end_date = helper.toDate(this.filter.date_of_fueling_end_date);
 
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_fueling_start_date = helper.toDate(this.filter.date_of_fueling_start_date);
+                this.filter.date_of_fueling_end_date = helper.toDate(this.filter.date_of_fueling_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/vehicle/fuel?page=' + page + url)
                     .then(response => {

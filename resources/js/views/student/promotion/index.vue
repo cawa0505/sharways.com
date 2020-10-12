@@ -82,7 +82,7 @@
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>
+                                    <th class="select-all">
                                         <label class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" value="1" v-model="selectAll" @change="toggleSelectAll">
                                             <span class="custom-control-label"></span>
@@ -100,7 +100,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="student_record in student_records.data">
-                                    <td>
+                                    <td class="select-all">
                                         <label class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" :value="student_record.id" v-model="promotionForm.ids">
                                             <span class="custom-control-label"></span>
@@ -185,10 +185,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components : {vSelect},
+        components : {},
         data() {
             return {
                 student_records: {

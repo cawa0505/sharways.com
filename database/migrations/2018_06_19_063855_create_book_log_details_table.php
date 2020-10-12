@@ -14,11 +14,10 @@ class CreateBookLogDetailsTable extends Migration
     public function up()
     {
         Schema::create('book_log_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('book_log_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('book_log_id')->unsigned()->nullable();
             $table->foreign('book_log_id')->references('id')->on('book_logs')->onDelete('cascade');
-            $table->integer('book_post_detail_id')->unsigned()->nullable();
+            $table->bigInteger('book_post_detail_id')->unsigned()->nullable();
             $table->foreign('book_post_detail_id')->references('id')->on('book_post_details')->onDelete('cascade');
             $table->date('date_of_return')->nullable();
             $table->text('return_remarks')->nullable();

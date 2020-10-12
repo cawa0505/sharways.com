@@ -14,12 +14,11 @@ class CreateExamRecordsTable extends Migration
     public function up()
     {
         Schema::create('exam_records', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('exam_schedule_id')->unsigned()->nullable();
+            $table->bigInteger('exam_schedule_id')->unsigned()->nullable();
             $table->foreign('exam_schedule_id','er_exam_schedule_id_foreign')->references('id')->on('exam_schedules')->onDelete('cascade');
-            $table->integer('subject_id')->unsigned()->nullable();
+            $table->bigInteger('subject_id')->unsigned()->nullable();
             $table->foreign('subject_id','er_subject_id_foreign')->references('id')->on('subjects')->onDelete('cascade');
             $table->date('date')->nullable();
             $table->time('start')->nullable();

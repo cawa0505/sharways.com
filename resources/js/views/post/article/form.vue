@@ -75,12 +75,9 @@
 
 <script>
     import articleTypeForm from '../../configuration/post/article-type/form'
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {datepicker,vSelect,articleTypeForm},
+        components: {articleTypeForm},
         data() {
             return {
                 articleForm: new Form({
@@ -108,7 +105,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.articleForm.upload_token = uuid();
+                this.articleForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
         },
@@ -136,13 +133,12 @@
                     this.store();
             },
             store(){
-                this.articleForm.date_of_article = helper.toDate(this.articleForm.date_of_article);
                 let loader = this.$loading.show();
                 this.articleForm.post('/api/article')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.articleForm.upload_token = uuid();
+                        this.articleForm.upload_token = this.$uuid.v4();
                         this.selected_article_type = null;
                         this.$emit('completed');
                         loader.hide();
@@ -180,7 +176,6 @@
                     });
             },
             update(){
-                this.articleForm.date_of_article = helper.toDate(this.articleForm.date_of_article);
                 let loader = this.$loading.show();
                 this.articleForm.patch('/api/article/'+this.uuid)
                     .then(response => {

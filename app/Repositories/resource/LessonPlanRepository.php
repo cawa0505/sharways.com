@@ -154,23 +154,16 @@ class LessonPlanRepository
 
         $query = $this->lesson_plan->info()->filterBySession()->filterByTopic($topic);
 
-        if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
-            $student_batch_ids = $this->student->getAuthParentStudentsBatch();
-
-            if ($student_batch_ids) {
-                $batch_id = array_unique(array_merge($batch_id, $student_batch_ids));
-            }
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
+            $batch_id = $batch_id ? array_intersect($student_batch_ids, $batch_id) : $student_batch_ids;
         }
 
-        if (\Auth::user()->hasRole(config('system.default_role.student'))) {
-            $student_batch_id = $this->student->getAuthStudentBatch();
-
-            if ($student_batch_id) {
-                array_push($batch_id, $student_batch_id);
-                $batch_id = array_unique($batch_id);
-            }
-        }
-
+        $batch_id = array_unique($batch_id);
         if (count($batch_id)) {
             $query->whereHas('subject',function($q) use($batch_id){
                 $q->whereIn('batch_id', $batch_id);
@@ -253,8 +246,8 @@ class LessonPlanRepository
     private function formatParams($params, $lesson_plan_id = null)
     {
         $topic      = gv($params, 'topic');
-        $start_date = gv($params, 'start_date');
-        $end_date   = gv($params, 'end_date');
+        $start_date = toDate(gv($params, 'start_date'));
+        $end_date   = toDate(gv($params, 'end_date'));
         $subject_id = gv($params, 'subject_id');
 
         if (! dateBetweenSession($start_date)) {
@@ -294,8 +287,8 @@ class LessonPlanRepository
         $formatted = [
             'subject_id' => $subject_id,
             'topic'      => $topic,
-            'start_date' => $start_date,
-            'end_date'   => $end_date,
+            'start_date' => toDate($start_date),
+            'end_date'   => toDate($end_date),
             'options'    => []
         ];
 
@@ -336,17 +329,14 @@ class LessonPlanRepository
      */
     public function isAccessible(LessonPlan $lesson_plan)
     {
-        if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
-            $student_batch_ids = $this->student->getAuthParentStudentsBatch();
-
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
+            
             if (! in_array($lesson_plan->subject->batch_id, $student_batch_ids))
-                throw ValidationException::withMessages(['message' => trans('user.permission_denied')]);
-        }
-
-        if (\Auth::user()->hasRole(config('system.default_role.student'))) {
-            $student_batch_id = $this->student->getAuthStudentBatch();
-
-            if ($lesson_plan->subject->batch_id != $student_batch_id)
                 throw ValidationException::withMessages(['message' => trans('user.permission_denied')]);
         }
     }

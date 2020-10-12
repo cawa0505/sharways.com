@@ -3,7 +3,6 @@ namespace App\Repositories\Configuration;
 
 use Twilio\Exceptions\TwilioException;
 use App\Models\Academic\AcademicSession;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\Configuration\Configuration;
 use Illuminate\Validation\ValidationException;
 
@@ -92,15 +91,20 @@ class ConfigurationRepository
         $config['l']             = (\Storage::exists('.access_code') ? 1 : 0);
         $config['v']             = \Storage::get('.version');
         $config['pagination']    = config('system.pagination');
-        $config['mode']          = (env('APP_MODE') == 'test') ? 0 : 1;
+        $config['mode']          = (config('app.mode') == 'test') ? 0 : 1;
         $config['default_roles'] = config('system.default_role');
 
         $config_variables             = getVar('config');
         $config['show_footer_credit'] = gbv($config_variables, 'show_footer_credit');
         $config['pb']                 = gbv($config_variables, 'pb');
+        $config['default_currency'] = getDefaultCurrency();
+        $config['current_date']       = today();
+        $config['mobile_app_compatible'] = my_version_compare(\Storage::get('.version'), config('system.mobile_app_compatible'), '>=');
 
-        if (! \Auth::check())
+        if (! auth()->check()) {
+            $config['authenticated'] = false;
             return $config;
+        }
 
         $config_variables = getVar('config');
         $config = array_merge($config, $this->getAllPublic());
@@ -108,8 +112,9 @@ class ConfigurationRepository
         $config['post_max_size']    = getPostMaxSize();
         $config['show_footer_credit'] = gbv($config_variables, "show_footer_credit");
         $config['pb'] = gbv($config_variables, "pb");
+        $config['menu'] = explode(',', array_key_exists('menu', $config) ? $config['menu'] : '');
 
-        $auth_user = \Auth::user();
+        $auth_user = auth()->user();
         $user_preference = $auth_user->userPreference;
 
         if ($user_preference) {
@@ -119,6 +124,7 @@ class ConfigurationRepository
             $config['user_sidebar'] = $auth_user->userPreference->sidebar;
         }
 
+        $config['authenticated'] = true;
         return $config;
     }
 
@@ -163,6 +169,11 @@ class ConfigurationRepository
     {
         $config_type = gv($params, 'config_type');
 
+        if ($config_type === 'menu') {
+            $this->updateMenu($params);
+            return;
+        }
+
         $this->testModeOperation($params);
 
         $this->smsConfiguration($params);
@@ -176,7 +187,7 @@ class ConfigurationRepository
                 $config = $this->firstOrCreate($key);
                 $old_config = $config->value;
 
-                $config->numeric_value = (is_numeric($value) && floor($value) == $value) ? $value : null;
+                $config->numeric_value = (is_numeric($value) && floor($value) == $value && digitCount($value) == digitCount(floor($value))) ? $value : null;
                 $config->text_value = ($config->numeric_value) ? null : ($value ? : null);
                 $config->save();
 
@@ -201,6 +212,40 @@ class ConfigurationRepository
         }
     }
 
+    private function updateMenu($params = array())
+    {
+        $modules = gv($params, 'modules', []);
+
+        $data = array();
+        foreach ($modules as $module) {
+            $menu = gv($module, 'menu');
+            if (gbv($menu, 'visibility'))
+                array_push($data, gv($menu, 'name'));
+
+            $submenu = gv($menu, 'submenu', []);
+
+            foreach ($submenu as $sbmenu) {
+                if (gbv($sbmenu, 'visibility'))
+                    array_push($data, gv($sbmenu, 'name'));
+            }
+        }
+
+        $config = $this->firstOrCreate('menu');
+        $config->text_value = implode(',',$data);
+        $config->save();
+    }
+
+    public function getModules()
+    {
+        $modules = getVar('modules');
+
+        $menu = $this->config->whereName('menu')->first();
+
+        $menus = $menu ? explode(',',$menu->text_value) : [];
+
+        return compact('modules','menus');
+    }
+
     /**
      * Store test mode configuration.
      *
@@ -211,7 +256,7 @@ class ConfigurationRepository
     {
         $config_type = gv($params, 'config_type');
 
-        if ($config_type != 'system') {
+        if (! in_array($config_type, ['system', 'mail', 'authentication', 'basic'])) {
             return;
         }
 
@@ -326,31 +371,33 @@ class ConfigurationRepository
 
         config(['config' => $this->getAll()]);
 
-        try {
-            \JWTAuth::parseToken()->authenticate();
+        if (auth()->check()) {
+            $auth_user = auth()->user();
 
-            if (\Auth::check()) {
-                $auth_user = \Auth::user();
+            $user_preference = auth()->user()->UserPreference;
 
-                $user_preference = \Auth::user()->UserPreference;
-
-                if ($user_preference) {
-                    config([
-                        'config.user_direction' => $user_preference->direction,
-                        'config.user_locale' => $user_preference->locale,
-                        'config.user_sidebar' => $user_preference->sidebar,
-                        'config.user_color_theme' => $user_preference->color_theme
-                    ]);
-                }
-                
-                $default_academic_session = ($user_preference) ? $this->academic_session->find($user_preference->academic_session_id) : $this->academic_session->whereIsDefault(1)->first();
-                config(['config.default_academic_session' => $default_academic_session]);
+            if ($user_preference) {
+                config([
+                    'config.user_direction' => $user_preference->direction,
+                    'config.user_locale' => $user_preference->locale,
+                    'config.user_sidebar' => $user_preference->sidebar,
+                    'config.user_color_theme' => $user_preference->color_theme
+                ]);
             }
-        } catch (JWTException $e) {
+            
+            $default_academic_session = ($user_preference) ? $this->academic_session->find($user_preference->academic_session_id) : $this->academic_session->whereIsDefault(1)->first();
+            if ($default_academic_session) {
+                $default_academic_session->start_date = toDate($default_academic_session->start_date);
+                $default_academic_session->end_date = toDate($default_academic_session->end_date);
+                config(['config.default_academic_session' => $default_academic_session]);
+            } else {
+                config(['config.default_academic_session' => null]);
+            }
         }
 
         $this->setVisibility();
 
+        config(['app.name' => config('config.institute_name')]);
         config([
             'nexmo.api_key' => config('config.nexmo_api_key'),
             'nexmo.api_secret' => config('config.nexmo_api_secret')
@@ -383,10 +430,6 @@ class ConfigurationRepository
     {
         if (! $type) {
             return;
-        }
-
-        if ($type === 'basic') {
-            envu(['APP_NAME' => config('config.institute_name')]);
         }
 
         if ($type === 'system') {

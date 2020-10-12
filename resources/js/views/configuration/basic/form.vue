@@ -151,8 +151,6 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-
     export default {
     	props: {
             setupWizard: {
@@ -162,7 +160,7 @@
                 required: false
             }
         },
-        components : {datepicker},
+        components : {},
         data() {
             return {
                 configForm: new Form({
@@ -212,7 +210,6 @@
             },
             submit(){
                 let loader = this.$loading.show();
-                this.configForm.institute_foundation_date = helper.toDate(this.configForm.institute_foundation_date);
                 this.configForm.config_type = 'basic';
                 return this.configForm.post('/api/configuration')
                     .then(response => {

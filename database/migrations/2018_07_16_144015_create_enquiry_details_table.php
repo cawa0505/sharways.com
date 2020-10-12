@@ -14,17 +14,16 @@ class CreateEnquiryDetailsTable extends Migration
     public function up()
     {
         Schema::create('enquiry_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('enquiry_id')->unsigned()->nullable();
+            $table->bigInteger('enquiry_id')->unsigned()->nullable();
             $table->foreign('enquiry_id')->references('id')->on('enquiries')->onDelete('cascade');
             $table->string('student_name')->nullable();
             $table->string('gender',20)->nullable();
             $table->date('date_of_birth')->nullable();
-            $table->integer('course_id')->unsigned()->nullable();
+            $table->bigInteger('course_id')->unsigned()->nullable();
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('set null');
-            $table->integer('institute_id')->unsigned()->nullable();
+            $table->bigInteger('institute_id')->unsigned()->nullable();
             $table->foreign('institute_id')->references('id')->on('institutes')->onDelete('set null');
             $table->boolean('is_admitted')->default(0);
             $table->text('remarks')->nullable();

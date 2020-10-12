@@ -72,11 +72,10 @@
 
 
 <script>
-    import switches from 'vue-switches'
     import transportCircleForm from '../circle/form'
 
     export default {
-        components: {switches, transportCircleForm},
+        components: {transportCircleForm},
         data() {
             return {
                 transportFeeForm: new Form({

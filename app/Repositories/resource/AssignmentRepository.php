@@ -161,23 +161,16 @@ class AssignmentRepository
                 'end_date' => $due_date_end_date
             ])->filterByTitle($title);
 
-        if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
-            $student_batch_ids = $this->student->getAuthParentStudentsBatch();
-
-            if ($student_batch_ids) {
-                $batch_id = array_unique(array_merge($batch_id, $student_batch_ids));
-            }
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
+            $batch_id = $batch_id ? array_intersect($student_batch_ids, $batch_id) : $student_batch_ids;
         }
 
-        if (\Auth::user()->hasRole(config('system.default_role.student'))) {
-            $student_batch_id = $this->student->getAuthStudentBatch();
-
-            if ($student_batch_id) {
-                array_push($batch_id, $student_batch_id);
-                $batch_id = array_unique($batch_id);
-            }
-        }
-
+        $batch_id = array_unique($batch_id);
         if (count($batch_id)) {
             $query->whereHas('subject',function($q) use($batch_id){
                 $q->whereIn('batch_id', $batch_id);
@@ -258,9 +251,9 @@ class AssignmentRepository
     private function formatParams($params, $assignment_id = null)
     {
         $title              = gv($params, 'title');
-        $date_of_assignment = gv($params, 'date_of_assignment');
-        $due_date           = gv($params, 'due_date');
-        $description        = stripInlineStyle(gv($params, 'description'));
+        $date_of_assignment = toDate(gv($params, 'date_of_assignment'));
+        $due_date           = toDate(gv($params, 'due_date'));
+        $description        = clean(gv($params, 'description'));
         $subject_id         = gv($params, 'subject_id');
 
         if (! dateBetweenSession($date_of_assignment)) {
@@ -270,9 +263,9 @@ class AssignmentRepository
         $formatted = [
             'subject_id'         => $subject_id,
             'title'              => $title,
-            'date_of_assignment' => $date_of_assignment,
-            'due_date'           => $due_date,
-            'description'        => stripInlineStyle($description),
+            'date_of_assignment' => toDate($date_of_assignment),
+            'due_date'           => toDate($due_date),
+            'description'        => clean($description),
             'options'            => []
         ];
 
@@ -313,17 +306,14 @@ class AssignmentRepository
      */
     public function isAccessible(Assignment $assignment)
     {
-        if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
-            $student_batch_ids = $this->student->getAuthParentStudentsBatch();
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
 
             if (! in_array($assignment->subject->batch_id, $student_batch_ids))
-                throw ValidationException::withMessages(['message' => trans('user.permission_denied')]);
-        }
-
-        if (\Auth::user()->hasRole(config('system.default_role.student'))) {
-            $student_batch_id = $this->student->getAuthStudentBatch();
-
-            if ($assignment->subject->batch_id != $student_batch_id)
                 throw ValidationException::withMessages(['message' => trans('user.permission_denied')]);
         }
     }

@@ -37,10 +37,8 @@
 
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {datepicker},
+        components: {},
         data() {
             return {
                 todoForm: new Form({
@@ -64,7 +62,6 @@
             },
             storeTodo(){
                 let loader = this.$loading.show();
-                this.todoForm.date = moment(this.todoForm.date).format('YYYY-MM-DD');
                 this.todoForm.post('/api/todo')
                     .then(response => {
                         toastr.success(response.message);
@@ -93,7 +90,6 @@
             },
             updateTodo(){
                 let loader = this.$loading.show();
-                this.todoForm.date = moment(this.todoForm.date).format('YYYY-MM-DD');
                 this.todoForm.patch('/api/todo/'+this.id)
                     .then(response => {
                         toastr.success(response.message);

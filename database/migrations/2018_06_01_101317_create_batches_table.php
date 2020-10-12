@@ -14,10 +14,9 @@ class CreateBatchesTable extends Migration
     public function up()
     {
         Schema::create('batches', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->integer('position')->default(0);
-            $table->integer('course_id')->unsigned()->nullable();
+            $table->bigInteger('course_id')->unsigned()->nullable();
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->text('description')->nullable();

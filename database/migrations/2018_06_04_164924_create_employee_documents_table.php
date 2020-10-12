@@ -14,11 +14,10 @@ class CreateEmployeeDocumentsTable extends Migration
     public function up()
     {
         Schema::create('employee_documents', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
-            $table->integer('employee_document_type_id')->unsigned()->nullable();
+            $table->bigInteger('employee_document_type_id')->unsigned()->nullable();
             $table->foreign('employee_document_type_id')->references('id')->on('employee_document_types')->onDelete('cascade');
             $table->string('title')->nullable();
             $table->text('description')->nullable();

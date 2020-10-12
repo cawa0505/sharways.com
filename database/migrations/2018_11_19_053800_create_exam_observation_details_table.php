@@ -14,9 +14,8 @@ class CreateExamObservationDetailsTable extends Migration
     public function up()
     {
         Schema::create('exam_observation_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('exam_observation_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('exam_observation_id')->unsigned()->nullable();
             $table->foreign('exam_observation_id','eod_exam_observation_id_foreign')->references('id')->on('exam_observations')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->integer('position')->default(0);

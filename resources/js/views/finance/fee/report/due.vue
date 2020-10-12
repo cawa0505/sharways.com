@@ -84,7 +84,7 @@
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th v-if="hasPermission('send-sms')">
+                                    <th class="select-all" v-if="hasPermission('send-sms')">
                                         <label class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" value="1" v-model="selectAll" @change="toggleSelectAll">
                                             <span class="custom-control-label"></span>
@@ -93,7 +93,7 @@
                                     <th>{{trans('student.admission_number_short')}}</th>
                                     <th>{{trans('student.name')}}</th>
                                     <th>{{trans('academic.batch')}}</th>
-                                    <th>{{trans('student.father_name')}}</th>
+                                    <th>{{trans('student.first_guardian_name')}}</th>
                                     <th>{{trans('student.contact_number')}}</th>
                                     <th>{{trans('finance.fee_group')}}</th>
                                     <th>{{trans('finance.total_fee')}}</th>
@@ -105,7 +105,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="item in list.data">
-                                    <td v-if="hasPermission('send-sms')">
+                                    <td class="select-all" v-if="hasPermission('send-sms')">
                                         <label class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" :value="item.id" v-model="sendSMSForm.ids">
                                             <span class="custom-control-label"></span>
@@ -114,7 +114,7 @@
                                     <td v-text="item.admission_number"></td>
                                     <td v-text="item.name"></td>
                                     <td v-text="item.batch"></td>
-                                    <td v-text="item.father_name"></td>
+                                    <td v-text="item.first_guardian_name"></td>
                                     <td v-text="item.contact_number"></td>
                                     <td v-text="item.fee_group"></td>
                                     <td v-text="item.total"></td>
@@ -154,7 +154,7 @@
                                     <label for="">{{trans('communication.sms')}} {{trans('communication.character_count', {count: characterCount})}} </label>
                                     <textarea class="form-control" v-model="sendSMSForm.sms" rows="2" name="sms" :placeholder="trans('communication.sms')"></textarea>
                                     <p class="help-block font-80pc">{{trans('communication.template_variable_tip')}}</p>
-                                    <p class="help-block font-90pc">{{trans('communication.available_variables')}}: NAME, BATCH, FATHER_NAME, FEE_GROUP,  TOTAL_FEE, DUE_DATE, LATE_FEE</p>
+                                    <p class="help-block font-90pc">{{trans('communication.available_variables')}}: NAME, BATCH, FIRST_GUARDIAN_NAME, FEE_GROUP,  TOTAL_FEE, DUE_DATE, LATE_FEE</p>
                                     <show-error :form-name="sendSMSForm" prop-name="sms"></show-error>
                                 </div>
                             </div>
@@ -175,10 +175,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components : { vSelect },
+        components : {  },
         data() {
             return {
                 list: {
@@ -215,8 +213,8 @@
                         translation: i18n.student.name
                     },
                     {
-                        value: 'father_name',
-                        translation: i18n.student.father_name
+                        value: 'first_guardian_name',
+                        translation: i18n.student.first_guardian_name
                     },
                     {
                         value: 'total',
@@ -367,7 +365,7 @@
 
                 return sms.replace("#NAME#", item.name)
                     .replace("#BATCH#", item.batch)
-                    .replace("#FATHER_NAME#", item.father_name)
+                    .replace("#FIRST_GUARDIAN_NAME#", item.first_guardian_name)
                     .replace("#FEE_GROUP#", item.fee_group)
                     .replace("#TOTAL_FEE#", item.total)
                     .replace("#DUE_DATE#", item.due_date)

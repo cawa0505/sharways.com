@@ -14,22 +14,24 @@ class CreateEnquiriesTable extends Migration
     public function up()
     {
         Schema::create('enquiries', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->string('father_name')->nullable();
-            $table->string('mother_name')->nullable();
-            $table->string('guardian_name')->nullable();
+            $table->string('first_guardian_name')->nullable();
+            $table->string('first_guardian_relation')->nullable();
+            $table->string('second_guardian_name')->nullable();
+            $table->string('second_guardian_relation')->nullable();
+            $table->string('third_guardian_name')->nullable();
+            $table->string('third_guardian_relation')->nullable();
             $table->string('email')->nullable();
             $table->string('contact_number',20)->nullable();
             $table->string('alternate_contact_number',20)->nullable();
             $table->date('date_of_enquiry')->nullable();
             $table->string('status',20)->nullable();
-            $table->integer('enquiry_type_id')->unsigned()->nullable();
+            $table->bigInteger('enquiry_type_id')->unsigned()->nullable();
             $table->foreign('enquiry_type_id')->references('id')->on('enquiry_types')->onDelete('cascade');
-            $table->integer('enquiry_source_id')->unsigned()->nullable();
+            $table->bigInteger('enquiry_source_id')->unsigned()->nullable();
             $table->foreign('enquiry_source_id')->references('id')->on('enquiry_sources')->onDelete('cascade');
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->text('remarks')->nullable();
             $table->text('options')->nullable();

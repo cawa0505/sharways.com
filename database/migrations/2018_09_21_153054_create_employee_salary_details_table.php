@@ -14,11 +14,10 @@ class CreateEmployeeSalaryDetailsTable extends Migration
     public function up()
     {
         Schema::create('employee_salary_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('employee_salary_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('employee_salary_id')->unsigned()->nullable();
             $table->foreign('employee_salary_id','esd_employee_salary_id_foreign')->references('id')->on('employee_salaries')->onDelete('cascade');
-            $table->integer('payroll_template_detail_id')->unsigned()->nullable();
+            $table->bigInteger('payroll_template_detail_id')->unsigned()->nullable();
             $table->foreign('payroll_template_detail_id','esd_payroll_template_detail_id_foreign')->references('id')->on('payroll_template_details')->onDelete('cascade');
             $table->decimal('amount',25,5)->default(0);
             $table->text('options')->nullable();

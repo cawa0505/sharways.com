@@ -51,10 +51,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="account in accounts.data">
-                                    <td>
-                                        {{account.name}}
-                                        <span v-if="account.is_default" class="badge badge-success">{{trans('general.default')}}</span>
-                                    </td>
+                                    <td v-text="account.name"></td>
                                     <td v-text="account.prefix"></td>
                                     <td>{{formatCurrency(account.opening_balance)}}</td>
                                     <td v-text="trans('finance.'+account.type)"></td>

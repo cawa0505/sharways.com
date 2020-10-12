@@ -14,11 +14,10 @@ class CreateStockTransferDetailsTable extends Migration
     public function up()
     {
         Schema::create('stock_transfer_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('stock_transfer_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('stock_transfer_id')->unsigned()->nullable();
             $table->foreign('stock_transfer_id')->references('id')->on('stock_transfers')->onDelete('cascade');
-            $table->integer('stock_item_id')->unsigned()->nullable();
+            $table->bigInteger('stock_item_id')->unsigned()->nullable();
             $table->foreign('stock_item_id')->references('id')->on('stock_items')->onDelete('cascade');
             $table->string('custom_item_name')->nullable();
             $table->boolean('is_consumable')->default(0);

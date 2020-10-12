@@ -14,12 +14,11 @@ class CreateTransportRouteDetailsTable extends Migration
     public function up()
     {
         Schema::create('transport_route_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->integer('position')->default(0);
-            $table->integer('transport_route_id')->unsigned()->nullable();
+            $table->bigInteger('transport_route_id')->unsigned()->nullable();
             $table->foreign('transport_route_id','tr_transport_route_id_foreign')->references('id')->on('transport_routes')->onDelete('cascade');
-            $table->integer('transport_stoppage_id')->unsigned()->nullable();
+            $table->bigInteger('transport_stoppage_id')->unsigned()->nullable();
             $table->foreign('transport_stoppage_id','trd_transport_stoppage_id_foreign')->references('id')->on('transport_stoppages')->onDelete('cascade');
             $table->text('options')->nullable();
             $table->timestamps();

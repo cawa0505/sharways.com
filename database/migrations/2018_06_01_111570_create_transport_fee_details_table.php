@@ -14,11 +14,10 @@ class CreateTransportFeeDetailsTable extends Migration
     public function up()
     {
         Schema::create('transport_fee_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('transport_fee_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('transport_fee_id')->unsigned()->nullable();
             $table->foreign('transport_fee_id')->references('id')->on('transport_fees')->onDelete('cascade');
-            $table->integer('transport_circle_id')->unsigned()->nullable();
+            $table->bigInteger('transport_circle_id')->unsigned()->nullable();
             $table->foreign('transport_circle_id')->references('id')->on('transport_circles')->onDelete('cascade');
             $table->integer('amount')->default(0);
             $table->text('options')->nullable();

@@ -9,6 +9,7 @@ use App\Models\Academic\ClassTiming;
 use App\Models\Academic\TimetableSession;
 use App\Models\Academic\TimetableAllocation;
 use Illuminate\Validation\ValidationException;
+use App\Repositories\Student\StudentRepository;
 use App\Models\Academic\TimetableAllocationDetail;
 use App\Repositories\Configuration\Academic\CourseGroupRepository;
 
@@ -21,6 +22,7 @@ class TimetableRepository
     protected $timetable_allocation;
     protected $subject;
     protected $timetable_allocation_detail;
+    protected $student;
 
     /**
      * Instantiate a new instance.
@@ -34,7 +36,8 @@ class TimetableRepository
         CourseGroupRepository $course_group,
         TimetableAllocation $timetable_allocation,
         Subject $subject,
-        TimetableAllocationDetail $timetable_allocation_detail
+        TimetableAllocationDetail $timetable_allocation_detail,
+        StudentRepository $student
     ) {
         $this->timetable = $timetable;
         $this->class_timing = $class_timing;
@@ -43,6 +46,7 @@ class TimetableRepository
         $this->timetable_allocation = $timetable_allocation;
         $this->subject = $subject;
         $this->timetable_allocation_detail = $timetable_allocation_detail;
+        $this->student = $student;
     }
 
     /**
@@ -118,6 +122,16 @@ class TimetableRepository
 
         $query = $this->timetable->info()->filterBySession();
 
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
+            $batch_id = $batch_id ? array_intersect($student_batch_ids, $batch_id) : $student_batch_ids;
+        }
+        
+        $batch_id = array_unique($batch_id);
         if (count($batch_id)) {
             $query->whereIn('batch_id', $batch_id);
         }
@@ -170,8 +184,7 @@ class TimetableRepository
 
         $batches = $this->course_group->getBatchOption();
 
-        $list = getVar('list');
-        $days = generateTranslatedSelectOption(isset($list['day']) ? $list['day'] : []);
+        $days = getDaysInOrder();
 
         return compact('class_timings', 'batches', 'days');
     }
@@ -208,7 +221,7 @@ class TimetableRepository
         $timetable = $this->timetable->forceCreate([
             'uuid'           => Str::uuid(),
             'batch_id'       => gv($params, 'batch_id'),
-            'date_effective' => gv($params, 'date_effective'),
+            'date_effective' => toDate(gv($params, 'date_effective')),
             'description'    => gv($params, 'description'),
             'options'        => []
         ]);
@@ -235,7 +248,7 @@ class TimetableRepository
     private function validateTimetable($params, $timetable_id = null)
     {
         $batch_id = gv($params, 'batch_id');
-        $date_effective = gv($params, 'date_effective');
+        $date_effective = toDate(gv($params, 'date_effective'));
 
         $batch = $this->batch->filterBySession()->whereId($batch_id)->first();
 
@@ -355,7 +368,7 @@ class TimetableRepository
         }
 
         $timetable->batch_id       = gv($params, 'batch_id');
-        $timetable->date_effective = gv($params, 'date_effective');
+        $timetable->date_effective = toDate(gv($params, 'date_effective'));
         $timetable->description    = gv($params, 'description');
         $timetable->save();
 
@@ -431,7 +444,7 @@ class TimetableRepository
         $date = gv($params, 'date_effective');
 
         $batch_id = is_array($batch_id) ? $batch_id : ($batch_id ? explode(',', $batch_id) : []);
-        $date = $date ? $date : date('Y-m-d');
+        $date = $date ? toDate($date) : date('Y-m-d');
 
         $query = $this->batch->with('timetables', 'timetables.batch', 'timetables.batch.course', 'timetables.timetableAllocations', 'timetables.timetableAllocations.timetableAllocationDetails', 'timetables.timetableAllocations.classTiming', 'timetables.timetableAllocations.classTiming.classTimingSessions', 'timetables.timetableAllocations.timetableAllocationDetails.subject', 'timetables.timetableAllocations.timetableAllocationDetails.subject.subjectTeachers', 'timetables.timetableAllocations.timetableAllocationDetails.subject.subjectTeachers.employee', 'timetables.timetableAllocations.timetableAllocationDetails.classTimingSession')->filterBySession();
 

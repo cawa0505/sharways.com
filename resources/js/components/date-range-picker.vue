@@ -8,10 +8,8 @@
     </div>
 </template>
 <script>
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {datepicker},
+        components: {},
         props: ['startDate','endDate','label'],
         data(){
             return {
@@ -20,13 +18,13 @@
         },
         methods: {
             updateStartDate(val){
-                let date = moment(val).format('YYYY-MM-DD');
+                let date = helper.toDate(val);
                 if(date > this.endDate)
                     this.$emit('update:endDate',date);
                 this.$emit('update:startDate',date);
             },
             updateEndDate(val){
-                let date = moment(val).format('YYYY-MM-DD');
+                let date = helper.toDate(val);
                 if(!this.startDate || this.startDate > date)
                     this.$emit('update:startDate',date);
                 this.$emit('update:endDate',date);

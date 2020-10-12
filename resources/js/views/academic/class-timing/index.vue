@@ -93,10 +93,8 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-
     export default {
-        components: {switches},
+        components: {},
         data(){
             return {
                 class_timings: {

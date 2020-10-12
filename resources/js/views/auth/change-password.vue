@@ -3,11 +3,11 @@
         <div class="page-titles">
             <div class="row">
                 <div class="col-12 col-sm-6">
-                    <h3 class="text-themecolor">{{trans('auth.change_password')}} <span class="card-subtitle">{{getAuthUser('full_name')}} ({{getAuthUser('email')}})</span></h3>
+                    <h3 class="text-themecolor">{{trans('auth.change_password')}} <span class="card-subtitle">{{getAuthUser('name')}} ({{getAuthUser('email')}})</span></h3>
                 </div>
                 <div class="col-12 col-sm-6">
                     <div class="action-buttons pull-right">
-                        <button class="btn btn-info btn-sm" @click="$router.push('/profile')"><i class="fas fa-user"></i> <span class="d-none d-sm-inline">{{trans('user.profile')}}</span></button>
+                        <button class="btn btn-info btn-sm" @click="$router.push('/dashboard')"><i class="fas fa-home"></i> <span class="d-none d-sm-inline">{{trans('general.dashboard')}}</span></button>
                     </div>
                 </div>
             </div>

@@ -14,8 +14,7 @@ class CreateBookConditionsTable extends Migration
     public function up()
     {
         Schema::create('book_conditions', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->text('options')->nullable();

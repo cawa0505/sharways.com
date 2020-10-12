@@ -21,6 +21,12 @@
                     <switches class="m-t-10" v-model="documentTypeForm.has_expiry_date" theme="bootstrap" color="success"></switches>
                 </div>
             </div>
+            <div class="col-12 col-sm-6">
+                <div class="form-group">
+                    <div for="">{{trans('transport.is_insurance_document')}}</div>
+                    <switches class="m-t-10" v-model="documentTypeForm.is_insurance_document" theme="bootstrap" color="success"></switches>
+                </div>
+            </div>
         </div>
         <div class="card-footer text-right">
             <router-link to="/configuration/transport/vehicle/document/type" class="btn btn-danger waves-effect waves-light " v-show="id">{{trans('general.cancel')}}</router-link>
@@ -35,15 +41,14 @@
 
 
 <script>
-    import switches from 'vue-switches'
-
     export default {
-        components: {switches},
+        components: {},
         data() {
             return {
                 documentTypeForm: new Form({
                     name : '',
                     has_expiry_date: false,
+                    is_insurance_document: false,
                     description : ''
                 })
             };
@@ -79,6 +84,7 @@
                     .then(response => {
                         this.documentTypeForm.name = response.name;
                         this.documentTypeForm.has_expiry_date = response.has_expiry_date;
+                        this.documentTypeForm.is_insurance_document = response.is_insurance_document;
                         this.documentTypeForm.description = response.description;
                         loader.hide();
                     })

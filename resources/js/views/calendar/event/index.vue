@@ -57,7 +57,7 @@
                             <div class="col-12 col-sm-3">
                                 <div class="form-group">
                                     <label for="">{{trans('academic.batch')}}</label>
-                                    <v-select label="name" track-by="id" v-model="selected_batches" group-values="batches" group-label="batch_group" :group-select="false" name="batch_id" id="batch_id" :options="batches" :placeholder="trans('academic.select_batch')" @select="onBatchSelect" :multiple="true" :close-on-select="false" :clear-on-select="false" :hide-selected="true" @remove="onBatchRemove" :selected="selected_batches">
+                                    <v-select label="name" track-by="id" v-model="selected_batches" group-values="batches" group-label="course_group" :group-select="false" name="batch_id" id="batch_id" :options="batches" :placeholder="trans('academic.select_batch')" @select="onBatchSelect" :multiple="true" :close-on-select="false" :clear-on-select="false" :hide-selected="true" @remove="onBatchRemove" :selected="selected_batches">
                                         <div class="multiselect__option" slot="afterList" v-if="!batches.length">
                                             {{trans('general.no_option_found')}}
                                         </div>
@@ -187,13 +187,11 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import eventForm from './form'
     import eventDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { eventForm,datepicker,eventDetail,vSelect},
+        components : { eventForm,eventDetail},
         data() {
             return {
                 events: {

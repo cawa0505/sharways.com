@@ -4,20 +4,18 @@
             <div class="row">
                 <div class="col-12 col-sm-6">
                     <h3 class="text-themecolor">{{trans('student.student_detail')}}
-                        <span class="card-subtitle">{{getStudentName(student)}}
-                            <span v-html="showStatus"></span>
-                        </span>
+                        <span class="card-subtitle">{{getStudentName(student)}}</span>
                     </h3>
                 </div>
                 <div class="col-12 col-sm-6">
                     <div class="action-buttons pull-right">
-                        <router-link to="/student/admission" class="btn btn-info btn-sm"><i class="fas fa-list"></i> <span class="d-none d-sm-inline">{{trans('student.student')}}</span></router-link>
-                        <div class="btn-group" v-if="getStatus == 'studying'">
+                        <router-link to="/student/list" class="btn btn-info btn-sm"><i class="fas fa-list"></i> <span class="d-none d-sm-inline">{{trans('student.student')}}</span></router-link>
+                        <div class="btn-group" v-if="student.student_records.length">
                             <button type="button" class="btn btn-info btn-sm dropdown-toggle no-caret " role="menu" id="moreOption" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-tooltip="trans('general.more_option')">
                                 <i class="fas fa-ellipsis-h"></i> <span class="d-none d-sm-inline"></span>
                             </button>
                             <div :class="['dropdown-menu',getConfig('direction') == 'ltr' ? 'dropdown-menu-right' : '']" aria-labelledby="moreOption">
-                                <button class="dropdown-item custom-dropdown" @click="$router.push('/student/'+student.uuid+'/fee/'+getStudentRecordId)"><i class="fas fa-file"></i> {{trans('finance.view_fee_allocation')}}</button>
+                                <button v-for="student_record in student.student_records" class="dropdown-item custom-dropdown" @click="$router.push('/student/'+student.uuid+'/fee/'+student_record.id)"><i class="fas fa-file"></i> {{student_record.batch.course.name}} {{trans('finance.fee_allocation')}}</button>
                             </div>
                         </div>
                     </div>
@@ -30,7 +28,7 @@
                     <div class="card">
                         <div class="card-body">
                             <div id="accordion" class="accordion" v-if="student.id">
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="basic" @click="tab = 'basic'" data-toggle="collapse" data-target="#collapseBasic" aria-expanded="false" aria-controls="collapseBasic">
                                        <h5><i class="fas fa-lg fa-graduation-cap fa-fix-w-32"></i> {{trans('student.basic_information')}}</h5>
                                     </div>
@@ -41,18 +39,18 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="parent" @click="tab = 'parent'" data-toggle="collapse" data-target="#collapseParent" aria-expanded="false" aria-controls="collapseParent">
                                         <h5><i class="fas fa-lg fa-users fa-fix-w-32"></i> {{trans('student.parent_information')}}</h5>
                                     </div>
 
                                     <div id="collapseParent" class="collapse" aria-labelledby="parent" data-parent="#accordion">
                                         <div class="card-body">
-                                            <parent-form :student="student" v-if="tab == 'parent'"></parent-form>
+                                            <parent-form :student="student" v-if="tab == 'parent'" @completed="getStudent"></parent-form>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="contact" @click="tab = 'contact'" data-toggle="collapse" data-target="#collapseContact" aria-expanded="false" aria-controls="collapseContact">
                                         <h5><i class="fas fa-lg fa-address-book fa-fix-w-32"></i> {{trans('student.contact_information')}}</h5>
                                     </div>
@@ -63,7 +61,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="document" @click="tab = 'document'" data-toggle="collapse" data-target="#collapseDocument" aria-expanded="false" aria-controls="collapseDocument">
                                         <h5><i class="fas fa-lg fa-folder fa-fix-w-32"></i> {{trans('student.document_information')}}</h5>
                                     </div>
@@ -74,7 +72,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="qualification" @click="tab = 'qualification'" data-toggle="collapse" data-target="#collapseQualification" aria-expanded="false" aria-controls="collapseQualification">
                                         <h5><i class="fas fa-lg fa-book fa-fix-w-32"></i> {{trans('student.qualification_information')}}</h5>
                                     </div>
@@ -85,7 +83,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="sibling" @click="tab = 'sibling'" data-toggle="collapse" data-target="#collapseSibling" aria-expanded="false" aria-controls="collapseSibling">
                                         <h5><i class="fas fa-lg fa-people-carry fa-fix-w-32"></i> {{trans('student.sibling_information')}}</h5>
                                     </div>
@@ -96,7 +94,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="account" @click="tab = 'account'" data-toggle="collapse" data-target="#collapseAccount" aria-expanded="false" aria-controls="collapseAccount">
                                         <h5><i class="fas fa-lg fa-university fa-fix-w-32"></i> {{trans('student.account_information')}}</h5>
                                     </div>
@@ -107,7 +105,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="login" @click="tab = 'login'" data-toggle="collapse" data-target="#collapseUserLogin" aria-expanded="false" aria-controls="collapseUserLogin">
                                         <h5><i class="fas fa-lg fa-sign-in-alt fa-fix-w-32"></i> {{trans('auth.user_login')}}</h5>
                                     </div>
@@ -118,7 +116,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="promotion" @click="tab = 'promotion'" data-toggle="collapse" data-target="#collapsePromotion" aria-expanded="false" aria-controls="collapsePromotion">
                                         <h5><i class="fas fa-lg fa-chart-line fa-fix-w-32"></i> {{trans('student.promotion_history')}}</h5>
                                     </div>
@@ -129,7 +127,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="overflow: visible;">
                                     <div class="card-header collapsed" id="termination" @click="tab = 'termination'" data-toggle="collapse" data-target="#collapseTermination" aria-expanded="false" aria-controls="collapseTermination">
                                         <h5><i class="fas fa-lg fa-sign-out-alt fa-fix-w-32"></i> {{trans('student.termination_history')}}</h5>
                                     </div>
@@ -165,26 +163,6 @@
                                             <td>{{trans('student.mother_name')}}</td>
                                             <td>{{student.parent ? student.parent.mother_name : ''}}</td>
                                         </tr>
-                                        <tr v-if="student.student_records">
-                                            <td>{{trans('academic.batch')}}</td>
-                                            <td>{{getStudentBatch}}</td>
-                                        </tr>
-                                        <tr v-if="getDateOfAdmission">
-                                            <td>{{trans('student.date_of_admission')}}</td>
-                                            <td>{{getDateOfAdmission | moment}}</td>
-                                        </tr>
-                                        <tr v-if="getAdmissionNumber">
-                                            <td>{{trans('student.admission_number')}}</td>
-                                            <td>{{getAdmissionNumber}}</td>
-                                        </tr>
-                                        <tr v-if="getDateOfPromotion">
-                                            <td>{{trans('student.date_of_promotion')}}</td>
-                                            <td>{{getDateOfPromotion | moment}}</td>
-                                        </tr>
-                                        <tr v-if="getDateOfTermination">
-                                            <td class="text-danger font-weight-bold">{{trans('student.date_of_termination')}}</td>
-                                            <td class="text-danger font-weight-bold">{{getDateOfTermination | moment}}</td>
-                                        </tr>
                                         <tr>
                                             <td>{{trans('student.contact_number')}}</td>
                                             <td>{{student.contact_number}}</td>
@@ -197,6 +175,37 @@
                                             <td>{{trans('student.date_of_birth')}}</td>
                                             <td>{{student.date_of_birth | moment}}</td>
                                         </tr>
+                                    </tbody>
+                                </table>
+
+
+                                <table class="table table-sm custom-show-table" v-for="student_record in student.student_records">
+                                    <tbody>
+                                        <tr>
+                                            <td>{{trans('academic.batch')}}</td>
+                                            <td><span v-html="getStatus(student_record)"></span> {{student_record.batch.course.name+' '+student_record.batch.name+' '+student_record.academic_session.name}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{trans('student.date_of_admission')}}</td>
+                                            <td>{{student_record.admission.date_of_admission | moment}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{trans('student.admission_number')}}</td>
+                                            <td>{{student_record.admission.admission_number}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{trans('student.date_of_promotion')}}</td>
+                                            <td>{{student_record.date_of_entry | moment}}</td>
+                                        </tr>
+                                        <tr v-if="student_record.date_of_exit">
+                                            <td class="text-danger font-weight-bold">{{trans('student.date_of_termination')}}</td>
+                                            <td class="text-danger font-weight-bold">{{student_record.date_of_exit | moment}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <table class="table table-sm custom-show-table">
+                                    <tbody>
                                         <tr>
                                             <td>{{trans('general.created_at')}}</td>
                                             <td>{{student.created_at | momentDateTime}}</td>
@@ -207,6 +216,8 @@
                                         </tr>
                                     </tbody>
                                 </table>
+
+
                             </div>
                         </div>
                     </div>
@@ -272,57 +283,17 @@
                 return helper.getStudentName(this.student);
         	},
             updatePhoto(val){
-            }
+            },
+            getStatus(student_record){
+                if (! student_record)
+                    return '<span class="badge badge-info lb-sm">'+i18n.student.student_status_not_admitted+'</span>';
+                else if (student_record.date_of_exit)
+                    return '<span class="badge badge-danger lb-sm">'+i18n.student.student_status_not_terminated+'</span>';
+                else
+                    return '<span class="badge badge-success lb-sm">'+i18n.student.student_status_not_studying+'</span>';
+            },
         },
         computed: {
-            getStudentBatch(){
-                let student_record = this.student.student_records.length ? this.student.student_records[0] : null;
-
-                return student_record ? (student_record.batch.course.name+' '+student_record.batch.name+' '+student_record.academic_session.name) : '-';
-            },
-            getStatus(){
-                let student_record = this.student.student_records.length ? this.student.student_records[0] : null;
-
-                if (! student_record)
-                    return 'not_admitted';
-
-                if (student_record.date_of_exit)
-                    return 'terminated';
-
-                return 'studying';
-            },
-            showStatus(){
-                if (this.getStatus == 'not_admitted')
-                    return '<span class="badge badge-info lb-sm">'+i18n.student.student_status_not_admitted+'</span>';
-                else if (this.getStatus == 'studying')
-                    return '<span class="badge badge-success lb-sm">'+i18n.student.student_status_not_studying+'</span>';
-                else if (this.getStatus == 'terminated')
-                    return '<span class="badge badge-danger lb-sm">'+i18n.student.student_status_not_terminated+'</span>';
-            },
-            getStudentRecordId(){
-                let student_records = this.student.student_records.filter(o => o.academic_session_id == this.getDefaultAcademicSession.id);
-                return student_records.length ? student_records[student_records.length - 1].id : '';
-            },
-            getDateOfTermination(){
-                let student_record = this.student.student_records.length ? this.student.student_records[0] : null;
-
-                return (student_record && student_record.date_of_exit) ? student_record.date_of_exit : null;
-            },
-            getDateOfAdmission(){
-                let student_record = this.student.student_records.length ? this.student.student_records[0] : null;
-
-                return (student_record) ? student_record.admission.date_of_admission : null;
-            },
-            getDateOfPromotion(){
-                let student_record = this.student.student_records.length ? this.student.student_records[0] : null;
-
-                return (student_record) ? student_record.date_of_entry : null;
-            },
-            getAdmissionNumber(){
-                let student_record = this.student.student_records.length ? this.student.student_records[0] : null;
-
-                return (student_record) ? helper.getAdmissionNumber(student_record.admission) : null;
-            },
             getDefaultAcademicSession(){
                 return helper.getDefaultAcademicSession();
             }

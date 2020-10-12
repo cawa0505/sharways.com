@@ -14,9 +14,8 @@ class CreateLessonPlanDetailsTable extends Migration
     public function up()
     {
         Schema::create('lesson_plan_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('lesson_plan_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('lesson_plan_id')->unsigned()->nullable();
             $table->foreign('lesson_plan_id')->references('id')->on('lesson_plans')->onDelete('cascade');
             $table->string('title')->nullable();
             $table->text('description')->nullable();

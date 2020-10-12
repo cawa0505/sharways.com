@@ -14,8 +14,7 @@ class CreateTransactionCategoriesTable extends Migration
     public function up()
     {
         Schema::create('transaction_categories', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('type',20)->nullable();
             $table->text('description')->nullable();

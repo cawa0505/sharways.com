@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Student;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Student\Registration;
-use App\Http\Requests\Student\RegistrationRequest;
-use App\Repositories\Student\RegistrationRepository;
+use App\Http\Requests\Student\OnlineRegistrationRequest;
 use App\Http\Requests\Student\RegistrationFeeRequest;
+use App\Http\Requests\Student\RegistrationRequest;
 use App\Http\Requests\Student\RegistrationUpdateRequest;
 use App\Http\Requests\Student\RegistrationUpdateStatusRequest;
+use App\Models\Student\Registration;
+use App\Repositories\Student\RegistrationRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class RegistrationController extends Controller
 {
@@ -123,7 +124,10 @@ class RegistrationController extends Controller
 
         $this->authorize('show', Registration::class);
 
-        return $this->ok($registration);
+        $registration_custom_fields = $this->repo->getRegistrationCustomField();
+        $online_registration_custom_fields = $this->repo->getOnlineRegistrationCustomField();
+        
+        return $this->success(compact('registration','registration_custom_fields','online_registration_custom_fields'));
     }
 
     /**
@@ -133,8 +137,8 @@ class RegistrationController extends Controller
      *      @Parameter("first_name", type="string", required="true", description="First Name of Student"),
      *      @Parameter("middle_name", type="string", required="optional", description="Middle Name of Student"),
      *      @Parameter("last_name", type="string", required="true", description="Last Name of Student"),
-     *      @Parameter("father_name", type="string", required="true", description="Father's Name of Student"),
-     *      @Parameter("mother_name", type="string", required="true", description="Mother's Name of Student"),
+     *      @Parameter("first_guardian_name", type="string", required="true", description="First Guardian of Student"),
+     *      @Parameter("second_guardian_name", type="string", required="true", description="Second Guardian of Student"),
      *      @Parameter("date_of_birth", type="date", required="true", description="Date of Birth of Student"),
      *      @Parameter("date_of_registration", type="date", required="true", description="Date of Registration of Student"),
      *      @Parameter("contact_number", type="string", required="true", description="Contact Number of Student"),
@@ -268,5 +272,12 @@ class RegistrationController extends Controller
         $this->repo->delete($registration);
 
         return $this->success(['message' => trans('student.registration_deleted')]);
+    }
+
+    public function onlineRegistration(OnlineRegistrationRequest $request)
+    {
+        $registration = $this->repo->onlineRegistration($this->request->all());
+
+        return $this->success(['message' => config('config.online_registration_success_message')]);
     }
 }

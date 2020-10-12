@@ -89,7 +89,7 @@ class VisitorLogRepository
         $visitor_log = $this->visitor_log->info()->filterBySession()->filterById($id)->first();
 
         if (! $visitor_log) {
-            throw ValidationException::withMessages([$field => trans('calendar.could_not_find_visitor_log')]);
+            throw ValidationException::withMessages([$field => trans('reception.could_not_find_visitor_log')]);
         }
 
         return $visitor_log;
@@ -117,7 +117,7 @@ class VisitorLogRepository
         $visitor_log = $this->visitor_log->info()->filterBySession()->filterByUuid($uuid)->first();
 
         if (! $visitor_log) {
-            throw ValidationException::withMessages([$field => trans('calendar.could_not_find_visitor_log')]);
+            throw ValidationException::withMessages([$field => trans('reception.could_not_find_visitor_log')]);
         }
 
         return $visitor_log;
@@ -247,7 +247,7 @@ class VisitorLogRepository
         $visitor_count         = gv($params, 'visitor_count');
         $student_id            = gv($params, 'student_id');
         $employee_id           = gv($params, 'employee_id');
-        $date_of_visit         = gv($params, 'date_of_visit');
+        $date_of_visit         = toDate(gv($params, 'date_of_visit'));
         $entry_time            = gv($params, 'entry_time');
         $exit_time             = gv($params, 'exit_time');
         $remarks               = gv($params, 'remarks');
@@ -271,7 +271,7 @@ class VisitorLogRepository
         }
 
         if ($exit_time && strtotime($exit_time) === false) {
-            throw ValidationException::withMessages(['message' => trans('reception.invalid_entry_time')]);
+            throw ValidationException::withMessages(['message' => trans('reception.invalid_exit_time')]);
         }
 
         if ($exit_time && toTime($entry_time) > toTime($exit_time)) {

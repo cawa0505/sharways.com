@@ -70,11 +70,8 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-    import draggable from 'vuedraggable'
-
     export default {
-        components: {switches,draggable},
+        components: {},
         props: ['uuid'],
         data(){
             return {

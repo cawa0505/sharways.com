@@ -1,6 +1,6 @@
 @include('print.print-layout.header')
     <h2 style="text-align: center;">{{config('config.default_academic_session.name')}}</h2>
-    <h2>{{trans('post.event').' '.trans('general.total_result_count',['count' => count($events)])}}</h2>
+    <h2>{{trans('calendar.event').' '.trans('general.total_result_count',['count' => count($events)])}}</h2>
     <table class="fancy-detail">
         <thead>
             <tr>

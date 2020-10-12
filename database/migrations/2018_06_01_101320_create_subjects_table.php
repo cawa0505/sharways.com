@@ -14,9 +14,8 @@ class CreateSubjectsTable extends Migration
     public function up()
     {
         Schema::create('subjects', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('code')->nullable();

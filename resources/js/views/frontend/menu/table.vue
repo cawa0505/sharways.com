@@ -60,10 +60,8 @@
 </template>
 
 <script>
-    import draggable from 'vuedraggable'
-    
 	export default {
-        components : { draggable},
+        components : { },
 		data(){
 			return {
                 sub_menu_list: [],

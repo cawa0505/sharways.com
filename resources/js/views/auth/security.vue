@@ -5,7 +5,7 @@
             <div class="card-body p-4">
                 <img :src="getLogo" style="max-width:250px;" class="mx-auto d-block" />
                 <center class="m-t-30">
-                    <h4 class="card-title m-t-10">{{getAuthUser('full_name')}}</h4>
+                    <h4 class="card-title m-t-10">{{getAuthUser('name')}}</h4>
                 </center>
                 <form class="form-horizontal form-material" id="twoFactorForm" @submit.prevent="submit" @keydown="twoFactorForm.errors.clear($event.target.name)">
                     <h3 class="box-title m-b-20 text-center">{{trans('auth.two_factor_security')}}</h3>
@@ -44,7 +44,7 @@
             }
         },
         mounted(){
-            if(!helper.getConfig('two_factor_security') || !helper.getAuthUser('two_factor_code'))
+            if(!helper.getConfig('two_factor_security'))
                 this.$router.push('/dashboard');
 
             if(!helper.getConfig('mode'))
@@ -59,20 +59,21 @@
             },
             submit(){
                 let loader = this.$loading.show();
-                if(this.twoFactorForm.two_factor_code == helper.getAuthUser('two_factor_code')){
-                    this.$store.dispatch('resetTwoFactorCode');
-                    toastr.success(i18n.auth.two_factor_security_verified);
-                    loader.hide();
+                this.twoFactorForm.post('/api/auth/security')
+                    .then(response =>  {
+                        toastr.success(i18n.auth.two_factor_security_verified);
+                        loader.hide();
 
-                    let redirect_path = '/dashboard';
-                    if(helper.hasRole('admin') && helper.getConfig('setup_wizard'))
-                        redirect_path = '/setup';
+                        let redirect_path = '/dashboard';
+                        if(helper.hasRole('admin') && helper.getConfig('setup_wizard'))
+                            redirect_path = '/setup';
 
-                    this.$router.push(redirect_path);
-                } else {
-                    toastr.error(i18n.auth.invalid_two_factor_code);
-                    loader.hide();
-                }
+                        this.$router.push(redirect_path);
+                    })
+                    .catch(error => {
+                        loader.hide();
+                        helper.showErrorMsg(error);
+                    });
             },
             getAuthUser(name){
                 return helper.getAuthUser(name);

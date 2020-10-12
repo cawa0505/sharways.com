@@ -64,6 +64,17 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-12 col-sm-2">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.registration_type')}}</label>
+                                    <select v-model="filter.registration_type" class="custom-select col-12">
+                                      <option value=null selected>{{trans('general.select_one')}}</option>
+                                      <option v-for="registration_type in registration_types" v-bind:value="registration_type.value">
+                                        {{ registration_type.text }}
+                                      </option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="col-12 col-sm-6">
                                 <date-range-picker :start-date.sync="filter.date_of_registration_start_date" :end-date.sync="filter.date_of_registration_end_date" :label="trans('transport.date_of_registration_between')"></date-range-picker>
                             </div>
@@ -90,7 +101,7 @@
                             <thead>
                                 <tr>
                                     <th>{{trans('student.name')}}</th>
-                                    <th>{{trans('student.father_name')}}</th>
+                                    <th>{{trans('student.first_guardian_name')}}</th>
                                     <th>{{trans('student.date_of_birth')}}</th>
                                     <th>{{trans('student.contact_number')}}</th>
                                     <th>{{trans('academic.course')}}</th>
@@ -102,8 +113,13 @@
                             </thead>
                             <tbody>
                                 <tr v-for="registration in registrations.data">
-                                    <td v-text="getStudentName(registration.student)"></td>
-                                    <td v-text="registration.student.parent ? registration.student.parent.father_name : ''"></td>
+                                    <td>
+                                        {{getStudentName(registration.student)}}
+                                        <span v-if="registration.is_online">
+                                            <span class="label label-info">{{trans('student.online_registration')}}</span>
+                                        </span>
+                                    </td>
+                                    <td v-text="registration.student.parent ? registration.student.parent.first_guardian_name : ''"></td>
                                     <td>{{registration.student.date_of_birth | moment}}</td>
                                     <td v-text="registration.student.contact_number"></td>
                                     <td v-text="registration.course.name"></td>
@@ -143,11 +159,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import registrationForm from './form'
 
     export default {
-        components : { registrationForm,vSelect },
+        components : { registrationForm },
         data() {
             return {
                 registrations: {
@@ -159,7 +174,8 @@
                     order: 'desc',
                     course_id: [],
                     previous_institute_id: [],
-                    status: '',
+                    status: null,
+                    registration_type: null,
                     date_of_registration_start_date: '',
                     date_of_registration_end_date: '',
                     page_length: helper.getConfig('page_length')
@@ -189,6 +205,7 @@
                     }
                 ],
                 courses: [],
+                registration_types: [],
                 selected_courses: null,
                 previous_institutes: [],
                 selected_institutes: null,
@@ -216,18 +233,19 @@
             },
             getRegistrations(page){
                 let loader = this.$loading.show();
-                this.filter.date_of_registration_start_date = helper.toDate(this.filter.date_of_registration_start_date);
-                this.filter.date_of_registration_end_date = helper.toDate(this.filter.date_of_registration_end_date);
 
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_registration_start_date = helper.toDate(this.filter.date_of_registration_start_date);
+                this.filter.date_of_registration_end_date = helper.toDate(this.filter.date_of_registration_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/registration?page=' + page + url)
                     .then(response => {
                         this.registrations = response.registrations;
                         this.courses = response.filters.courses;
                         this.previous_institutes = response.filters.previous_institutes;
+                        this.registration_types = response.filters.registration_types;
                         loader.hide();
                     })
                     .catch(error => {

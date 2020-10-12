@@ -14,9 +14,8 @@ class CreateStudentQualificationsTable extends Migration
     public function up()
     {
         Schema::create('student_qualifications', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
             $table->string('standard')->nullable();
             $table->string('institute_name')->nullable();

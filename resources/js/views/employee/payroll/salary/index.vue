@@ -101,12 +101,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import salaryDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : {salaryDetail,datepicker,vSelect},
+        components : {salaryDetail},
         data() {
             return {
                 salaries: {
@@ -168,6 +166,7 @@
                 axios.get('/api/employee/payroll/salary?page=' + page + url)
                     .then(response => {
                         this.salaries = response.salaries;
+                        this.employees = response.filters.employees;
                         loader.hide();
                     })
                     .catch(error => {
@@ -223,7 +222,13 @@
             },
             formatCurrency(amount){
                 return helper.formatCurrency(amount);
-            }
+            },
+            onEmployeeSelect(selectedOption){
+                this.filter.employee_id.push(selectedOption.id);
+            },
+            onEmployeeRemove(removedOption){
+                this.filter.employee_id.splice(this.filter.employee_id.indexOf(removedOption.id), 1);
+            },
         },
         filters: {
           moment(date) {

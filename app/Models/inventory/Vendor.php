@@ -36,12 +36,17 @@ class Vendor extends Model
 
     public function expenses()
     {
-        return $this->belongsTo('App\Models\Finance\Transaction\Expense');
+        return $this->hasMany('App\Models\Finance\Transaction\Expense');
     }
 
     public function getOption(string $option)
     {
         return array_get($this->options, $option);
+    }
+
+    public function scopeInfo($q)
+    {
+        return $q;
     }
     
     public function scopeFilterById($q, $id)
@@ -51,5 +56,23 @@ class Vendor extends Model
         }
 
         return $q->where('id', '=', $id);
+    }
+
+    public function scopeFilterByName($q, $name, $s = 0)
+    {
+        if (! $name) {
+            return $q;
+        }
+
+        return ($s) ? $q->where('name', '=', $name) : $q->where('name', 'like', '%'.$name.'%');
+    }
+
+    public function scopeFilterByContactPerson($q, $contact_person, $s = 0)
+    {
+        if (! $contact_person) {
+            return $q;
+        }
+
+        return ($s) ? $q->where('contact_person', '=', $contact_person) : $q->where('contact_person', 'like', '%'.$contact_person.'%');
     }
 }

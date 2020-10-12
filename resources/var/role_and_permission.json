@@ -16,7 +16,15 @@
 			"import-previous-session-data": []
 		},
 		"communication": {
-			"send-sms": ["manager","accountant","principal"]
+			"send-sms": ["manager","accountant","principal"],
+			"send-email": ["manager","accountant","principal"],
+			"delete-communication-history": ["manager"]
+		},
+		"general": {
+			"create-institute-document": ["manager"],
+			"edit-institute-document": ["manager"],
+			"list-institute-document": ["manager"],
+			"delete-institute-document": ["manager"]
 		},
 		"utility": {
 			"access-todo": ["manager","principal","staff","librarian","accountant","student","parent"]
@@ -56,11 +64,7 @@
 			"list-certificate": ["manager","principal"],
 			"create-certificate": ["manager","principal"],
 			"edit-certificate": ["manager","principal"],
-			"delete-certificate": ["manager"],
-			"list-transfer-certificate": ["manager","principal"],
-			"create-transfer-certificate": ["manager","principal"],
-			"edit-transfer-certificate": ["manager","principal"],
-			"delete-transfer-certificate": ["manager"]
+			"delete-certificate": ["manager"]
 		},
 		"student": {
 			"new-registration": ["manager","principal"],
@@ -82,6 +86,7 @@
 			"customize-late-fee": ["manager"],
 			"cancel-fee-payment": ["manager","accountant"],
 			"edit-roll-number": ["manager","principal","staff"],
+			"generate-student-id-card": ["manager","principal","staff"],
 			"list-student-attendance": ["manager","principal","staff"],
 			"mark-student-attendance": ["manager","principal","staff"],
 			"import-student": ["manager"],
@@ -137,7 +142,11 @@
 			"store-class-teacher-wise-exam-mark": [],
 			"store-subject-teacher-wise-exam-mark": [],
 			"access-exam-report": ["manager","principal","student","parent"],
-			"access-class-teacher-wise-exam-report": ["manager","principal","staff"]
+			"access-class-teacher-wise-exam-report": ["manager","principal","staff"],
+			"list-online-exam": ["manager","principal"],
+			"create-online-exam": ["manager","principal"],
+			"edit-online-exam": ["manager"],
+			"delete-online-exam": ["manager"]
 		},
 		"transport": {
 			"list-transport-circle": ["manager"],
@@ -177,7 +186,10 @@
 			"create-transport-route": ["manager"],
 			"edit-transport-route": ["manager"],
 			"delete-transport-route": [],
-			"assign-transport-route": ["manager"]
+			"assign-transport-route": ["manager"],
+			"list-vehicle-incharge": ["manager"],
+			"store-vehicle-incharge": ["manager"],
+			"delete-vehicle-incharge": ["manager"]
 		},
 		"employee": {
 			"access-all-employee": [],
@@ -202,7 +214,9 @@
 			"list-payroll-transaction": ["manager","principal","staff","accountant","librarian"],
 			"create-payroll-transaction": ["manager","principal"],
 			"edit-payroll-transaction": ["manager"],
-			"cancel-payroll-transaction": ["manager"]
+			"cancel-payroll-transaction": ["manager"],
+			"generate-employee-id-card": ["manager","principal"],
+			"import-employee": ["manager"]
 		},
 		"library": {
 			"create-book": ["manager","librarian"],
@@ -236,6 +250,22 @@
 			"edit-visitor-log": ["manager"],
 			"list-visitor-log": ["manager"],
 			"delete-visitor-log": ["manager"],
+			"create-postal-record": ["manager","principal"],
+			"edit-postal-record": ["manager","principal"],
+			"list-postal-record": ["manager","principal"],
+			"delete-postal-record": ["manager","principal"],
+			"create-call-log": ["manager","principal"],
+			"edit-call-log": ["manager","principal"],
+			"list-call-log": ["manager","principal"],
+			"delete-call-log": ["manager","principal"],
+			"create-complaint": ["manager"],
+			"edit-complaint": ["manager"],
+			"list-complaint": ["manager"],
+			"delete-complaint": ["manager"],
+			"create-gate-pass": ["manager","principal"],
+			"edit-gate-pass": ["manager","principal"],
+			"list-gate-pass": ["manager","principal"],
+			"delete-gate-pass": ["manager","principal"],
 			"create-enquiry": ["manager","principal"],
 			"edit-enquiry": ["manager","principal"],
 			"list-enquiry": ["manager","principal"],
@@ -263,6 +293,28 @@
 			"create-syllabus": ["manager","principal","staff"],
 			"edit-syllabus": ["manager","principal","staff"],
 			"delete-syllabus": ["manager","principal","staff"]
+		},
+		"inventory": {
+			"list-vendor": ["manager","principal"],
+			"create-vendor": ["manager","principal"],
+			"edit-vendor": ["manager","principal"],
+			"delete-vendor": ["manager"],
+			"list-stock-category": ["manager","principal"],
+			"create-stock-category": ["manager","principal"],
+			"edit-stock-category": ["manager","principal"],
+			"delete-stock-category": ["manager"],
+			"list-stock-item": ["manager","principal"],
+			"create-stock-item": ["manager","principal"],
+			"edit-stock-item": ["manager","principal"],
+			"delete-stock-item": ["manager"],
+			"list-stock-purchase": ["manager","principal"],
+			"create-stock-purchase": ["manager","principal"],
+			"edit-stock-purchase": ["manager","principal"],
+			"delete-stock-purchase": ["manager"],
+			"list-stock-transfer": ["manager","principal"],
+			"create-stock-transfer": ["manager","principal"],
+			"edit-stock-transfer": ["manager","principal"],
+			"delete-stock-transfer": ["manager"]
 		}
 	}
 }

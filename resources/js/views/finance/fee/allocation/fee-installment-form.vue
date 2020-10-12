@@ -81,12 +81,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import switches from 'vue-switches'
-    import datepicker from 'vuejs-datepicker'
-
 	export default {
-		components: {vSelect,switches,datepicker},
+		components: {},
 		props: ['iuuid'],
 		data(){
 			return {
@@ -164,7 +160,6 @@
 			},
 			submit(){
                 let loader = this.$loading.show();
-                this.feeInstallmentForm.due_date = moment(this.feeInstallmentForm.due_date).format('YYYY-MM-DD');
 				this.feeInstallmentForm.patch('/api/fee/installment/'+this.iuuid)
 					.then(response => {
 						toastr.success(response.message);

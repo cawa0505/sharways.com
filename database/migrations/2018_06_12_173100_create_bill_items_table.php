@@ -14,12 +14,11 @@ class CreateBillItemsTable extends Migration
     public function up()
     {
         Schema::create('bill_items', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid');
-            $table->integer('bill_id')->unsigned()->nullable();
+            $table->bigInteger('bill_id')->unsigned()->nullable();
             $table->foreign('bill_id')->references('id')->on('bills')->onDelete('cascade');
-            $table->integer('stock_item_id')->unsigned()->nullable();
+            $table->bigInteger('stock_item_id')->unsigned()->nullable();
             $table->foreign('stock_item_id')->references('id')->on('stock_items')->onDelete('cascade');
             $table->string('custom_item_name')->nullable();
             $table->decimal('quantity',25,5)->default(0);

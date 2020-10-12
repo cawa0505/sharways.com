@@ -14,11 +14,10 @@ class CreateStudentGroupCollectionTable extends Migration
     public function up()
     {
         Schema::create('student_group_collection', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->integer('student_group_id')->unsigned()->nullable();
+            $table->bigInteger('student_group_id')->unsigned()->nullable();
             $table->foreign('student_group_id')->references('id')->on('student_groups')->onDelete('cascade');
         });
     }

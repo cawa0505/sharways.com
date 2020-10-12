@@ -41,6 +41,36 @@
                                             </tbody>
                                             <tfoot>
                                                 <tr>
+                                                    <td>{{trans('student.additional_fee_charge')}}</td>
+                                                    <td colspan="2">
+                                                        <div class="form-group">
+                                                            <input class="invoice-input-left" type="text" v-model="feePaymentForm.additional_fee_charge_label" name="additional_fee_charge_label" :placeholder="trans('student.fee_label')">
+                                                            <show-error :form-name="feePaymentForm" prop-name="additional_fee_charge_label"></show-error>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div class="form-group">
+                                                            <input class="invoice-input" type="text" v-model="feePaymentForm.additional_fee_charge" name="additional_fee_charge" :placeholder="trans('student.additional_fee_charge')">
+                                                            <show-error :form-name="feePaymentForm" prop-name="additional_fee_charge"></show-error>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{trans('student.additional_fee_discount')}}</td>
+                                                    <td colspan="2">
+                                                        <div class="form-group">
+                                                            <input class="invoice-input-left" type="text" v-model="feePaymentForm.additional_fee_discount_label" name="additional_fee_discount_label" :placeholder="trans('student.fee_label')">
+                                                            <show-error :form-name="feePaymentForm" prop-name="additional_fee_discount_label"></show-error>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div class="form-group">
+                                                            <input class="invoice-input" type="text" v-model="feePaymentForm.additional_fee_discount" name="additional_fee_discount" :placeholder="trans('student.additional_fee_discount')">
+                                                            <show-error :form-name="feePaymentForm" prop-name="additional_fee_discount"></show-error>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
                                                     <th>{{trans('general.total')}}</th>
                                                     <th colspan="2"></th>
                                                     <th class="text-right">{{formatCurrency(getGrandTotal)}}</th>
@@ -137,16 +167,17 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         props: ['id','uuid','feePayment'],
         data() {
             return {
                 feePaymentForm: new Form({
                     amount: 0,
+                    additional_fee_discount: 0,
+                    additional_fee_charge: 0,
+                    additional_fee_charge_label: '',
+                    additional_fee_discount_label: '',
                     installments: [],
                     installment_id: '',
                     account_id: '',
@@ -201,10 +232,6 @@
                         this.accounts = response.accounts;
                         this.payment_methods = response.payment_methods;
                         this.payment_method_details = response.payment_method_details;
-                        this.selected_payment_method = response.selected_payment_method;
-                        this.feePaymentForm.payment_method_id = response.selected_payment_method ? response.selected_payment_method.id : '';
-                        this.selected_account = response.selected_account;
-                        this.feePaymentForm.account_id = response.selected_account ? response.selected_account.id : '';
                         loader.hide();
                     })
                     .catch(error => {
@@ -230,7 +257,6 @@
                 return helper.formatCurrency(amount);
             },
             submit(){
-                this.feePaymentForm.date = moment(this.feePaymentForm.date).format('YYYY-MM-DD');
                 let loader = this.$loading.show();
                 this.feePaymentForm.post('/api/student/'+this.uuid+'/payment/'+this.id)
                     .then(response => {
@@ -257,7 +283,7 @@
                 this.feePaymentForm.installments.forEach(installment => {
                     total += (installment.installment_balance + parseInt(installment.late_fee_balance));
                 })   
-                return total;
+                return total + +this.feePaymentForm.additional_fee_charge - +this.feePaymentForm.additional_fee_discount;
             }
         },
         watch: {

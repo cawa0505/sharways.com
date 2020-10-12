@@ -95,12 +95,9 @@
 </template>
 
 <script>
-    import uuid from 'uuid/v4'
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
 
 	export default {
-		components: {datepicker,vSelect},
+		components: {},
 		props: ['uuid','tid'],
 		data(){
 			return {
@@ -123,7 +120,7 @@
 			}
 		},
 		mounted(){
-            this.termForm.upload_token = uuid();
+            this.termForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
 
@@ -152,13 +149,12 @@
             },
 			storeTerm(){
 				let loader = this.$loading.show();
-				this.termForm.date_of_joining = helper.toDate(this.termForm.date_of_joining);
 				this.termForm.post('/api/employee/'+this.uuid+'/term')
 					.then(response => {
 						toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
 						this.$emit('completed');
-                        this.termForm.upload_token = uuid();
+                        this.termForm.upload_token = this.$uuid.v4();
 						loader.hide();
 					})
 					.catch(error => {
@@ -187,7 +183,6 @@
             },
             updateTerm(){
                 let loader = this.$loading.show();
-				this.termForm.date_of_leaving = helper.toDate(this.termForm.date_of_leaving);
                 this.termForm.patch('/api/employee/'+this.uuid+'/term/'+this.tid)
                     .then(response => {
                         toastr.success(response.message);

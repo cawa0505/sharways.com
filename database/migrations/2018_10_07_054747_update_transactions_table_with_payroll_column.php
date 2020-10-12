@@ -14,9 +14,9 @@ class UpdateTransactionsTableWithPayrollColumn extends Migration
     public function up()
     {
         Schema::table('transactions', function ($table) {
-            $table->integer('employee_id')->unsigned()->nullable()->after('student_fee_record_id');
+            $table->bigInteger('employee_id')->unsigned()->nullable()->after('student_fee_record_id');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
-            $table->integer('payroll_id')->unsigned()->nullable()->after('employee_id');
+            $table->bigInteger('payroll_id')->unsigned()->nullable()->after('employee_id');
             $table->foreign('payroll_id')->references('id')->on('payrolls')->onDelete('cascade');
             $table->boolean('is_advance_salary')->default(0)->after('payroll_id');
         });

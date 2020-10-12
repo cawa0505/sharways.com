@@ -14,9 +14,9 @@ class UpdateBatchTableWithExamColumns extends Migration
     public function up()
     {
         Schema::table('batches', function (Blueprint $table) {
-            $table->integer('exam_grade_id')->unsigned()->nullable()->after('name');
+            $table->bigInteger('exam_grade_id')->unsigned()->nullable()->after('name');
             $table->foreign('exam_grade_id')->references('id')->on('exam_grades')->onDelete('set null');
-            $table->integer('exam_observation_id')->unsigned()->nullable()->after('name');
+            $table->bigInteger('exam_observation_id')->unsigned()->nullable()->after('name');
             $table->foreign('exam_observation_id')->references('id')->on('exam_observations')->onDelete('set null');
         });
     }

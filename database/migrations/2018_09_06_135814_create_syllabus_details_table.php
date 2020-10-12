@@ -14,9 +14,8 @@ class CreateSyllabusDetailsTable extends Migration
     public function up()
     {
         Schema::create('syllabus_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('syllabus_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('syllabus_id')->unsigned()->nullable();
             $table->foreign('syllabus_id')->references('id')->on('syllabuses')->onDelete('cascade');
             $table->string('title')->nullable();
             $table->text('description')->nullable();

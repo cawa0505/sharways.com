@@ -43,6 +43,16 @@
                                     </v-select>
                                 </div>
                             </div>
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label for="">{{trans('transport.vehicle_service_center')}}</label>
+                                    <v-select label="name" track-by="id" v-model="selected_vehicle_service_center" name="vehicle_service_center_id" id="vehicle_service_center_id" :options="vehicle_service_centers" :placeholder="trans('transport.select_vehicle_service_center')" @select="onVehicleServiceCenterSelect" :multiple="true" :close-on-select="false" :clear-on-select="false" :hide-selected="true" @remove="onVehicleServiceCenterRemove" :selected="selected_vehicle_service_center">
+                                        <div class="multiselect__option" slot="afterList" v-if="!vehicle_service_centers.length">
+                                            {{trans('general.no_option_found')}}
+                                        </div>
+                                    </v-select>
+                                </div>
+                            </div>
                             <div class="col-12 col-sm-6">
                                 <date-range-picker :start-date.sync="filter.date_of_service_start_date" :end-date.sync="filter.date_of_service_end_date" :label="trans('transport.date_of_service_between')"></date-range-picker>
                             </div>
@@ -70,6 +80,7 @@
                             <thead>
                                 <tr>
                                     <th>{{trans('transport.vehicle')}}</th>
+                                    <th>{{trans('transport.vehicle_service_center')}}</th>
                                     <th>{{trans('transport.vehicle_service_record_amount')}}</th>
                                     <th>{{trans('transport.vehicle_log_log')}}</th>
                                     <th>{{trans('transport.date_of_service')}}</th>
@@ -81,6 +92,11 @@
                             <tbody>
                                 <tr v-for="vehicle_service_record in vehicle_service_records.data">
                                     <td>{{vehicle_service_record.vehicle.name+' ('+vehicle_service_record.vehicle.registration_number+')'}}</td>
+                                    <td>
+                                        <span v-if="vehicle_service_record.vehicle_service_center
+                                        ">{{vehicle_service_record.vehicle_service_center.name}}</span>
+                                        <span v-else>-</span>
+                                    </td>
                                     <td>{{formatCurrency(vehicle_service_record.amount)}}</td>
                                     <td>{{vehicle_service_record.log}}</td>
                                     <td>{{vehicle_service_record.date_of_service | moment}}</td>
@@ -97,7 +113,7 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td>{{trans('general.total')}}</td>
+                                    <td colspan="2">{{trans('general.total')}}</td>
                                     <td>{{formatCurrency(total_amount)}}</td>
                                     <td colspan="5"></td>
                                 </tr>
@@ -120,7 +136,7 @@
                     <div class="modal-container modal-lg">
                         <div class="modal-header">
                             <slot name="header">
-                                {{vehicle_service_record.vehicle ? (vehicle_service_record.vehicle.name+' ('+vehicle_service_record.vehicle.registration_number+')') : ''}}
+                                {{vehicle_service_record.vehicle ? (vehicle_service_record.vehicle.name+' ('+vehicle_service_record.vehicle.registration_number+')') : ''}} <span v-if="vehicle_service_record.vehicle_service_center">{{trans('transport.vehicle_service_center')}}: {{vehicle_service_record.vehicle_service_center.name}}</span>
                                 <span class="float-right pointer" @click="showDetailModal = false">x</span>
                             </slot>
                         </div>
@@ -132,9 +148,9 @@
                                 </div>
                                 <div class="m-t-20" v-html="vehicle_service_record.description"></div>
                                 <div v-if="attachments.length">
-                                    <ul style="list-style: none;padding: 0;" class="m-t-10">
-                                        <li v-for="attachment in attachments">
-                                            <a :href="`/transport/vehicle/service/record/${vehicle_service_record.id}/attachment/${attachment.uuid}/download?token=${authToken}`"><i class="fas fa-paperclip"></i> {{attachment.user_filename}}</a>
+                                    <ul class="m-t-10 upload-file-list">
+                                        <li class="upload-file-list-item" v-for="attachment in attachments">
+                                            <a :href="`/transport/vehicle/service/record/${vehicle_service_record.id}/attachment/${attachment.uuid}/download?token=${authToken}`" class="no-link-color"><i :class="['file-icon', 'fas', 'fa-lg', attachment.file_info.icon]"></i> <span class="upload-file-list-item-size">{{attachment.file_info.size}}</span> {{attachment.user_filename}}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -157,12 +173,10 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-    import vSelect from 'vue-multiselect'
     import vehicleServiceRecordForm from './form'
 
     export default {
-        components : { vehicleServiceRecordForm,vSelect,switches },
+        components : { vehicleServiceRecordForm},
         data() {
             return {
                 vehicle_service_records: {
@@ -173,6 +187,7 @@
                     sort_by : 'date_of_service',
                     order: 'desc',
                     vehicle_id: [],
+                    vehicle_service_center_id: [],
                     date_of_service_start_date: moment().startOf('month').format('YYYY-MM-DD'),
                     date_of_service_end_date: moment().endOf('month').format('YYYY-MM-DD'),
                     page_length: helper.getConfig('page_length')
@@ -200,7 +215,9 @@
                     }
                 ],
                 vehicles: [],
+                vehicle_service_centers: [],
                 selected_vehicle: null,
+                selected_vehicle_service_center: null,
                 showCreatePanel: false,
                 showFilterPanel: false,
                 viewId: '',
@@ -230,17 +247,18 @@
             },
             getVehicleServiceRecords(page){
                 let loader = this.$loading.show();
-                this.filter.date_of_service_start_date = helper.toDate(this.filter.date_of_service_start_date);
-                this.filter.date_of_service_end_date = helper.toDate(this.filter.date_of_service_end_date);
 
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_service_start_date = helper.toDate(this.filter.date_of_service_start_date);
+                this.filter.date_of_service_end_date = helper.toDate(this.filter.date_of_service_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/vehicle/service/record?page=' + page + url)
                     .then(response => {
                         this.vehicle_service_records = response.vehicle_service_records;
                         this.vehicles = response.filters.vehicles;
+                        this.vehicle_service_centers = response.filters.vehicle_service_centers;
                         this.total_amount = response.total_amount;
                         loader.hide();
                     })
@@ -311,6 +329,12 @@
             },
             onVehicleRemove(removedOption){
                 this.filter.vehicle_id.splice(this.filter.vehicle_id.indexOf(removedOption.id), 1);
+            },
+            onVehicleServiceCenterSelect(selectedOption){
+                this.filter.vehicle_service_center_id.push(selectedOption.id);
+            },
+            onVehicleServiceCenterRemove(removedOption){
+                this.filter.vehicle_service_center_id.splice(this.filter.vehicle_service_center_id.indexOf(removedOption.id), 1);
             },
             showDetailAction(vehicle_service_record){
                 this.viewId = vehicle_service_record.id;

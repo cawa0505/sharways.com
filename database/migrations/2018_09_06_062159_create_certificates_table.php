@@ -14,14 +14,13 @@ class CreateCertificatesTable extends Migration
     public function up()
     {
         Schema::create('certificates', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid');
-            $table->integer('certificate_template_id')->unsigned()->nullable();
+            $table->bigInteger('certificate_template_id')->unsigned()->nullable();
             $table->foreign('certificate_template_id')->references('id')->on('certificate_templates')->onDelete('cascade');
-            $table->integer('student_record_id')->unsigned()->nullable();
+            $table->bigInteger('student_record_id')->unsigned()->nullable();
             $table->foreign('student_record_id')->references('id')->on('student_records')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->date('date_of_certificate')->nullable();
             $table->longText('body')->nullable();

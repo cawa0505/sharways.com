@@ -14,10 +14,9 @@ class CreateEmployeeLeaveAllocationsTable extends Migration
     public function up()
     {
         Schema::create('employee_leave_allocations', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id','ela_employee_id_foreign')->references('id')->on('employees')->onDelete('cascade');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

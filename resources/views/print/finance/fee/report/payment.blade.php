@@ -1,14 +1,13 @@
-@include('print.print-layout.feepaymentreport')
+@include('print.print-layout.header')
     <h2 style="text-align: center;">{{config('config.default_academic_session.name')}}</h2>
-    <h2 style="text-align: center; font-size: 18px;">{{trans('finance.fee_payment_report')}}</h2>
-    <p style="margin-top:20px; text-align: right; font-size: 12px;">{{trans('general.report_date_time').' '.showDateTime(now())}}</p>
+    <h2>{{trans('finance.fee_payment_report').' '.trans('general.total_result_count',['count' => count($list)])}}</h2>
     <table class="fancy-detail">
         <thead>
             <tr>
                 <th>{{trans('finance.receipt_no')}}</th>
                 <th>{{trans('student.name')}}</th>
                 <th>{{trans('academic.batch')}}</th>
-                <th>{{trans('student.father_name')}}</th>
+                <th>{{trans('student.first_guardian_name')}}</th>
                 <th>{{trans('student.contact_number')}}</th>
                 <th>{{trans('finance.amount')}}</th>
                 <th>{{trans('finance.date')}}</th>
@@ -22,7 +21,7 @@
                     <td>{{ $item['receipt_no'] }}</td>
                     <td>{{ $item['name'] }}</td>
                     <td>{{ $item['batch'] }}</td>
-                    <td>{{ $item['father_name'] }}</td>
+                    <td>{{ $item['first_guardian_name'] }}</td>
                     <td>{{ $item['contact_number'] }}</td>
                     <td>{{ currency($item['amount']) }}</td>
                     <td>{{ $item['date'] }}</td>

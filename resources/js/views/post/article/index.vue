@@ -120,13 +120,11 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import articleForm from './form'
     import articleDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { articleForm,datepicker,articleDetail,vSelect},
+        components : { articleForm,articleDetail},
         data() {
             return {
                 articles: {
@@ -189,6 +187,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_article_start_date = helper.toDate(this.filter.date_of_article_start_date);
+                this.filter.date_of_article_end_date = helper.toDate(this.filter.date_of_article_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/article?page=' + page + url)
                     .then(response => {

@@ -14,8 +14,7 @@ class CreatePaymentMethodsTable extends Migration
     public function up()
     {
         Schema::create('payment_methods', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->text('options')->nullable();

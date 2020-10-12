@@ -107,7 +107,10 @@
                                     <td class="table-option">
                                         <div class="btn-group">
                                             <button class="btn btn-info btn-sm" v-tooltip="trans('student.view_student_detail')" @click="$router.push('/student/'+student_record.student.uuid)">
-                                                <i class="fas fa-arrow-circle-right"></i> {{trans('general.view')}}
+                                                <i class="fas fa-arrow-circle-right"></i>
+                                            </button>
+                                            <button class="btn btn-success btn-sm" v-tooltip="trans('student.view_transfer_certificate')" @click="$router.push('/student/termination/'+student_record.student.uuid+'/'+student_record.id)">
+                                                <i class="fas fa-file-alt"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -125,10 +128,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components : {vSelect},
+        components : {},
         data() {
             return {
                 student_records: {
@@ -180,12 +181,12 @@
             },
             getStudentRecords(page){
                 let loader = this.$loading.show();
-                this.filter.date_of_exit_start_date = helper.toDate(this.filter.date_of_exit_start_date);
-                this.filter.date_of_exit_end_date = helper.toDate(this.filter.date_of_exit_end_date);
 
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_exit_start_date = helper.toDate(this.filter.date_of_exit_start_date);
+                this.filter.date_of_exit_end_date = helper.toDate(this.filter.date_of_exit_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/student/terminated?page=' + page + url)
                     .then(response => {
@@ -261,6 +262,11 @@
             },
             'filter.page_length': function(val){
                 this.getStudentRecords();
+            }
+        },
+        computed: {
+            authToken(){
+                return helper.getAuthToken();
             }
         }
     }

@@ -14,13 +14,12 @@ class CreateStockTransfersTable extends Migration
     public function up()
     {
         Schema::create('stock_transfers', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('room_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('room_id')->unsigned()->nullable();
             $table->foreign('room_id')->references('id')->on('rooms')->onDelete('cascade');
-            $table->integer('student_record_id')->unsigned()->nullable();
+            $table->bigInteger('student_record_id')->unsigned()->nullable();
             $table->foreign('student_record_id')->references('id')->on('student_records')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->date('date')->nullable();
             $table->date('return_due_date')->nullable();

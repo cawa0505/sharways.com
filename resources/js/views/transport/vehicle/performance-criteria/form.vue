@@ -82,11 +82,8 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         data() {
             return {
                 vehiclePerformanceCriteriaForm: new Form({
@@ -132,7 +129,6 @@
             },
             storeVehicleLog(){
                 let loader = this.$loading.show();
-                this.vehiclePerformanceCriteriaForm.date_effective = moment(this.vehiclePerformanceCriteriaForm.date_effective).format('YYYY-MM-DD');
                 this.vehiclePerformanceCriteriaForm.post('/api/vehicle/performance/criteria')
                     .then(response => {
                         toastr.success(response.message);
@@ -168,7 +164,6 @@
             },
             updateVehicleLog(){
                 let loader = this.$loading.show();
-                this.vehiclePerformanceCriteriaForm.date_effective = moment(this.vehiclePerformanceCriteriaForm.date_effective).format('YYYY-MM-DD');
                 this.vehiclePerformanceCriteriaForm.patch('/api/vehicle/performance/criteria/'+this.id)
                     .then(response => {
                         toastr.success(response.message);

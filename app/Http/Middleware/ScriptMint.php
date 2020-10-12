@@ -31,6 +31,10 @@ class ScriptMint
     public function handle($request, Closure $next, $guard = null)
     {
         $this->repo->init();
+        
+        if (!\Storage::exists('.app_installed')) {
+            return $next($request);
+        }
 
         $this->config->setDefault();
         

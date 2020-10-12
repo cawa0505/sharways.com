@@ -39,6 +39,14 @@
                         <h4 class="card-title">{{trans('general.filter')}}</h4>
                         <div class="row">
                             <div class="col-12 col-sm-4">
+                                <div class="form-group">
+                                    <label for="">{{trans('academic.batch')}}</label>
+                                    <v-select label="name" track-by="id" group-values="batches" group-label="course_group" :group-select="false" v-model="selected_batches" name="batch_id" id="batch_id" :options="batches" :placeholder="trans('academic.select_batch')" @select="onBatchSelect" :multiple="true" :close-on-select="false" :clear-on-select="false" :hide-selected="true" @remove="onBatchRemove" :selected="selected_batches">
+                                        <div class="multiselect__option" slot="afterList" v-if="!batches.length">
+                                            {{trans('general.no_option_found')}}
+                                        </div>
+                                    </v-select>
+                                </div>
                             </div>
                         </div>
                         <div class="card-footer text-right">
@@ -66,7 +74,12 @@
                             </thead>
                             <tbody>
                                 <tr v-for="exam_schedule in exam_schedules.data">
-                                    <td v-text="exam_schedule.exam.name"></td>
+                                    <td>
+                                        {{exam_schedule.exam.name}}
+                                        <span v-if="exam_schedule.exam.exam_term_id">
+                                            ({{exam_schedule.exam.term.course_group.name}})
+                                        </span>
+                                    </td>
                                     <td v-text="exam_schedule.batch.course.name+' '+exam_schedule.batch.name"></td>
                                     <td>
                                         <span v-if="! showDetail">
@@ -92,6 +105,7 @@
                                         <td>{{exam_schedule.exam_grade_id ? exam_schedule.grade.name : '-'}}</td>
                                         <td class="table-option">
                                             <div class="btn-group">
+                                                <a :href="`/exam/schedule/${exam_schedule.id}/admit-card/print?token=${authToken}`" target="_blank" class="btn btn-success btn-sm" v-tooltip="trans('exam.admit_card')"><i class="fas fa-file-alt"></i></a>
                                                 <button class="btn btn-info btn-sm" v-if="hasPermission('edit-exam-schedule')" v-tooltip="trans('exam.edit_schedule')" @click.prevent="editExamSchedule(exam_schedule)"><i class="fas fa-edit"></i></button>
                                                 <button class="btn btn-danger btn-sm" v-if="hasPermission('delete-exam-schedule')" :key="exam_schedule.id" v-confirm="{ok: confirmDelete(exam_schedule)}" v-tooltip="trans('exam.delete_schedule')"><i class="fas fa-trash"></i></button>
                                             </div>
@@ -127,6 +141,7 @@
                     sort_by : 'created_at',
                     order: 'desc',
                     name: '',
+                    batch_id: [],
                     page_length: helper.getConfig('page_length')
                 },
                 orderByOptions: [
@@ -135,6 +150,8 @@
                         translation: i18n.general.created_at
                     }
                 ],
+                batches: [],
+                selected_batches: null,
                 showFilterPanel: false,
                 showDetail: true,
                 help_topic: ''
@@ -163,7 +180,8 @@
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/exam/schedule?page=' + page + url)
                     .then(response => {
-                        this.exam_schedules = response;
+                        this.batches = response.filters.batches;
+                        this.exam_schedules = response.exam_schedules;
                         loader.hide();
                     })
                     .catch(error => {
@@ -234,7 +252,13 @@
                 }
 
                 return helper.formatDate(records[records.length - 1].date);
-            }
+            },
+            onBatchSelect(selectedOption){
+                this.filter.batch_id.push(selectedOption.id);
+            },
+            onBatchRemove(removedOption){
+                this.filter.batch_id.splice(this.filter.batch_id.indexOf(removedOption.id), 1);
+            },
         },
         filters: {
           moment(date) {

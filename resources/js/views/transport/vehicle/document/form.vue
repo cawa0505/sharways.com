@@ -45,6 +45,57 @@
                         <show-error :form-name="vehicleDocumentForm" prop-name="description"></show-error>
                     </div>
                 </div>
+                <template v-if="insurance_document">
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group">
+                            <label for="">{{trans('transport.vehicle_policy_number')}}</label>
+                            <input class="form-control" type="text" v-model="vehicleDocumentForm.policy_number" name="policy_number" :placeholder="trans('transport.vehicle_policy_number')">
+                            <show-error :form-name="vehicleDocumentForm" prop-name="policy_number"></show-error>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group">
+                            <label for="">{{trans('transport.vehicle_insurance_date')}}</label>
+                            <datepicker v-model="vehicleDocumentForm.insurance_date" :bootstrapStyling="true" @selected="vehicleDocumentForm.errors.clear('insurance_date')" :placeholder="trans('transport.vehicle_insurance_date')"></datepicker>
+                            <show-error :form-name="vehicleDocumentForm" prop-name="insurance_date"></show-error>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group">
+                            <label for="">{{trans('transport.vehicle_insurance_amount')}}</label>
+                            <input class="form-control" type="text" v-model="vehicleDocumentForm.insurance_amount" name="insurance_amount" :placeholder="trans('transport.vehicle_insurance_amount')">
+                            <show-error :form-name="vehicleDocumentForm" prop-name="insurance_amount"></show-error>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group">
+                            <label for="">{{trans('transport.vehicle_insured_amount')}}</label>
+                            <input class="form-control" type="text" v-model="vehicleDocumentForm.insured_amount" name="insured_amount" :placeholder="trans('transport.vehicle_insured_amount')">
+                            <show-error :form-name="vehicleDocumentForm" prop-name="insured_amount"></show-error>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group">
+                            <label for="">{{trans('transport.vehicle_insurance_company_name')}}</label>
+                            <input class="form-control" type="text" v-model="vehicleDocumentForm.insurance_company_name" name="insurance_company_name" :placeholder="trans('transport.vehicle_insurance_company_name')">
+                            <show-error :form-name="vehicleDocumentForm" prop-name="insurance_company_name"></show-error>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group">
+                            <label for="">{{trans('transport.vehicle_insurance_agent_name')}}</label>
+                            <input class="form-control" type="text" v-model="vehicleDocumentForm.insurance_agent_name" name="insurance_agent_name" :placeholder="trans('transport.vehicle_insurance_agent_name')">
+                            <show-error :form-name="vehicleDocumentForm" prop-name="insurance_agent_name"></show-error>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group">
+                            <label for="">{{trans('transport.vehicle_insurance_agent_contact_number')}}</label>
+                            <input class="form-control" type="text" v-model="vehicleDocumentForm.insurance_agent_contact_number" name="insurance_agent_contact_number" :placeholder="trans('transport.vehicle_insurance_agent_contact_number')">
+                            <show-error :form-name="vehicleDocumentForm" prop-name="insurance_agent_contact_number"></show-error>
+                        </div>
+                    </div>
+                </template>
             </div>
             <div class="row">
                 <div class="col-12 col-sm-3">
@@ -68,12 +119,9 @@
 
 
 <script>
-    import uuid from 'uuid/v4'
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components:{vSelect,datepicker},
+        components:{},
         props: ['id'],
         data() {
             return {
@@ -83,6 +131,13 @@
                     vehicle_document_type_id: '',
                     date_of_expiry: '',
                     description : '',
+                    policy_number : '',
+                    insurance_date : '',
+                    insurance_amount : '',
+                    insured_amount : '',
+                    insurance_company_name : '',
+                    insurance_agent_name : '',
+                    insurance_agent_contact_number : '',
                     upload_token: ''
                 }),
                 vehicles: [],
@@ -92,11 +147,12 @@
                 vehicle_document_type_details: [],
                 clearAttachment: false,
                 expiry_date: false,
+                insurance_document: false,
                 module_id: ''
             };
         },
         mounted() {
-            this.vehicleDocumentForm.upload_token = uuid();
+            this.vehicleDocumentForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
 
@@ -126,14 +182,12 @@
             },
             storeDocument(){
                 let loader = this.$loading.show();
-                this.vehicleDocumentForm.date_of_expiry = helper.toDate(this.vehicleDocumentForm.date_of_expiry);
-
                 this.vehicleDocumentForm.post('/api/vehicle/document')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
                         this.$emit('completed');
-                        this.vehicleDocumentForm.upload_token = uuid();
+                        this.vehicleDocumentForm.upload_token = this.$uuid.v4();
                         this.selected_vehicle_document_type = null;
                         this.selected_vehicle = null;
                         loader.hide();
@@ -156,12 +210,31 @@
                         this.vehicleDocumentForm.description = response.vehicle_document.description;
                         this.vehicleDocumentForm.upload_token = response.vehicle_document.upload_token;
                         this.expiry_date = response.vehicle_document.vehicle_document_type.has_expiry_date ? true : false;
+                        this.insurance_document = response.vehicle_document.vehicle_document_type.is_insurance_document ? true : false;
                         this.module_id = response.vehicle_document.id;
+
+                        let insurance_info = response.vehicle_document.options && response.vehicle_document.options.hasOwnProperty("insurance") ? response.vehicle_document.options.insurance : {
+                            policy_number : '',
+                            insurance_date : '',
+                            insurance_amount : '',
+                            insured_amount : '',
+                            insurance_company_name : '',
+                            insurance_agent_name : '',
+                            insurance_agent_contact_number : '',
+                        };
+                        this.vehicleDocumentForm.policy_number = insurance_info.policy_number; 
+                        this.vehicleDocumentForm.insurance_date = insurance_info.insurance_date; 
+                        this.vehicleDocumentForm.insurance_amount = insurance_info.insurance_amount; 
+                        this.vehicleDocumentForm.insured_amount = insurance_info.insured_amount; 
+                        this.vehicleDocumentForm.insurance_company_name = insurance_info.insurance_company_name; 
+                        this.vehicleDocumentForm.insurance_agent_name = insurance_info.insurance_agent_name; 
+                        this.vehicleDocumentForm.insurance_agent_contact_number = insurance_info.insurance_agent_contact_number; 
+
                         loader.hide();
                     })
                     .catch(error => {
                         loader.hide();
-                        this.$router.push('/vehicle/document');
+                        this.$router.push('/transport/vehicle/document');
                     });
             },
             updateDocument(){
@@ -186,6 +259,12 @@
                     this.expiry_date = true;
                 } else {
                     this.expiry_date = false;
+                }
+
+                if (vehicle_document_type.is_insurance_document) {
+                    this.insurance_document = true;
+                } else {
+                    this.insurance_document = false;
                 }
             },
             onVehicleSelect(selectedOption){

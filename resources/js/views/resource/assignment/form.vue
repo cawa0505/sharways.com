@@ -61,12 +61,9 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         data() {
             return {
                 assignmentForm: new Form({
@@ -97,7 +94,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.assignmentForm.upload_token = uuid();
+                this.assignmentForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
         },
@@ -141,14 +138,12 @@
                     this.store();
             },
             store(){
-                this.assignmentForm.date_of_assignment = helper.toDate(this.assignmentForm.date_of_assignment);
-                this.assignmentForm.due_date = helper.toDate(this.assignmentForm.due_date);
                 let loader = this.$loading.show();
                 this.assignmentForm.post('/api/assignment')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.assignmentForm.upload_token = uuid();
+                        this.assignmentForm.upload_token = this.$uuid.v4();
                         this.selected_batch = null;
                         this.selected_subject = null;
                         this.$emit('completed');
@@ -183,8 +178,6 @@
                     });
             },
             update(){
-                this.assignmentForm.date_of_assignment = helper.toDate(this.assignmentForm.date_of_assignment);
-                this.assignmentForm.due_date = helper.toDate(this.assignmentForm.due_date);
                 let loader = this.$loading.show();
                 this.assignmentForm.patch('/api/assignment/'+this.uuid)
                     .then(response => {

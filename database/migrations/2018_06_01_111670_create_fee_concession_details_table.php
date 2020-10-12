@@ -14,11 +14,10 @@ class CreateFeeConcessionDetailsTable extends Migration
     public function up()
     {
         Schema::create('fee_concession_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('fee_concession_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('fee_concession_id')->unsigned()->nullable();
             $table->foreign('fee_concession_id')->references('id')->on('fee_concessions')->onDelete('cascade');
-            $table->integer('fee_head_id')->unsigned()->nullable();
+            $table->bigInteger('fee_head_id')->unsigned()->nullable();
             $table->foreign('fee_head_id')->references('id')->on('fee_heads')->onDelete('cascade');
             $table->integer('amount')->default(0);
             $table->string('type',20)->nullable();

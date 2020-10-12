@@ -23,7 +23,7 @@ class Event extends Model
                             'upload_token',
                             'options'
                         ];
-    protected $casts = ['options' => 'array'];
+    protected $casts = ['options' => 'array', 'start_date' => 'date', 'end_date' => 'date'];
     protected $primaryKey = 'id';
     protected $table = 'events';
     protected static $logName = 'event';
@@ -141,7 +141,9 @@ class Event extends Model
     public function scopeUpcomingAndLive($q)
     {
         return $q->where(function($q1) {
-            $q1->where('start_date','>=',date('Y-m-d'))->orWhere('end_date','<=',date('Y-m-d'));
+            $q1->where('start_date','>=', date('Y-m-d'))->orWhere(function($q2) {
+                $q2->where('start_date', '<', date('Y-m-d'))->where('end_date','>=', date('Y-m-d'));
+            });
         });
     }
 }

@@ -46,6 +46,18 @@
             </div>
             <div class="col-12 col-sm-4">
                 <div class="form-group">
+                    <label for="">{{trans('student.default_attendance_method')}}</label>
+                    <select v-model="batchForm.default_attendance_method" class="custom-select col-12" name="default_attendance_method">
+                      <option value="" selected>{{trans('general.select_one')}}</option>
+                      <option v-for="option in attendance_methods" v-bind:value="option.value">
+                        {{ option.text }}
+                      </option>
+                    </select>
+                    <show-error :form-name="batchForm" prop-name="default_attendance_method"></show-error>
+                </div>
+            </div>
+            <div class="col-12 col-sm-4">
+                <div class="form-group">
                     <label for="">{{trans('academic.batch_description')}}</label>
                     <autosize-textarea v-model="batchForm.description" rows="1" name="description" :placeholder="trans('academic.batch_description')"></autosize-textarea>
                     <show-error :form-name="batchForm" prop-name="description"></show-error>
@@ -80,6 +92,26 @@
                 </div>
             </div>
         </template>
+
+        <template v-if="id">
+            <h4 class="card-title">{{trans('calendar.holiday_configuration')}}</h4>
+            <p class="alert alert-info">{{trans('academic.batch_holiday_except_date_tip')}}</p>
+            <div class="row">
+                <div class="col-12 col-sm-4">
+                    <div class="form-group">
+                        <datepicker v-model="holiday" :bootstrapStyling="true" @selected="onSelected"></datepicker>
+                        <show-error :form-name="batchForm" prop-name="dates"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-9">
+                    <div class="form-group">
+                        <span class="label label-info m-r-10 m-b-10 p-10" v-for="date in batchForm.holidays_except">
+                            {{date | momentWithDay}} <i class="fas fa-times-circle cursor" v-tooltip="trans('general.remove')" @click="remove(date)"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </template>
         
         <div class="card-footer text-right">
             <router-link to="/academic/batch" class="btn btn-danger waves-effect waves-light " v-show="id">{{trans('general.cancel')}}</router-link>
@@ -94,10 +126,8 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components: {vSelect},
+        components: {},
         data() {
             return {
                 batchForm: new Form({
@@ -108,8 +138,12 @@
                     max_strength: '',
                     roll_number_prefix: '',
                     roll_number_digit: 0,
-                    description: ''
+                    default_attendance_method: '',
+                    description: '',
+                    holidays_except: []
                 }),
+                holiday: '',
+                attendance_methods: [],
                 courses: [],
                 selected_course: null,
                 exam_grades: [],
@@ -144,6 +178,7 @@
                         this.courses = response.courses;
                         this.exam_grades = response.exam_grades;
                         this.exam_observations = response.exam_observations;
+                        this.attendance_methods = response.attendance_methods;
                         loader.hide();
                     })
                     .catch(error => {
@@ -176,10 +211,12 @@
                         this.batchForm.exam_observation_id = response.batch.exam_observation_id;
                         this.selected_exam_observation = response.batch.exam_observation_id ? {id: response.batch.exam_observation_id, name: response.batch.observation.name} : null;
                         this.batchForm.description = response.batch.description;
-                        this.batchForm.max_strength = response.batch.options ? response.batch.options.max_strength : helper.getConfig('default_max_strength_per_batch'),
-                        this.batchForm.roll_number_prefix = response.batch.options ? response.batch.options.roll_number_prefix : helper.getConfig('default_roll_number_prefix'),
+                        this.batchForm.max_strength = response.batch.options ? response.batch.options.max_strength : helper.getConfig('default_max_strength_per_batch');
+                        this.batchForm.default_attendance_method = response.batch.options ? response.batch.options.default_attendance_method : '';
+                        this.batchForm.roll_number_prefix = response.batch.options ? response.batch.options.roll_number_prefix : helper.getConfig('default_roll_number_prefix');
                         this.batchForm.roll_number_digit = response.batch.options && response.batch.options.hasOwnProperty('roll_number_digit') ? response.batch.options.roll_number_digit : 0,
                         this.selected_course = response.selected_course;
+                        this.batchForm.holidays_except = response.batch.options.holidays_except || [];
                         loader.hide();
                     })
                     .catch(error => {
@@ -194,6 +231,7 @@
                     .then(response => {
                         toastr.success(response.message);
                         loader.hide();
+                        this.batchForm.holidays_except = [];
                         this.$router.push('/academic/batch');
                     })
                     .catch(error => {
@@ -209,7 +247,31 @@
             },
             onExamObservationSelect(selectedOption){
                 return this.batchForm.exam_observation_id = selectedOption.id;
+            },
+            onSelected(val){
+                this.holiday = '';
+                val = helper.toDate(val);
+                
+                if (this.batchForm.holidays_except.indexOf(val) < 0)
+                    this.batchForm.holidays_except.push(val);
+
+                this.batchForm.errors.clear('holidays_except');
+                this.holiday = '';
+            },
+            remove(date){
+                let idx = this.batchForm.holidays_except.indexOf(date);
+                
+                if (idx < 0)
+                    return;
+
+                this.batchForm.holidays_except.splice(idx, 1);
+                this.holiday = '';
             }
+        },
+        filters: {
+          momentWithDay(date) {
+            return helper.formatDateWithDay(date);
+          },
         }
     }
 </script>

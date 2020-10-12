@@ -14,11 +14,10 @@ class CreateEventEmployeeCategoryTable extends Migration
     public function up()
     {
         Schema::create('event_employee_category', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('event_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('event_id')->unsigned()->nullable();
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
-            $table->integer('employee_category_id')->unsigned()->nullable();
+            $table->bigInteger('employee_category_id')->unsigned()->nullable();
             $table->foreign('employee_category_id')->references('id')->on('employee_categories')->onDelete('cascade');
             $table->timestamps();
         });

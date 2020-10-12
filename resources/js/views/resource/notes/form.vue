@@ -51,11 +51,9 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {vSelect},
+        components: {},
         data() {
             return {
                 notesForm: new Form({
@@ -84,7 +82,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.notesForm.upload_token = uuid();
+                this.notesForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
         },
@@ -133,7 +131,7 @@
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.notesForm.upload_token = uuid();
+                        this.notesForm.upload_token = this.$uuid.v4();
                         this.selected_batch = null;
                         this.selected_subject = null;
                         this.$emit('completed');

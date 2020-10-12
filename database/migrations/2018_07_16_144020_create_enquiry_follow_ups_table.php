@@ -14,14 +14,13 @@ class CreateEnquiryFollowUpsTable extends Migration
     public function up()
     {
         Schema::create('enquiry_follow_ups', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('enquiry_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('enquiry_id')->unsigned()->nullable();
             $table->foreign('enquiry_id')->references('id')->on('enquiries')->onDelete('cascade');
             $table->date('date_of_follow_up')->nullable();
             $table->string('status',20)->nullable();
             $table->date('date_of_next_follow_up')->nullable();
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->text('remarks')->nullable();
             $table->text('options')->nullable();

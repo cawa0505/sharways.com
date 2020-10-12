@@ -5,6 +5,7 @@
         <thead>
             <tr>
                 <th>{{trans('transport.vehicle')}}</th>
+                <th>{{trans('transport.vehicle_service_center_only')}}</th>
                 <th>{{trans('transport.vehicle_service_record_amount')}}</th>
                 <th>{{trans('transport.date_of_service')}}</th>
                 <th>{{trans('transport.vehicle_log_log')}}</th>
@@ -16,6 +17,7 @@
         	@foreach($vehicle_service_records as $vehicle_service_record)
         		<tr>
         			<td>{{$vehicle_service_record->Vehicle->detail}}</td>
+                    <td>{{optional($vehicle_service_record->vehicleServiceCenter)->name}}</td>
                     <td>{{currency($vehicle_service_record->amount,1)}}</td>
                     <td>{{showDate($vehicle_service_record->date_of_service)}}</td>
                     <td>{{$vehicle_service_record->log}}</td>
@@ -33,7 +35,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td>{{trans('general.total')}}</td>
+                <td colspan="2">{{trans('general.total')}}</td>
                 <td>{{currency($total_amount,1)}}</td>
                 <td colspan="4"></td>
             </tr>

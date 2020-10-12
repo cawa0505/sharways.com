@@ -6,6 +6,7 @@
 	    "sidebar": "mini",
 	    "locale": "en",
 	    "timezone": "Asia/Kolkata",
+	    "first_day_of_week": "monday",
 	    "notification_position": "toast-bottom-right",
 	    "date_format": "DD-MM-YYYY",
 	    "time_format": "H:mm",
@@ -16,21 +17,25 @@
 	    "from_name": "Hello",
 	    "logo": "",
 	    "icon": "",
-	    "token_lifetime": 120,
+	    "token_lifetime": 1440,
+	    "mobile_token_lifetime": 43200,
 	    "reset_password_token_lifetime": 30,
 	    "activity_log": 1,
 	    "email_log": 1,
 	    "reset_password": 1,
+	    "login_with_otp": 0,
 	    "footer_credit": "InstiKit by ScriptMint",
 	    "multilingual": 1,
 	    "ip_filter": 1,
 	    "email_template": 1,
+	    "online_registration": 0,
 	    "message": 1,
 	    "backup": 1,
 	    "todo": 1,
 	    "frontend_website": 1,
 	    "designation_subordinate_level": 1,
 	    "default_attendance_type": "daily",
+	    "student_late_attendance_time": "daily",
 	    "enable_registration": 0,
 	    "enable_registration_fee": 0,
 	    "default_max_strength_per_batch": 30,
@@ -38,6 +43,7 @@
 	    "system_admin_designation": "System Admin",
 	    "system_admin_employee_category": "System Admin",
 	    "employee_code_digit": 3,
+	    "transfer_certificate_digit": 3,
 	    "vehicle_fuel_quantity_decimal_place": 2,
 	    "library_max_book_issue_to_student": 4,
 	    "library_max_book_issue_to_employee": 6,
@@ -65,6 +71,7 @@
 		"home","contact","events","articles","teachers","calendar"
 	],
 	"hidden_field": "xxxxxxxxxx",
+	"mobile_app_compatible": "2.5.0",
 	"private_config_variables": [
 		"smtp_username",
 		"smtp_password",
@@ -91,12 +98,17 @@
         "maintenance_mode",
         "reset_password",
         "two_factor_security",
+        "login_with_otp",
         "https",
         "mode",
+        "currency",
         "footer_credit",
         "ip_filter",
         "logo",
         "frontend_website",
+        "online_registration",
+        "online_registration_header",
+        "online_registration_success_message",
         "institute_name",
         "address_line_1",
         "address_line_2",
@@ -126,7 +138,7 @@
 		"employee_photo": "uploads/employee_photo"
 	},
 	"pagination": [
-		"1","5","10","25","50","100"
+		"1","5","10","12","25","50","100"
 	],
 	"mail_drivers": [
 		{
@@ -140,10 +152,6 @@
 		{
 			"text": "Mailgun",
 			"value": "mailgun"
-		},
-		{
-			"text": "Mandrill",
-			"value": "mandrill"
 		},
 		{
 			"text": "SMTP",
@@ -214,6 +222,10 @@
 		{ 
 			"text": "MMM-DD-YYYY",
 			"value": "MMM-DD-YYYY"
+		},
+		{ 
+			"text": "YYYY-MM-DD",
+			"value": "YYYY-MM-DD"
 		}
 	],
 	"time_formats": [

@@ -14,12 +14,11 @@ class CreateFeeInstallmentsTable extends Migration
     public function up()
     {
         Schema::create('fee_installments', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid');
-            $table->integer('fee_allocation_group_id')->unsigned()->nullable();
+            $table->bigInteger('fee_allocation_group_id')->unsigned()->nullable();
             $table->foreign('fee_allocation_group_id')->references('id')->on('fee_allocation_groups')->onDelete('cascade');
-            $table->integer('transport_fee_id')->unsigned()->nullable();
+            $table->bigInteger('transport_fee_id')->unsigned()->nullable();
             $table->foreign('transport_fee_id')->references('id')->on('transport_fees')->onDelete('cascade');
             $table->string('title')->nullable();
             $table->date('due_date')->nullable();

@@ -14,10 +14,9 @@ class CreateTimetablesTable extends Migration
     public function up()
     {
         Schema::create('timetables', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
             $table->date('date_effective')->nullable();
             $table->text('description')->nullable();

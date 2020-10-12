@@ -2,6 +2,7 @@
 
 namespace App\Models\Student;
 
+use App\Helper\Cal;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -45,14 +46,14 @@ class Student extends Model
                             'permanent_country',
                             'options'
                         ];
-    protected $casts = ['options' => 'array'];
+    protected $casts = ['options' => 'array', 'date_of_birth' => 'date'];
     protected $primaryKey = 'id';
     protected $table = 'students';
     protected static $logName = 'student';
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['updated_at'];
-    protected $appends = ['present_address','permanent_address'];
+    protected $appends = ['present_address','permanent_address','name', 'age'];
     
     public function parent()
     {
@@ -109,27 +110,46 @@ class Student extends Model
         return array_get($this->options, $option);
     }
 
+    public function getNameAttribute()
+    {
+        return $this->first_name.($this->middle_name ? (' '.$this->middle_name) : '').($this->last_name ? (' '.$this->last_name) : '');
+    }
+
     public function getPresentAddressAttribute()
     {
-        $address = $this->present_address_line_1.' '.$this->present_address_line_2.' '.$this->present_city.' '.$this->present_state.' '.$this->present_zipcode.' '.$this->present_country;
+        $data= array(
+            $this->present_address_line_1,
+            $this->present_address_line_2,
+            $this->present_city,
+            $this->present_state,
+            $this->present_zipcode,
+            $this->present_country
+        );
 
-        return preg_replace('/\s+/', ' ',$address);
+        $data = array_filter($data);
+
+        return implode(', ', $data);
     }
 
     public function getPermanentAddressAttribute()
     {
-        if ($this->same_as_present_address) {
-            return $this->present_address;
-        }
+        $data= array(
+            $this->permanent_address_line_1,
+            $this->permanent_address_line_2,
+            $this->permanent_city,
+            $this->permanent_state,
+            $this->permanent_zipcode,
+            $this->permanent_country
+        );
 
-        $address = $this->permanent_address_line_1.' '.$this->permanent_address_line_2.' '.$this->permanent_city.' '.$this->permanent_state.' '.$this->permanent_zipcode.' '.$this->permanent_country;
+        $data = array_filter($data);
 
-        return preg_replace('/\s+/', ' ',$address);
+        return implode(', ', $data);
     }
 
-    public function getNameAttribute()
+    public function getAgeAttribute()
     {
-        return $this->first_name.($this->middle_name ? (' '.$this->middle_name) : '').($this->last_name ? (' '.$this->last_name) : '');
+        return $this->date_of_birth ? Cal::getAge($this->date_of_birth) : null;
     }
     
     public function scopeFilterById($q, $id)

@@ -76,11 +76,8 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import switches from 'vue-switches'
-
     export default {
-        components: {vSelect, switches},
+        components: {},
         data() {
             return {
                 subjectForm: new Form({

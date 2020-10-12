@@ -14,11 +14,10 @@ class CreateStudentFeeRecordDetailsTable extends Migration
     public function up()
     {
         Schema::create('student_fee_record_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_fee_record_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_fee_record_id')->unsigned()->nullable();
             $table->foreign('student_fee_record_id')->references('id')->on('student_fee_records')->onDelete('cascade');
-            $table->integer('fee_head_id')->unsigned()->nullable();
+            $table->bigInteger('fee_head_id')->unsigned()->nullable();
             $table->foreign('fee_head_id')->references('id')->on('fee_heads')->onDelete('cascade');
             $table->integer('amount')->default(0);
             $table->text('options')->nullable();

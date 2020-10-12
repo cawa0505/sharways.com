@@ -43,12 +43,11 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
     import editRecord from '../edit-record'
 
 	export default {
 		props: ['student'],
-		components: {datepicker,editRecord},
+		components: {editRecord},
 		data() {
 			return {
                 record: null,

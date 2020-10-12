@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories\Calendar;
 
+use Carbon\Carbon;
 use App\Models\Calendar\Holiday;
 use Illuminate\Validation\ValidationException;
 
@@ -108,6 +109,7 @@ class HolidayRepository
         $sort_by   = gv($params, 'sort_by', 'date');
         $order     = gv($params, 'order', 'desc');
         $keyword     = gv($params, 'keyword');
+        $upcoming = gbv($params, 'upcoming');
 
         $date_start_date = gv($params, 'date_start_date');
         $date_end_date   = gv($params, 'date_end_date');
@@ -115,7 +117,9 @@ class HolidayRepository
         $query = $this->holiday->filterBySession()->filterByKeyword($keyword)->dateBetween([
                 'start_date' => $date_start_date,
                 'end_date' => $date_end_date
-            ]);
+            ])->when($upcoming, function ($query1, $upcoming) {
+                return $query1->where('date', '>=', date('Y-m-d'));
+            });
 
         return $query->orderBy($sort_by, $order);
     }
@@ -164,7 +168,10 @@ class HolidayRepository
     {
         $dates = gv($params, 'dates', []);
 
+        $new_dates = array();
         foreach ($dates as $date) {
+            $date = toDate($date);
+            $new_dates[] = $date;
             if (! validateDate($date)) {
                 throw ValidationException::withMessages(['dates' => trans('calendar.not_a_valid_date', ['date' => showDate($date)])]);
             }
@@ -174,16 +181,16 @@ class HolidayRepository
             }
         }
 
-        $existing_holidays = $this->holiday->whereIn('date', $dates)->get()->pluck('date')->all();
+        $existing_holidays = $this->holiday->whereIn('date', $new_dates)->get()->pluck('date')->all();
 
         $remaining_holidays = array_diff($dates, $existing_holidays);
 
-        $this->holiday->whereIn('date', $dates)->update(['description' => gv($params, 'description')]);
+        $this->holiday->whereIn('date', $new_dates)->update(['description' => gv($params, 'description')]);
 
         $new_holidays = array();
         foreach ($remaining_holidays as $date) {
             $new_holidays[] = array(
-                'date' => $date,
+                'date' => toDate($date),
                 'description' => gv($params, 'description'),
                 'created_at' => now()
             );
@@ -202,14 +209,14 @@ class HolidayRepository
      */
     public function update(Holiday $holiday, $params)
     {
-        $date = gv($params, 'date');
+        $date = toDate(gv($params, 'date'));
         $description = gv($params, 'description');
 
         if ($this->holiday->where('id', '!=', $holiday->id)->filterByDate($date)->count()) {
             throw ValidationException::withMessages(['date' => trans('calendar.already_marked_as_holiday', ['date' => showDate($date)])]);
         }
 
-        $holiday->date = $date;
+        $holiday->date = toDate($date);
         $holiday->description = $description;
         $holiday->options = array();
         $holiday->save();

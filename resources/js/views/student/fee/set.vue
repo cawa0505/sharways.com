@@ -118,7 +118,7 @@
                                         </div>
                                     </div>
                                     <div class="col-12 col-sm-2">
-                                        <div class="form-group" v-if="installment.late_fee_applicable && installment.late_fee_frequency !== 500">
+                                        <div class="form-group" v-if="installment.late_fee_applicable">
                                             <input class="form-control" type="text" v-model="installment.late_fee" :name="getLateFeeFieldName(installment)" :placeholder="trans('finance.late_fee')" :disabled="installment.status != 'unpaid'">
                                             <show-error :form-name="studentFeeRecordForm" :prop-name="getLateFeeFieldName(installment)"></show-error>
                                         </div>
@@ -142,10 +142,9 @@
 
 <script>
     import studentSummary from './../summary'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : {studentSummary,datepicker},
+        components : {studentSummary},
         data() {
             return {
                 uuid:this.$route.params.uuid,
@@ -266,7 +265,7 @@
             isInstallmentOverdue(fee_installment){
                 let installment = this.student_record.student_fee_records.find(o => o.fee_installment_id == fee_installment.id);
 
-                if (moment().format('YYYY-MM-DD') > fee_installment.due_date && installment.status != 'paid')
+                if (helper.today() > fee_installment.due_date && installment.status != 'paid')
                     return true;
 
                 return false;

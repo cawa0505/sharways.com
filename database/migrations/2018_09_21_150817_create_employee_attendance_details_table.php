@@ -14,11 +14,10 @@ class CreateEmployeeAttendanceDetailsTable extends Migration
     public function up()
     {
         Schema::create('employee_attendance_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('employee_attendance_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('employee_attendance_id')->unsigned()->nullable();
             $table->foreign('employee_attendance_id','ead_employee_attendance_id_foreign')->references('id')->on('employee_attendances')->onDelete('cascade');
-            $table->integer('employee_attendance_type_id')->unsigned()->nullable();
+            $table->bigInteger('employee_attendance_type_id')->unsigned()->nullable();
             $table->foreign('employee_attendance_type_id','ead_employee_attendance_type_id_foreign')->references('id')->on('employee_attendance_types')->onDelete('cascade');
             $table->decimal('value',25,5)->nullable();
             $table->text('remarks')->nullable();

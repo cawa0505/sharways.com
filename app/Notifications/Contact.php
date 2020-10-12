@@ -44,10 +44,10 @@ class Contact extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('Visitor Message | '.env('APP_NAME'))
+                    ->subject('Visitor Message | '.config('app.name'))
                     ->greeting('Hello')
                     ->line('New message received from visitor!')
-                    ->action('Check Message', env('APP_URL'))
+                    ->action('Check Message', config('app.url'))
                     ->line('Thank you!');
     }
 

@@ -99,12 +99,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
     import visitorMessageDetail from './show'
 
     export default {
-        components : { datepicker,vSelect,visitorMessageDetail },
+        components : { visitorMessageDetail },
         data() {
             return {
                 visitor_messages: {
@@ -158,6 +156,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_start_date = helper.toDate(this.filter.date_start_date);
+                this.filter.date_end_date = helper.toDate(this.filter.date_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/visitor/message?page=' + page + url)
                     .then(response => {

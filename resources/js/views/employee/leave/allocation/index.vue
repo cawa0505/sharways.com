@@ -108,12 +108,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import leaveAllocationForm from './form'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { leaveAllocationForm,datepicker,vSelect},
+        components : { leaveAllocationForm},
         data() {
             return {
                 leave_allocations: {

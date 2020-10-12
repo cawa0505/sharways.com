@@ -14,14 +14,13 @@ class CreateNotesTable extends Migration
     public function up()
     {
         Schema::create('notes', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
             $table->text('title')->nullable();
             $table->longText('description')->nullable();
-            $table->integer('subject_id')->unsigned()->nullable();
+            $table->bigInteger('subject_id')->unsigned()->nullable();
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->uuid('upload_token')->nullable();
             $table->text('options')->nullable();

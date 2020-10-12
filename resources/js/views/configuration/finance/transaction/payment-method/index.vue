@@ -50,10 +50,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="payment_method in payment_methods.data">
-                                    <td>
-                                        {{payment_method.name}}
-                                        <span v-if="payment_method.is_default" class="badge badge-success">{{trans('general.default')}}</span>
-                                    </td>
+                                    <td v-text="payment_method.name"></td>
                                     <td>
                                         <ul style="list-style:none;padding:0;margin:0;">
                                             <li v-if="payment_method.options.requires_instrument_number">

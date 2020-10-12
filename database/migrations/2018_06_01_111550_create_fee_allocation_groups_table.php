@@ -14,11 +14,10 @@ class CreateFeeAllocationGroupsTable extends Migration
     public function up()
     {
         Schema::create('fee_allocation_groups', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('fee_allocation_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('fee_allocation_id')->unsigned()->nullable();
             $table->foreign('fee_allocation_id')->references('id')->on('fee_allocations')->onDelete('cascade');
-            $table->integer('fee_group_id')->unsigned()->nullable();
+            $table->bigInteger('fee_group_id')->unsigned()->nullable();
             $table->foreign('fee_group_id')->references('id')->on('fee_groups')->onDelete('cascade');
             $table->text('options')->nullable();
             $table->timestamps();

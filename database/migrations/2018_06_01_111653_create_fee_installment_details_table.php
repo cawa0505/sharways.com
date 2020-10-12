@@ -14,11 +14,10 @@ class CreateFeeInstallmentDetailsTable extends Migration
     public function up()
     {
         Schema::create('fee_installment_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('fee_installment_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('fee_installment_id')->unsigned()->nullable();
             $table->foreign('fee_installment_id')->references('id')->on('fee_installments')->onDelete('cascade');
-            $table->integer('fee_head_id')->unsigned()->nullable();
+            $table->bigInteger('fee_head_id')->unsigned()->nullable();
             $table->foreign('fee_head_id')->references('id')->on('fee_heads')->onDelete('cascade');
             $table->boolean('is_optional')->default(0);
             $table->integer('amount')->default(0);

@@ -14,11 +14,10 @@ class CreateStudentsTable extends Migration
     public function up()
     {
         Schema::create('students', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
-            $table->integer('student_parent_id')->unsigned()->nullable();
+            $table->bigInteger('student_parent_id')->unsigned()->nullable();
             $table->foreign('student_parent_id')->references('id')->on('student_parents')->onDelete('set null');
             $table->uuid('uuid')->nullable();
             $table->string('first_name')->nullable();
@@ -30,13 +29,13 @@ class CreateStudentsTable extends Migration
             $table->string('contact_number',20)->nullable();
             $table->string('email',50)->nullable();
             $table->string('nationality',20)->nullable();
-            $table->integer('blood_group_id')->unsigned()->nullable();
+            $table->bigInteger('blood_group_id')->unsigned()->nullable();
             $table->foreign('blood_group_id')->references('id')->on('blood_groups')->onDelete('set null');
-            $table->integer('religion_id')->unsigned()->nullable();
+            $table->bigInteger('religion_id')->unsigned()->nullable();
             $table->foreign('religion_id')->references('id')->on('religions')->onDelete('set null');
-            $table->integer('category_id')->unsigned()->nullable();
+            $table->bigInteger('category_id')->unsigned()->nullable();
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
-            $table->integer('caste_id')->unsigned()->nullable();
+            $table->bigInteger('caste_id')->unsigned()->nullable();
             $table->foreign('caste_id')->references('id')->on('castes')->onDelete('set null');
             $table->string('student_photo')->nullable();
             $table->string('mother_tongue',20)->nullable();

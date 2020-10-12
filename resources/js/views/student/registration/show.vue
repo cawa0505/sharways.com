@@ -38,7 +38,12 @@
                                     <tbody>
                                         <tr>
                                         	<td>{{trans('student.name')}}</td>
-                                        	<td>{{getStudentName(registration.student)}}</td>
+                                        	<td>
+                                                {{getStudentName(registration.student)}}
+                                                <span v-if="registration.is_online">
+                                                    <span class="label label-info">{{trans('student.online_registration')}}</span>
+                                                </span>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td>{{trans('student.registration_status')}}</td>
@@ -119,6 +124,14 @@
                                         	<td>{{trans('general.updated_at')}}</td>
                                         	<td>{{registration.student.updated_at | momentDateTime}}</td>
                                         </tr>
+                                        <tr v-if="registration.is_online" v-for="custom_field in online_registration_custom_fields">
+                                            <td>{{custom_field.name}}</td>
+                                            <td>{{getCustomFieldValue(custom_field)}}</td>
+                                        </tr>
+                                        <tr v-for="custom_field in registration_custom_fields">
+                                            <td>{{custom_field.name}}</td>
+                                            <td>{{getCustomFieldValue(custom_field)}}</td>
+                                        </tr>
                                    	</tbody>
                                 </table>
                             </div>
@@ -174,7 +187,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>{{trans('finance.receipt_no')}}</td>
-                                                <td>{{transaction.voucher_number}}</td>
+                                                <td>#{{transaction.prefix+transaction.number}}</td>
                                                 <td>{{trans('finance.account')}}</td>
                                                 <td>{{transaction.account.name}}</td>
                                             </tr>
@@ -255,6 +268,8 @@
                 cancelPaymentForm: new Form({
                     cancellation_remarks: ''
                 }),
+                registration_custom_fields: [],
+                online_registration_custom_fields: [],
                 editModal: false,
                 showReceiptModal: false
             }
@@ -272,8 +287,10 @@
                 let loader = this.$loading.show();
         		axios.get('/api/registration/'+this.id)
         			.then(response => {
-        				this.registration = response;
-                        this.transaction = (response.transactions.length) ? response.transactions[0] : null;
+        				this.registration_custom_fields = response.registration_custom_fields;
+                        this.online_registration_custom_fields = response.online_registration_custom_fields;
+                        this.registration = response.registration;
+                        this.transaction = (response.registration.transactions.length) ? response.registration.transactions[0] : null;
                         loader.hide();
         			})
         			.catch(error => {
@@ -299,6 +316,9 @@
             },
             getEmployeeName(employee){
                 return helper.getEmployeeName(employee);
+            },
+            getCustomFieldValue(custom_field) {
+                return helper.getCustomFieldValue(this.registration.options.custom_values, custom_field.id);
             },
             cancelPayment(){
                 let loader = this.$loading.show();

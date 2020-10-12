@@ -149,7 +149,7 @@ class SyllabusRepository
      */
     public function getData($params)
     {
-        $sort_by  = gv($params, 'sort_by', 'start_date');
+        $sort_by  = gv($params, 'sort_by', 'created_at');
         $order    = gv($params, 'order', 'desc');
         $title    = gv($params, 'title');
         $batch_id = gv($params, 'batch_id');
@@ -158,23 +158,16 @@ class SyllabusRepository
 
         $query = $this->syllabus->info()->filterBySession()->filterByTitle($title);
 
-        if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
-            $student_batch_ids = $this->student->getAuthParentStudentsBatch();
-
-            if ($student_batch_ids) {
-                $batch_id = array_unique(array_merge($batch_id, $student_batch_ids));
-            }
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
+            $batch_id = $batch_id ? array_intersect($student_batch_ids, $batch_id) : $student_batch_ids;
         }
 
-        if (\Auth::user()->hasRole(config('system.default_role.student'))) {
-            $student_batch_id = $this->student->getAuthStudentBatch();
-
-            if ($student_batch_id) {
-                array_push($batch_id, $student_batch_id);
-                $batch_id = array_unique($batch_id);
-            }
-        }
-
+        $batch_id = array_unique($batch_id);
         if (count($batch_id)) {
             $query->whereHas('subject',function($q) use($batch_id){
                 $q->whereIn('batch_id', $batch_id);
@@ -295,8 +288,8 @@ class SyllabusRepository
         $titles = array();
         foreach ($topics as $index => $topic) {
             $title       = gv($topic, 'title');
-            $start_date  = gv($topic, 'start_date');
-            $end_date    = gv($topic, 'end_date');
+            $start_date  = toDate(gv($topic, 'start_date'));
+            $end_date    = toDate(gv($topic, 'end_date'));
             $description = gv($topic, 'description');
 
             if (! $title) {
@@ -307,7 +300,7 @@ class SyllabusRepository
                 throw ValidationException::withMessages([$index.'_topic_description' => trans('validation.required', ['attribute' => trans('resource.syllabus_topic_description')])]);
             }
 
-            if ($start_date && $end_date && $end_date < $start_date) {
+            if ($start_date && $end_date && toDate($end_date) < toDate($start_date)) {
                 throw ValidationException::withMessages(['message' => trans('resource.syllabus_topic_start_date_greater_than_end_date')]);
             }
 
@@ -362,17 +355,14 @@ class SyllabusRepository
      */
     public function isAccessible(Syllabus $syllabus)
     {
-        if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
-            $student_batch_ids = $this->student->getAuthParentStudentsBatch();
-
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
+            
             if (! in_array($syllabus->subject->batch_id, $student_batch_ids))
-                throw ValidationException::withMessages(['message' => trans('user.permission_denied')]);
-        }
-
-        if (\Auth::user()->hasRole(config('system.default_role.student'))) {
-            $student_batch_id = $this->student->getAuthStudentBatch();
-
-            if ($syllabus->subject->batch_id != $student_batch_id)
                 throw ValidationException::withMessages(['message' => trans('user.permission_denied')]);
         }
     }
@@ -434,8 +424,8 @@ class SyllabusRepository
 
             $titles[] = $title;
             $syllabus_topic->syllabus_id = $syllabus->id;
-            $syllabus_topic->start_date = gv($topic, 'start_date');
-            $syllabus_topic->end_date = gv($topic, 'end_date');
+            $syllabus_topic->start_date = toDate(gv($topic, 'start_date'));
+            $syllabus_topic->end_date = toDate(gv($topic, 'end_date'));
             $syllabus_topic->description = gv($topic, 'description');
             $syllabus_topic->save();
         }

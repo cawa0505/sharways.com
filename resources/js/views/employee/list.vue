@@ -20,6 +20,7 @@
                             <div :class="['dropdown-menu',getConfig('direction') == 'ltr' ? 'dropdown-menu-right' : '']" aria-labelledby="moreOption">
                                 <button class="dropdown-item custom-dropdown" @click="print"><i class="fas fa-print"></i> {{trans('general.print')}}</button>
                                 <button class="dropdown-item custom-dropdown" @click="pdf"><i class="fas fa-file-pdf"></i> {{trans('general.generate_pdf')}}</button>
+                                <a class="dropdown-item custom-dropdown" :href="exportExcel()"><i class="fas fa-file-excel"></i> {{trans('general.generate_excel')}}</a>
                             </div>
                         </div>
                         <help-button @clicked="help_topic = 'employee'"></help-button>
@@ -122,7 +123,7 @@
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th v-if="hasPermission('edit-employee')">
+                                    <th class="select-all" v-if="hasPermission('edit-employee')">
                                         <label class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" value="1" v-model="selectAll" @change="toggleSelectAll">
                                             <span class="custom-control-label"></span>
@@ -142,7 +143,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="employee in employees.data">
-                                    <td v-if="hasPermission('edit-employee')">
+                                    <td class="select-all" v-if="hasPermission('edit-employee')">
                                         <label class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" :value="employee.id" v-model="employeeGroupForm.ids">
                                             <span class="custom-control-label"></span>
@@ -224,11 +225,10 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
     import employeeForm from './form'
 
     export default {
-        components : { employeeForm,vSelect },
+        components : { employeeForm },
         data() {
             return {
                 employees: {
@@ -347,7 +347,7 @@
             },
             getStatus(employee){
                 let term = employee.employee_terms;
-                if (term.length && term[0].date_of_joining <= moment().format('YYYY-MM-DD') && (!term[0].date_of_leaving || term[0].date_of_leaving >= moment().format('YYYY-MM-DD')))
+                if (term.length && term[0].date_of_joining <= helper.today() && (!term[0].date_of_leaving || term[0].date_of_leaving >= helper.today()))
                     return '<span class="label label-success">'+i18n.employee.status_active+'</span>';
                 else
                     return '<span class="label label-danger">'+i18n.employee.status_inactive+'</span>';
@@ -376,6 +376,10 @@
                         loader.hide();
                         helper.showErrorMsg(error);
                     });
+            },
+            exportExcel(){
+                let url = helper.getFilterURL(this.filter);
+                return '/api/employee?action=excel' + url + '&token=' + this.authToken;
             },
             onDepartmentSelect(selectedOption){
                 this.filter.department_id.push(selectedOption.id);

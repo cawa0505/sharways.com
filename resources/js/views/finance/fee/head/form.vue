@@ -40,10 +40,8 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components: {vSelect},
+        components: {},
         data() {
             return {
                 feeHeadForm: new Form({

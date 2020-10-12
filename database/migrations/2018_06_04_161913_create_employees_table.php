@@ -14,10 +14,9 @@ class CreateEmployeesTable extends Migration
     public function up()
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->integer('code')->default(0);
             $table->string('first_name')->nullable();
@@ -32,19 +31,20 @@ class CreateEmployeesTable extends Migration
             $table->string('email',50)->nullable();
             $table->string('alternate_email',20)->nullable();
             $table->string('nationality',20)->nullable();
-            $table->integer('blood_group_id')->unsigned()->nullable();
+            $table->bigInteger('blood_group_id')->unsigned()->nullable();
             $table->foreign('blood_group_id')->references('id')->on('blood_groups')->onDelete('set null');
-            $table->integer('religion_id')->unsigned()->nullable();
+            $table->bigInteger('religion_id')->unsigned()->nullable();
             $table->foreign('religion_id')->references('id')->on('religions')->onDelete('set null');
-            $table->integer('category_id')->unsigned()->nullable();
+            $table->bigInteger('category_id')->unsigned()->nullable();
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
-            $table->integer('caste_id')->unsigned()->nullable();
+            $table->bigInteger('caste_id')->unsigned()->nullable();
             $table->foreign('caste_id')->references('id')->on('castes')->onDelete('set null');
             $table->string('photo')->nullable();
             $table->string('mother_tongue',20)->nullable();
             $table->string('unique_identification_number',20)->nullable();
             $table->string('father_name')->nullable();
             $table->string('mother_name')->nullable();
+            $table->string('spouse_name')->nullable();
             $table->string('emergency_contact_name')->nullable();
             $table->string('emergency_contact_number')->nullable();
             $table->string('present_address_line_1')->nullable();

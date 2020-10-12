@@ -112,9 +112,6 @@ class CertificateTemplateRepository
             'NAME',
             'COURSE',
             'BATCH',
-            'RELIGION',
-            'CASTE',
-            'CATEGORY',
             'SESSION',
             'DATE_OF_BIRTH',
             'DATE_OF_ADMISSION',
@@ -122,11 +119,11 @@ class CertificateTemplateRepository
             'ROLL_NUMBER',
             'FATHER_NAME',
             'MOTHER_NAME',
-            'PRESENT_ADDRESS',
-            'PERMANENT_ADDRESS',
             'CURRENT_DATE',
             'CURRENT_TIME',
-            'CURRENT_DATE_TIME'
+            'CURRENT_DATE_TIME',
+            'PRESENT_ADDRESS',
+            'PERMANENT_ADDRESS'
         ];
     }
 
@@ -139,18 +136,15 @@ class CertificateTemplateRepository
             'FATHER_NAME',
             'MOTHER_NAME',
             'SESSION',
-            'RELIGION',
-            'CASTE',
-            'CATEGORY',
             'DESIGNATION',
             'DATE_OF_BIRTH',
             'DATE_OF_JOINING',
             'EMPLOYEE_CODE',
-            'PRESENT_ADDRESS',
-            'PERMANENT_ADDRESS',
             'CURRENT_DATE',
             'CURRENT_TIME',
-            'CURRENT_DATE_TIME'
+            'CURRENT_DATE_TIME',
+            'PRESENT_ADDRESS',
+            'PERMANENT_ADDRESS'
         ];
     }
 
@@ -256,7 +250,7 @@ class CertificateTemplateRepository
         $formatted = [
 			'name' => gv($params, 'name'),
 			'type' => gv($params, 'type'),
-            'body' => gv($params, 'body')
+            'body' => clean(gv($params, 'body'))
         ];
         
         $formatted['options'] = ['custom_fields' => $custom_field_values];

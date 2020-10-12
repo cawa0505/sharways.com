@@ -81,10 +81,10 @@ class UserRepository
         $user_preference->save();
 
         if ($user_preference->direction === 'rtl') {
-            \Cache::put('direction', 'rtl', config('jwt.ttl'));
+            \Cache::put('direction', 'rtl', 1440 * 60);
         } else {
-            \Cache::put('direction', 'ltr', config('jwt.ttl'));
+            \Cache::put('direction', 'ltr', 1440 * 60);
         }
-        \Cache::put('locale', $user_preference->locale, config('jwt.ttl'));
+        \Cache::put('locale', $user_preference->locale, 1440 * 60);
     }
 }

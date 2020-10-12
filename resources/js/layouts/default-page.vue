@@ -4,7 +4,7 @@
         <app-header></app-header>
         <app-sidebar></app-sidebar>
 
-        <div class="page-wrapper">
+        <div class="page-wrapper page-wrapper-header">
             <!-- <div v-html="message" v-if="!getConfig('mode')"></div> -->
             <router-view></router-view>
         	<app-footer></app-footer>

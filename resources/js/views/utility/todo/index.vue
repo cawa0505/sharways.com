@@ -105,11 +105,9 @@
 
 <script>
     import todoForm from './form'
-    import switches from 'vue-switches'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { todoForm,switches,datepicker },
+        components : { todoForm},
         data() {
             return {
                 todos: {
@@ -170,6 +168,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.start_date = helper.toDate(this.filter.start_date);
+                this.filter.end_date = helper.toDate(this.filter.end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/todo?page=' + page + url)
                     .then(response => {

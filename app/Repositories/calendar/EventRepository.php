@@ -194,26 +194,34 @@ class EventRepository
         }
 
         if (count($course_id)) {
-            $query->whereHas('courses', function ($q) use ($course_id) {
-                $q->whereIn('course_id', $course_id);
+            $query->where(function($q1) use($course_id) {
+                $q1->where('audience', 'everyone')->orWhereHas('courses', function ($q2) use ($course_id) {
+                    $q2->whereIn('course_id', $course_id);
+                });
             });
         }
 
         if (count($batch_id)) {
-            $query->whereHas('batches', function ($q) use ($batch_id) {
-                $q->whereIn('batch_id', $batch_id);
+            $query->where(function($q1) use($batch_id) {
+                $q1->where('audience', 'everyone')->orWhereHas('batches', function ($q2) use ($batch_id) {
+                    $q2->whereIn('batch_id', $batch_id);
+                });
             });
         }
 
         if (count($department_id)) {
-            $query->whereHas('departments', function ($q) use ($department_id) {
-                $q->whereIn('department_id', $department_id);
+            $query->where(function($q1) use($department_id) {
+                $q1->where('audience', 'everyone')->orWhereHas('departments', function ($q2) use ($department_id) {
+                    $q2->whereIn('department_id', $department_id);
+                });
             });
         }
 
         if (count($employee_category_id)) {
-            $query->whereHas('employeeCategories', function ($q) use ($employee_category_id) {
-                $q->whereIn('employee_category_id', $employee_category_id);
+            $query->where(function($q1) use($employee_category_id) {
+                $q1->where('audience', 'everyone')->orWhereHas('employeeCategories', function ($q2) use ($employee_category_id) {
+                    $q2->whereIn('employee_category_id', $employee_category_id);
+                });
             });
         }
 
@@ -306,8 +314,8 @@ class EventRepository
         $title                = gv($params, 'title');
         $venue                = gv($params, 'venue');
         $description          = gv($params, 'description');
-        $start_date           = gv($params, 'start_date');
-        $end_date             = gv($params, 'end_date');
+        $start_date           = toDate(gv($params, 'start_date'));
+        $end_date             = toDate(gv($params, 'end_date'));
         $start_time           = gv($params, 'start_time');
         $end_time             = gv($params, 'end_time');
         $no_time              = gbv($params, 'no_time');
@@ -370,11 +378,11 @@ class EventRepository
             'event_type_id' => $event_type_id,
             'title'         => $title,
             'venue'         => $venue,
-            'start_date'    => $start_date,
-            'end_date'      => $end_date,
+            'start_date'    => toDate($start_date),
+            'end_date'      => toDate($end_date),
             'start_time'    => (! $no_time) ? toTime($start_time) : null,
             'end_time'      => (! $no_time) ? toTime($end_time) : null,
-            'description'   => stripInlineStyle($description),
+            'description'   => clean($description),
             'audience'      => $audience,
             'options'       => []
         ];
@@ -544,7 +552,7 @@ class EventRepository
             }
         } elseif ($event->audience == 'selected_batch') {
             foreach ($event->batches as $batch) {
-                $selected[] = ['id' => $batch->id, 'name' => $batch->course_with_name];
+                $selected[] = ['id' => $batch->id, 'name' => $batch->batch_with_course];
             }
         } elseif ($event->audience == 'selected_department') {
             foreach ($event->departments as $department) {

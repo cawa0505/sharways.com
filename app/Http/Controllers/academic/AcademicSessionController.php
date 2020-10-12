@@ -28,6 +28,18 @@ class AcademicSessionController extends Controller
     }
 
     /**
+     * Used to get pre requisites
+     * @get ("/api/academic/session/pre-requisite")
+     * @return Response
+     */
+    public function preRequisite()
+    {
+        $this->authorize('preRequisite', AcademicSession::class);
+
+        return $this->ok($this->repo->getPreRequisite());
+    }
+
+    /**
      * Used to get all Academic Sessions
      * @get ("/api/academic/session")
      * @return Response

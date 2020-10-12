@@ -7,7 +7,7 @@
                 <th>{{trans('student.admission_number_short')}}</th>
                 <th>{{trans('student.name')}}</th>
                 <th>{{trans('academic.batch')}}</th>
-                <th>{{trans('student.father_name')}}</th>
+                <th>{{trans('student.first_guardian_name')}}</th>
                 <th>{{trans('student.contact_number')}}</th>
                 <th>{{trans('finance.total')}}</th>
                 <th>{{trans('finance.fee_installment_due_date')}}</th>
@@ -21,7 +21,7 @@
                     <td>{{ $item['admission_number'] }}</td>
                     <td>{{ $item['name'] }}</td>
                     <td>{{ $item['batch'] }}</td>
-                    <td>{{ $item['father_name'] }}</td>
+                    <td>{{ $item['first_guardian_name'] }}</td>
                     <td>{{ $item['contact_number'] }}</td>
                     <td>{{ $item['total'] }}</td>
                     <td>{{ $item['due_date'] }}</td>

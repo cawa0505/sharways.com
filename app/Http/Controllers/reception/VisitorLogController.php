@@ -85,6 +85,23 @@ class VisitorLogController extends Controller
     }
 
     /**
+     * Used to print Gate Pass
+     * @post ("/reception/visitor/log/{uuid}/print")
+     * @param ({
+     *      @Parameter("uuid", type="string", required="true", description="Unique Id of Visitor Log"),
+     * })
+     * @return Response
+     */
+    public function printDetail($uuid)
+    {
+        $this->authorize('list', VisitorLog::class);
+
+        $visitor_log = $this->repo->findByUuidOrFail($uuid);
+
+        return view()->first(['custom-print.reception.visitor-pass', 'print.reception.visitor-pass'], compact('visitor_log'));
+    }
+
+    /**
      * Used to store Visitor Log
      * @post ("/api/visitor/log")
      * @param ({
@@ -115,7 +132,7 @@ class VisitorLogController extends Controller
 
         $visitor_log = $this->repo->findByUuidOrFail($uuid);
 
-        $selected_student = ($visitor_log->student_id) ? ['id' => $visitor_log->student_id, 'name' => $visitor_log->Student->name.' ('.$visitor_log->Student->Parent->father_name.' '.$visitor_log->Student->contact_number.')'] : [];
+        $selected_student = ($visitor_log->student_id) ? ['id' => $visitor_log->student_id, 'name' => $visitor_log->Student->name.' ('.$visitor_log->Student->Parent->first_guardian_name.' '.$visitor_log->Student->contact_number.')'] : [];
 
         $selected_employee = ($visitor_log->employee_id) ? ['id' => $visitor_log->employee_id, 'name' => $visitor_log->Employee->name.' ('.$visitor_log->Employee->contact_number.')'] : [];
 

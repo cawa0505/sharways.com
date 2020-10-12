@@ -64,7 +64,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(item, index) in list.data">
-                                    <td>{{index+1}}</td>
+                                    <td>{{item.sno}}</td>
                                     <td>{{item.voucher_number}}</td>
                                     <td>{{item.date | moment}}</td>
                                     <td>{{item.type == 'payment' ? item.amount : '-'}}</td>
@@ -98,11 +98,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components : { vSelect, datepicker },
+        components : { },
         data() {
             return {
                 list: {
@@ -132,7 +129,7 @@
                 this.$router.push('/dashboard');
             }
 
-            this.filter.date = moment().format('YYYY-MM-DD');
+            this.filter.date = helper.today();
             this.getReport();
         },
         methods: {

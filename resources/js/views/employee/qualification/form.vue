@@ -63,12 +63,9 @@
 
 
 <script>
-    import VueMonthlyPicker from 'vue-monthly-picker'
-    import switches from 'vue-switches'
-    import uuid from 'uuid/v4'
 
     export default {
-        components:{switches,VueMonthlyPicker},
+        components:{},
         data() {
             return {
                 qualificationForm: new Form({
@@ -87,7 +84,7 @@
         },
         props: ['uuid','qid','name'],
         mounted() {
-            this.qualificationForm.upload_token = uuid();
+            this.qualificationForm.upload_token = this.$uuid.v4();
             
             if(this.qid)
                 this.getQualification();
@@ -108,7 +105,7 @@
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
                         this.$emit('completed');
-                        this.qualificationForm.upload_token = uuid();
+                        this.qualificationForm.upload_token = this.$uuid.v4();
                         loader.hide();
                     })
                     .catch(error => {

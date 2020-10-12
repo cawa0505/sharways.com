@@ -1,42 +1,46 @@
 export default [
     {
         path: '/',
-        component: () => import('@views/pages/themes/default/home' /* webpackChunkName: "js/pages/themes/home" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/home" */ '@views/pages/themes/default/home')
     },
     {
         path: '/home',
-        component: () => import('@views/pages/themes/default/home' /* webpackChunkName: "js/pages/themes/home" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/home" */ '@views/pages/themes/default/home')
     },
     {
         path: '/contact',
-        component: () => import('@views/pages/themes/default/contact' /* webpackChunkName: "js/pages/themes/contact" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/contact" */ '@views/pages/themes/default/contact')
+    },
+    {
+        path: '/online-registration',
+        component: () => import(/* webpackChunkName: "js/pages/themes/onlineRegistration" */ '@views/pages/themes/default/online-registration')
     },
     {
         path: '/events',
-        component: () => import('@views/pages/themes/default/events' /* webpackChunkName: "js/pages/themes/events" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/events" */ '@views/pages/themes/default/events')
     },
     {
         path: '/calendar',
-        component: () => import('@views/pages/themes/default/calendar' /* webpackChunkName: "js/pages/themes/calendar" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/calendar" */ '@views/pages/themes/default/calendar')
     },
     {
         path: '/gallery',
-        component: () => import('@views/pages/themes/default/gallery' /* webpackChunkName: "js/pages/themes/gallery" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/gallery" */ '@views/pages/themes/default/gallery')
     },
     {
         path: '/teachers',
-        component: () => import('@views/pages/themes/default/teachers' /* webpackChunkName: "js/pages/themes/teachers" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/teachers" */ '@views/pages/themes/default/teachers')
     },
     {
         path: '/articles',
-        component: () => import('@views/pages/themes/default/articles/index' /* webpackChunkName: "js/pages/themes/articles/index" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/articles/index" */ '@views/pages/themes/default/articles/index')
     },
     {
         path: '/articles/:uuid',
-        component: () => import('@views/pages/themes/default/articles/show' /* webpackChunkName: "js/pages/themes/articles/show" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/articles/show" */ '@views/pages/themes/default/articles/show')
     },
     {
         path: '/page/:page',
-        component: () => import('@views/pages/themes/default/page' /* webpackChunkName: "js/pages/themes/page" */)
+        component: () => import(/* webpackChunkName: "js/pages/themes/page" */ '@views/pages/themes/default/page')
     }
 ]

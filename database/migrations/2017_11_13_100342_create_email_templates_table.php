@@ -14,8 +14,7 @@ class CreateEmailTemplatesTable extends Migration
     public function up()
     {
         Schema::create('email_templates', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->boolean('is_default')->default(0);
             $table->string('name')->nullable();
             $table->string('slug')->nullable();

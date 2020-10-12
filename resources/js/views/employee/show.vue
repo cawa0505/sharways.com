@@ -18,7 +18,7 @@
             <div class="row">
                 <div class="col-12 col-sm-8 p-0">
                     <div id="accordion" class="accordion" v-if="employee.id">
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="basic" @click="tab = 'basic'" data-toggle="collapse" data-target="#collapseBasic" aria-expanded="false" aria-controls="collapseBasic">
                                 <h5><i class="fas fa-lg fa-graduation-cap fa-fix-w-32"></i> {{trans('employee.basic_information')}}</h5>
                             </div>
@@ -30,7 +30,7 @@
                             </div>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="contact" @click="tab = 'contact'" data-toggle="collapse" data-target="#collapseContact" aria-expanded="false" aria-controls="collapseContact">
                                 <h5><i class="fas fa-lg fa-address-book fa-fix-w-32"></i> {{trans('employee.contact_information')}}</h5>
                             </div>
@@ -42,7 +42,7 @@
                             </div>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="document" @click="tab = 'document'" data-toggle="collapse" data-target="#collapseDocument" aria-expanded="false" aria-controls="collapseDocument">
                                 <h5><i class="fas fa-lg fa-folder fa-fix-w-32"></i> {{trans('employee.document_information')}}</h5>
                             </div>
@@ -54,7 +54,7 @@
                             </div>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="qualification" @click="tab = 'qualification'" data-toggle="collapse" data-target="#collapseQualification" aria-expanded="false" aria-controls="collapseQualification">
                                 <h5><i class="fas fa-lg fa-book fa-fix-w-32"></i> {{trans('employee.qualification_information')}}</h5>
                             </div>
@@ -66,7 +66,7 @@
                             </div>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="account" @click="tab = 'account'" data-toggle="collapse" data-target="#collapseAccount" aria-expanded="false" aria-controls="collapseAccount">
                                 <h5><i class="fas fa-lg fa-university fa-fix-w-32"></i> {{trans('employee.account_information')}}</h5>
                             </div>
@@ -78,7 +78,7 @@
                             </div>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="login" @click="tab = 'login'" data-toggle="collapse" data-target="#collapseUserLogin" aria-expanded="false" aria-controls="collapseUserLogin">
                                 <h5><i class="fas fa-lg fa-sign-in-alt fa-fix-w-32"></i> {{trans('auth.user_login')}}</h5>
                             </div>
@@ -90,7 +90,7 @@
                             </div>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="designation" @click="tab = 'designation'" data-toggle="collapse" data-target="#collapseDesignation" aria-expanded="false" aria-controls="collapseDesignation">
                                 <h5><i class="fas fa-lg fa-user-plus fa-fix-w-32"></i> {{trans('employee.designation_history')}}</h5>
                             </div>
@@ -102,7 +102,7 @@
                             </div>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="overflow: visible;">
                             <div class="card-header collapsed" id="term" @click="tab = 'term'" data-toggle="collapse" data-target="#collapseTerm" aria-expanded="false" aria-controls="collapseTerm">
                                 <h5><i class="fas fa-lg fa-user-times fa-fix-w-32"></i> {{trans('employee.term_history')}}</h5>
                             </div>
@@ -238,7 +238,7 @@
             },
             getStatus(employee){
                 let term = employee.employee_terms;
-                if (term.length && term[0].date_of_joining <= moment().format('YYYY-MM-DD') && (!term[0].date_of_leaving || term[0].date_of_leaving >= moment().format('YYYY-MM-DD')))
+                if (term.length && term[0].date_of_joining <= helper.today() && (!term[0].date_of_leaving || term[0].date_of_leaving >= helper.today()))
                     return '<span class="label label-success">'+i18n.employee.status_active+'</span>';
                 else
                     return '<span class="label label-danger">'+i18n.employee.status_inactive+'</span>';

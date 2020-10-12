@@ -8,9 +8,7 @@ const store = new Vuex.Store({
         auth: {
             status: false,
             id: '',
-            first_name: '',
-            middle_name: '',
-            last_name: '',
+            name: '',
             email: '',
             username: '',
             avatar: '',
@@ -115,11 +113,11 @@ const store = new Vuex.Store({
         getAuthUser: (state) => (name) => {
             return state.auth[name];
         },
-        getAuthUserFullName: (state) => {
-            return state.auth['first_name']+' '+state.auth['last_name'];
-        },
         getAuthStatus: (state) => {
             return state.auth.status;
+        },
+        getAuthUserRoles: (state) => {
+            return state.auth.roles.toString();
         },
         hasRole: (state) => (name) => {
             return (state.auth.roles.indexOf(name) >= 0) ? true : false

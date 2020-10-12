@@ -108,10 +108,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-
 	export default {
-		components: {datepicker},
+		components: {},
 		props: ['registration'],
 		data() {
 			return {
@@ -171,7 +169,6 @@
 			},
 			submit(){
 				let loader = this.$loading.show();
-                this.actionForm.date_of_admission = moment(this.actionForm.date_of_admission).format('YYYY-MM-DD');
 				this.actionForm.post('/api/registration/'+this.registration.id+'/update/status')
 					.then(response => {
 						toastr.success(response.message);

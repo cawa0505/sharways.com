@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use JWTAuth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\OtpRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Academic\AcademicSession;
 use App\Repositories\Auth\AuthRepository;
 use App\Repositories\Auth\UserRepository;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Http\Requests\Auth\PasswordRequest;
+use App\Http\Requests\Auth\TwoFactorRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Repositories\Configuration\ConfigurationRepository;
@@ -20,8 +20,6 @@ class AuthController extends Controller
     protected $request;
     protected $repo;
     protected $user;
-    protected $config;
-    protected $academic_session;
     protected $module = 'user';
 
     /**
@@ -32,17 +30,13 @@ class AuthController extends Controller
     public function __construct(
         Request $request,
         AuthRepository $repo,
-        UserRepository $user,
-        ConfigurationRepository $config,
-        AcademicSession $academic_session
+        UserRepository $user
     ) {
         $this->request = $request;
         $this->repo = $repo;
         $this->user = $user;
         
         $this->middleware('prohibited.test.mode')->only('changePassword');
-        $this->config = $config;
-        $this->academic_session = $academic_session;
     }
 
     /**
@@ -54,35 +48,50 @@ class AuthController extends Controller
      * })
      * @return authentication token
      */
-    public function authenticate(LoginRequest $request)
+    public function login(LoginRequest $request)
     {
-        $auth = $this->repo->auth($this->request->all());
+        $data = $this->repo->auth($this->request->all());
 
-        $auth_user                   = $auth['auth_user'];
-        $token                       = $auth['token'];
-        $auth_user->user_roles       = $auth_user->roles()->pluck('name')->all();
-        $auth_user->user_permissions = $auth_user->getAllPermissions()->pluck('name')->all();
+        return $this->success($data);
+    }
 
-        \Cache::put('locale', $auth_user->userPreference->locale, config('jwt.ttl'));
-        \Cache::put('direction', $auth_user->userPreference->direction, config('jwt.ttl'));
+    /**
+     * Used to authenticate user
+     * @post ("/api/auth/login/otp")
+     * @param ({
+     *      @Parameter("mobile", type="numeric", required="true", description="Mobile of User"),
+     * })
+     * @return authentication token
+     */
+    public function otp(OtpRequest $request)
+    {
+        $data = $this->repo->otp($this->request->all());
 
-        $reload = (config('app.locale') != cache('locale') || config('config.direction') != cache('direction')) ? 1 : 0;
+        if ($data === -1) {
+            return $this->success(['message' => trans('auth.otp_generated')]);
+        }
 
-        $config            = $this->config->getConfig();
-        $academic_sessions = $this->academic_session->all();
-        $default_academic_session = $auth_user->userPreference->academic_session_id ? $auth_user->userPreference->academicSession : $academic_sessions->firstWhere('is_default',1);
+        return $this->success($data);
+    }
 
-        activity('login')->log('login');
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function me()
+    {
+        return $this->success(auth()->user());
+    }
 
-        return $this->success([
-            'message'           => trans('auth.logged_in'),
-            'token'             => $token,
-            'user'              => $auth_user,
-            'reload'            => $reload,
-            'config'            => $config,
-            'academic_sessions' => $academic_sessions,
-            'default_academic_session' => $default_academic_session
-        ]);
+    /**
+     * Refresh a token.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function refresh()
+    {
+        return $this->success(auth()->refresh());
     }
 
     /**
@@ -92,23 +101,16 @@ class AuthController extends Controller
      */
     public function logout()
     {
-        $auth_user = \Auth::user();
-
-        try {
-            $token = JWTAuth::getToken();
-        } catch (JWTException $e) {
-            return $this->error($e->getMessage());
-        }
+        $auth_user = auth()->user();
 
         \Cache::forget('direction');
         \Cache::forget('locale');
 
         activity('logout')->log('logout');
-        
-        JWTAuth::invalidate($token);
 
-        $config = $this->config->getConfig();
-        return $this->success(['message' => trans('auth.logged_out'), 'config' => $config]);
+        auth()->logout();
+
+        return $this->success(['message' => trans('auth.logged_out'), 'config' => $this->repo->getConfig()]);
     }
 
     /**
@@ -136,7 +138,7 @@ class AuthController extends Controller
      */
     public function validatePasswordReset()
     {
-        $this->repo->validateResetPasswordToken(request('token'));
+        $this->repo->validateResetPasswordToken(request('token'), request('email'));
 
         return $this->success(['message' => '']);
     }
@@ -191,5 +193,20 @@ class AuthController extends Controller
         $this->repo->validateCurrentPassword(request('password'));
 
         return $this->success(['message' => trans('auth.lock_screen_verified')]);
+    }
+
+    /**
+     * Used to verify two factor security
+     * @post ("/api/auth/security")
+     * @param ({
+     *      @Parameter("two_factor_code", type="numeric", required="true", description="Two factor code"),
+     * })
+     * @return Response
+     */
+    public function security(TwoFactorRequest $request)
+    {
+        $this->repo->security(request('two_factor_code'));
+
+        return $this->success(['message' => trans('auth.two_factor_security_verified')]);
     }
 }

@@ -85,11 +85,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
 	export default {
-		components: {datepicker,vSelect},
+		components: {},
 		props: ['registration'],
 		data() {
 			return {
@@ -149,7 +146,6 @@
 			},
 			submit(){
 				let loader = this.$loading.show();
-                this.registrationFeeForm.date = moment(this.registrationFeeForm.date).format('YYYY-MM-DD');
 				this.registrationFeeForm.post('/api/registration/'+this.registration.id+'/fee/payment')
 					.then(response => {
 						toastr.success(response.message);

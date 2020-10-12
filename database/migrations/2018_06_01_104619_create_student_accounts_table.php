@@ -14,9 +14,8 @@ class CreateStudentAccountsTable extends Migration
     public function up()
     {
         Schema::create('student_accounts', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('account_number')->nullable();

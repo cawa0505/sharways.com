@@ -60,11 +60,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components: {vSelect,datepicker},
+        components: {},
         props: ['student','record'],
         data(){
             return {
@@ -116,7 +113,6 @@
             },
             submit(){
                 let loader = this.$loading.show();
-                this.recordForm.date_of_entry = moment(this.recordForm.date_of_entry).format('YYYY-MM-DD');
                 this.recordForm.patch('/api/student/'+this.student.uuid+'/record/'+this.record.id)
                     .then(response => {
                         toastr.success(response.message);

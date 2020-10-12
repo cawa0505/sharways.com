@@ -14,12 +14,11 @@ class CreateVehicleDocumentsTable extends Migration
     public function up()
     {
         Schema::create('vehicle_documents', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('vehicle_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('vehicle_id')->unsigned()->nullable();
             $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('cascade');
             $table->string('title')->nullable();
-            $table->integer('vehicle_document_type_id')->unsigned()->nullable();
+            $table->bigInteger('vehicle_document_type_id')->unsigned()->nullable();
             $table->foreign('vehicle_document_type_id')->references('id')->on('vehicle_document_types')->onDelete('cascade');
             $table->date('date_of_expiry')->nullable();
             $table->text('description')->nullable();

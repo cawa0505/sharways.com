@@ -14,9 +14,8 @@ class CreateEmployeeAccountsTable extends Migration
     public function up()
     {
         Schema::create('employee_accounts', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('account_number')->nullable();

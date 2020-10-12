@@ -14,10 +14,9 @@ class CreateTransportRoutesTable extends Migration
     public function up()
     {
         Schema::create('transport_routes', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
-            $table->integer('academic_session_id')->unsigned()->nullable();
+            $table->bigInteger('academic_session_id')->unsigned()->nullable();
             $table->foreign('academic_session_id','tr_academic_session_id_foreign')->references('id')->on('academic_sessions')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->text('options')->nullable();

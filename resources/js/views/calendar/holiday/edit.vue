@@ -44,10 +44,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components : { datepicker },
+        components : {  },
         data() {
             return {
                 id:this.$route.params.id,
@@ -90,7 +88,6 @@
             },
             update(){
                 let loader = this.$loading.show();
-                this.holidayForm.date = helper.toDate(this.holidayForm.date);
                 this.holidayForm.patch('/api/holiday/'+this.id)
                     .then(response => {
                         toastr.success(response.message);

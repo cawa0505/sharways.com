@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Utility;
 
-use JWTAuth;
 use App\Models\Utility\Todo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

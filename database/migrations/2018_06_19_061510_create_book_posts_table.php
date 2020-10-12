@@ -14,9 +14,8 @@ class CreateBookPostsTable extends Migration
     public function up()
     {
         Schema::create('book_posts', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('book_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('book_id')->unsigned()->nullable();
             $table->foreign('book_id')->references('id')->on('books')->onDelete('cascade');
             $table->date('date_of_addition')->nullable();
             $table->integer('quantity')->default(0);

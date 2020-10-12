@@ -120,7 +120,7 @@
                                             <template v-if="visitor_log.name">{{trans('reception.visitor_name')+': '+visitor_log.name}} <br /></template>
                                             <template v-if="visitor_log.relation_with_student">{{trans('reception.relation_with_student')+': '+visitor_log.relation_with_student}} <br /></template>
                                             {{trans('student.name')+': '+getStudentName(visitor_log.student)}} <br />
-                                            {{trans('student.father_name')+': '+visitor_log.student.parent.father_name}} <br />
+                                            {{trans('student.first_guardian_name')+': '+visitor_log.student.parent.first_guardian_name}} <br />
                                             {{trans('student.mother_name')+': '+visitor_log.student.parent.mother_name}} <br />
                                             {{trans('student.contact_number')+': '+visitor_log.student.contact_number}} <br />
                                         </template>
@@ -149,6 +149,7 @@
                                     </td>
                                     <td class="table-option">
                                         <div class="btn-group">
+                                            <a :href="`/reception/visitor/pass/${visitor_log.uuid}/print?token=${authToken}`" target="_blank" class="btn btn-success btn-sm" v-tooltip="trans('general.print')"><i class="fas fa-print"></i></a>
                                             <button class="btn btn-info btn-sm" v-if="hasPermission('edit-visitor-log')" v-tooltip="trans('reception.edit_visitor_log')" @click.prevent="editVisitorLog(visitor_log)"><i class="fas fa-edit"></i></button>
                                             <button class="btn btn-danger btn-sm" v-if="hasPermission('delete-visitor-log')" :key="visitor_log.id" v-confirm="{ok: confirmDelete(visitor_log)}" v-tooltip="trans('reception.delete_visitor_log')"><i class="fas fa-trash"></i></button>
                                         </div>
@@ -171,12 +172,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import visitorLogForm from './form'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { visitorLogForm,datepicker,vSelect },
+        components : { visitorLogForm},
         data() {
             return {
                 visitor_logs: {
@@ -255,6 +254,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_visit_start_date = helper.toDate(this.filter.date_of_visit_start_date);
+                this.filter.date_of_visit_end_date = helper.toDate(this.filter.date_of_visit_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/visitor/log?page=' + page + url)
                     .then(response => {

@@ -54,8 +54,8 @@
                                                 <td>{{getStudentName(book_log.student_record.student)}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{trans('student.father_name')}}</td>
-                                                <td>{{book_log.student_record.student.parent.father_name}}</td>
+                                                <td>{{trans('student.first_guardian_name')}}</td>
+                                                <td>{{book_log.student_record.student.parent.first_guardian_name}}</td>
                                             </tr>
                                             <tr>
                                                 <td>{{trans('student.contact_number')}}</td>
@@ -298,11 +298,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
 	export default {
-        components: {datepicker,vSelect},
+        components: {},
     	data(){
     		return {
     			uuid:this.$route.params.uuid,
@@ -389,7 +386,6 @@
             },
             returnAction(){
                 let loader = this.$loading.show();
-                this.returnForm.date_of_return = helper.toDate(this.returnForm.date_of_return);
 
                 if(!this.returnForm.is_non_returnable) {
                     this.returnForm.non_returnable_charge_applicable = 0;
@@ -438,15 +434,15 @@
                 return this.book_log.book_log_details.filter(o => o.date_of_return != null || o.is_non_returnable).length;
             },
             isOverDue(){
-                let date = this.returnForm.date_of_return ? helper.toDate(this.returnForm.date_of_return) : moment().format('YYYY-MM-DD');
+                let date = this.returnForm.date_of_return ? helper.toDate(this.returnForm.date_of_return) : helper.today();
 
-                if(this.book_log.book_log_details.length > this.getBookReturnCount && moment(this.book_log.due_date).format('YYYY-MM-DD') < date)
+                if(this.book_log.book_log_details.length > this.getBookReturnCount && helper.toDate(this.book_log.due_date) < date)
                     return true;
 
                 return false;
             },
             overdueDay(){
-                let date = this.returnForm.date_of_return ? helper.toDate(this.returnForm.date_of_return) : moment().format('YYYY-MM-DD');
+                let date = this.returnForm.date_of_return ? helper.toDate(this.returnForm.date_of_return) : helper.today();
 
                 if(this.isOverDue)
                     return helper.getDateDiff(this.book_log.due_date, date);

@@ -14,15 +14,14 @@ class CreateExamSchedulesTable extends Migration
     public function up()
     {
         Schema::create('exam_schedules', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('exam_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('exam_id')->unsigned()->nullable();
             $table->foreign('exam_id','es_exam_id_foreign')->references('id')->on('exams')->onDelete('cascade');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id','es_batch_id_foreign')->references('id')->on('batches')->onDelete('cascade');
-            $table->integer('exam_grade_id')->unsigned()->nullable();
+            $table->bigInteger('exam_grade_id')->unsigned()->nullable();
             $table->foreign('exam_grade_id','es_exam_grade_id_foreign')->references('id')->on('exam_grades')->onDelete('set null');
-            $table->integer('exam_assessment_id')->unsigned()->nullable();
+            $table->bigInteger('exam_assessment_id')->unsigned()->nullable();
             $table->foreign('exam_assessment_id','es_exam_assessment_id_foreign')->references('id')->on('exam_assessments')->onDelete('cascade');
             $table->longText('observation_marks')->nullable();
             $table->text('description')->nullable();

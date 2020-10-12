@@ -14,10 +14,9 @@ class CreateFrontendBlocksTable extends Migration
     public function up()
     {
         Schema::create('frontend_blocks', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('frontend_menu_id')->unsigned()->nullable();
+            $table->bigInteger('frontend_menu_id')->unsigned()->nullable();
             $table->foreign('frontend_menu_id')->references('id')->on('frontend_menus')->onDelete('set null');
             $table->integer('position')->default(0);
             $table->string('title')->nullable();

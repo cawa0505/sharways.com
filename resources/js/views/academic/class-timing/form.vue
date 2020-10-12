@@ -106,11 +106,9 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-    import uuid from 'uuid/v4'
 
 	export default {
-        components: {switches},
+        components: {},
         props: ['uuid'],
 		data(){
 			return {
@@ -165,7 +163,7 @@
             },  
             addRow(){
                 let new_index = this.classTimingForm.sessions.push({
-                    uuid: uuid(),
+                    uuid: this.$uuid.v4(),
                     name: '',
                     start_hour: '',
                     start_min: '',

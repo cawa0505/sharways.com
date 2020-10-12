@@ -14,7 +14,7 @@ class UpdateStudentFeeRecordDetailsTableWithTransaction extends Migration
     public function up()
     {
         Schema::table('student_fee_record_details', function ($table) {
-            $table->integer('transaction_id')->unsigned()->nullable()->after('amount');
+            $table->bigInteger('transaction_id')->unsigned()->nullable()->after('amount');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('set null');
         });
     }

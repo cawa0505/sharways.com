@@ -25,7 +25,7 @@ class EmployeeDetailRequest extends FormRequest
     {
         return [
             'first_name'      => 'required_if:type,basic|min:2',
-            'last_name'       => 'required_if:type,basic|min:1',
+            'last_name'       => 'required_if:type,basic|min:2',
             'date_of_birth'   => 'required_if:type,basic|date',
             'contact_number'  => 'required_if:type,contact',
             'gender'          => 'required_if:type,basic',

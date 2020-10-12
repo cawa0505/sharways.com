@@ -114,7 +114,7 @@
         },
         computed: {
             checkSupportValidity(){
-                if (moment().format('YYYY-MM-DD') <= this.product.date_of_support_expiry)
+                if (helper.today() <= this.product.date_of_support_expiry)
                     return true;
                 else
                     return false;

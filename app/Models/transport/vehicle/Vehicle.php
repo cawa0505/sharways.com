@@ -38,6 +38,11 @@ class Vehicle extends Model
         return $this->hasMany('App\Models\Transport\Vehicle\VehicleDocument');
     }
 
+    public function vehicleIncharges()
+    {
+        return $this->hasMany('App\Models\Transport\Vehicle\VehicleIncharge');
+    }
+
     public function vehicleLogs()
     {
         return $this->hasMany('App\Models\Transport\Vehicle\VehicleLog');

@@ -14,35 +14,34 @@ class CreateTransactionsTable extends Migration
     public function up()
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
             $table->string('prefix',20)->nullable();
             $table->integer('number')->default(0);
             $table->tinyInteger('type')->default(0);
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->integer('bill_id')->unsigned()->nullable();
+            $table->bigInteger('bill_id')->unsigned()->nullable();
             $table->foreign('bill_id')->references('id')->on('bills')->onDelete('cascade');
-            $table->integer('income_id')->unsigned()->nullable();
+            $table->bigInteger('income_id')->unsigned()->nullable();
             $table->foreign('income_id')->references('id')->on('incomes')->onDelete('cascade');
-            $table->integer('expense_id')->unsigned()->nullable();
+            $table->bigInteger('expense_id')->unsigned()->nullable();
             $table->foreign('expense_id')->references('id')->on('expenses')->onDelete('cascade');
-            $table->integer('account_transfer_id')->unsigned()->nullable();
+            $table->bigInteger('account_transfer_id')->unsigned()->nullable();
             $table->foreign('account_transfer_id')->references('id')->on('account_transfers')->onDelete('cascade');
-            $table->integer('payment_method_id')->unsigned()->nullable();
+            $table->bigInteger('payment_method_id')->unsigned()->nullable();
             $table->foreign('payment_method_id')->references('id')->on('payment_methods')->onDelete('cascade');
             $table->decimal('amount',25,5)->default(0);
-            $table->integer('account_id')->unsigned()->nullable();
+            $table->bigInteger('account_id')->unsigned()->nullable();
             $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
             $table->string('head')->nullable();
-            $table->integer('registration_id')->unsigned()->nullable();
+            $table->bigInteger('registration_id')->unsigned()->nullable();
             $table->foreign('registration_id')->references('id')->on('registrations')->onDelete('cascade');
-            $table->integer('student_fee_record_id')->unsigned()->nullable();
+            $table->bigInteger('student_fee_record_id')->unsigned()->nullable();
             $table->foreign('student_fee_record_id')->references('id')->on('student_fee_records')->onDelete('cascade');
-            $table->integer('book_log_detail_id')->unsigned()->nullable();
+            $table->bigInteger('book_log_detail_id')->unsigned()->nullable();
             $table->foreign('book_log_detail_id')->references('id')->on('book_log_details')->onDelete('cascade');
-            $table->integer('transaction_group_id')->unsigned()->nullable();
+            $table->bigInteger('transaction_group_id')->unsigned()->nullable();
             $table->foreign('transaction_group_id')->references('id')->on('transactions')->onDelete('cascade');
             $table->string('instrument_number')->nullable();
             $table->string('instrument_bank_detail')->nullable();

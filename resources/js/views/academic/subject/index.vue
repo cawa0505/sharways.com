@@ -75,7 +75,7 @@
                                 <tr v-for="batch in batches.data">
                                     <td>
                                         {{batch.course.name}} <br />
-                                        <div class="dropdown">
+                                        <div class="dropdown" v-if="hasPermission('edit-subject')">
                                             <button type="button" class="btn btn-info btn-sm" href="#" role="button" id="moreSubOption" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-tooltip="trans('general.option')">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
@@ -162,13 +162,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import switches from 'vue-switches'
     import subjectForm from './form'
-    import draggable from 'vuedraggable'
 
     export default {
-        components : { subjectForm,vSelect,switches,draggable },
+        components : { subjectForm },
         data() {
             return {
                 batches: {

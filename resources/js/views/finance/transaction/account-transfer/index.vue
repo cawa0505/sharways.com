@@ -112,6 +112,7 @@
                                     <td>{{account_transfer.created_at | momentDateTime}}</td>
                                     <td class="table-option">
                                         <div class="btn-group">
+                                            <a :href="`/finance/transaction/account/transfer/${account_transfer.uuid}/print?token=${authToken}`" target="_blank" class="btn btn-success btn-sm" v-tooltip="trans('general.print')"><i class="fas fa-print"></i></a>
                                             <button class="btn btn-success btn-sm" v-tooltip="trans('general.view_detail')" @click.prevent="showAction(account_transfer)"><i class="fas fa-arrow-circle-right"></i></button>
                                             <template v-if="!account_transfer.is_cancelled">
                                                 <button class="btn btn-info btn-sm" v-if="hasPermission('edit-account-transfer')" v-tooltip="trans('finance.edit_account_transfer')" @click.prevent="editAccountTransfer(account_transfer)"><i class="fas fa-edit"></i></button>
@@ -138,13 +139,11 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import accountTransferForm from './form'
     import accountTransferDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { accountTransferForm,datepicker,accountTransferDetail,vSelect},
+        components : { accountTransferForm,accountTransferDetail},
         data() {
             return {
                 account_transfers: {
@@ -213,6 +212,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_account_transfer_start_date = helper.toDate(this.filter.date_of_account_transfer_start_date);
+                this.filter.date_of_account_transfer_end_date = helper.toDate(this.filter.date_of_account_transfer_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/account/transfer?page=' + page + url)
                     .then(response => {

@@ -134,6 +134,20 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Used to default attendance
+     * @post ("/api/student/attendance/default")
+     * @return Response
+     */
+    public function default()
+    {
+        $this->authorize('store', StudentAttendance::class);
+
+        $this->repo->default($this->request->all());
+
+        return $this->success(['message' => trans('student.attendance_updated')]);
+    }
+
+    /**
      * Used to delete attendance
      * @post ("/api/student/attendance/delete")
      * @return Response
@@ -145,5 +159,17 @@ class AttendanceController extends Controller
         $this->repo->delete($this->request->all());
 
         return $this->success(['message' => trans('student.attendance_removed')]);
+    }
+
+    /**
+     * Used to get monthly student attendance
+     * @get ("/api/student/{uuid}/record/{record_id}/attendance")
+     * @return Response
+     */
+    public function studentMonthlyReport($uuid, $record_id)
+    {
+        $this->authorize('list', StudentAttendance::class);
+
+        return $this->ok($this->repo->studentMonthlyReport($uuid, $record_id));
     }
 }

@@ -14,9 +14,8 @@ class CreateVehicleServiceRecordsTable extends Migration
     public function up()
     {
         Schema::create('vehicle_service_records', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('vehicle_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('vehicle_id')->unsigned()->nullable();
             $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('cascade');
             $table->date('date_of_service')->nullable();
             $table->decimal('amount',25,5)->default(0);
@@ -24,7 +23,7 @@ class CreateVehicleServiceRecordsTable extends Migration
             $table->date('next_due_date')->nullable();
             $table->integer('next_due_log')->nullable();
             $table->text('description')->nullable();
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->uuid('upload_token')->nullable();
             $table->text('options')->nullable();

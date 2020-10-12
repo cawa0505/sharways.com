@@ -14,13 +14,12 @@ class CreateLessonPlansTable extends Migration
     public function up()
     {
         Schema::create('lesson_plans', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
-            $table->integer('subject_id')->unsigned()->nullable();
+            $table->bigInteger('subject_id')->unsigned()->nullable();
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

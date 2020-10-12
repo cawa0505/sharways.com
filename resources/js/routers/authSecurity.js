@@ -1,10 +1,10 @@
 export default [
     {
         path: '/auth/security',
-        component: () => import('@views/auth/security' /* webpackChunkName: "js/auth/security" */),
+        component: () => import(/* webpackChunkName: "js/auth/security" */ '@views/auth/security'),
     },
     {
         path: '/auth/lock',
-        component: () => import('@views/auth/lock' /* webpackChunkName: "js/auth/lock" */),
+        component: () => import(/* webpackChunkName: "js/auth/lock" */ '@views/auth/lock'),
     }
 ]

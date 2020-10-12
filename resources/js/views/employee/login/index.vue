@@ -58,10 +58,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-
 	export default {
-		components: {vSelect},
+		components: {},
 		props: ['employee'],
 		data(){
 			return {
@@ -111,7 +109,7 @@
 					})
 			},
 			updateLoginForm(employee){
-				let role = employee.user.roles.length ? employee.user.roles[0].name : null;
+				let role = employee.user_id ? employee.user.roles[0].name : null;
 				this.userForm.enable_employee_login = (employee.user_id && employee.user.status == 'activated') ? true : false;
 				this.userForm.employee_email = employee.user_id ? employee.user.email : ''; 
 				this.userForm.employee_username = employee.user_id ? employee.user.username : ''; 

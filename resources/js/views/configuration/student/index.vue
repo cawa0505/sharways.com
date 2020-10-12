@@ -22,6 +22,20 @@
                                     <show-error :form-name="configForm" prop-name="admission_number_digit"></show-error>
                                 </div>
                             </div>
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.transfer_certificate_prefix')}}</label>
+                                       <input class="form-control" type="text" v-model="configForm.transfer_certificate_prefix" name="transfer_certificate_prefix" :placeholder="trans('student.transfer_certificate_prefix')">
+                                    <show-error :form-name="configForm" prop-name="transfer_certificate_prefix"></show-error>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.transfer_certificate_digit')}}</label>
+                                       <input class="form-control" type="number" v-model="configForm.transfer_certificate_digit" name="transfer_certificate_digit" :placeholder="trans('student.transfer_certificate_digit')">
+                                    <show-error :form-name="configForm" prop-name="transfer_certificate_digit"></show-error>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -38,7 +52,7 @@
                                 <div class="form-group">
                                     <label for="">{{trans('student.days_allowed_to_modify_student_attendance')}}</label>
                                     <div class="input-group">
-                                       <input class="form-control" type="text" v-model="configForm.days_allowed_to_modify_student_attendance" name="days_allowed_to_modify_student_attendance" :placeholder="trans('student.days_allowed_to_modify_student_attendance')">
+                                       <input class="form-control" type="number" v-model="configForm.days_allowed_to_modify_student_attendance" name="days_allowed_to_modify_student_attendance" :placeholder="trans('student.days_allowed_to_modify_student_attendance')">
                                        <div class="input-group-append">
                                             <span class="input-group-text">{{trans('general.days')}}</span>
                                         </div>
@@ -59,12 +73,26 @@
                                 <div class="form-group">
                                     <label for="">{{trans('student.days_allowed_to_mark_student_advance_attendance')}}</label>
                                     <div class="input-group">
-                                       <input class="form-control" type="text" v-model="configForm.days_allowed_to_mark_student_advance_attendance" name="days_allowed_to_mark_student_advance_attendance" :placeholder="trans('student.days_allowed_to_mark_student_advance_attendance')">
+                                       <input class="form-control" type="number" v-model="configForm.days_allowed_to_mark_student_advance_attendance" name="days_allowed_to_mark_student_advance_attendance" :placeholder="trans('student.days_allowed_to_mark_student_advance_attendance')">
                                        <div class="input-group-append">
                                             <span class="input-group-text">{{trans('general.days')}}</span>
                                         </div>
                                     </div>
                                     <show-error :form-name="configForm" prop-name="days_allowed_to_mark_student_advance_attendance"></show-error>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.late_attendance_time')}}</label>
+                                    <div class="input-group">
+                                       <input class="form-control" type="number" v-model="configForm.student_late_attendance_time" name="late_attendance_time" :placeholder="trans('student.late_attendance_time')">
+                                       <div class="input-group-append">
+                                            <span class="input-group-text">{{trans('general.minutes')}}</span>
+                                        </div>
+                                    </div>
+                                    <show-error :form-name="configForm" prop-name="student_late_attendance_time"></show-error>
                                 </div>
                             </div>
                         </div>
@@ -87,10 +115,13 @@
                 configForm: new Form({
                     admission_number_prefix: '',
                     admission_number_digit: '',
+                    transfer_certificate_prefix: '',
+                    transfer_certificate_digit: '',
                     allow_to_modify_student_attendance: '',
                     days_allowed_to_modify_student_attendance: '',
                     allow_to_mark_student_advance_attendance: '',
                     days_allowed_to_mark_student_advance_attendance: '',
+                    student_late_attendance_time: '',
                     config_type: ''
                 },false)
             }

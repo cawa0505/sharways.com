@@ -14,14 +14,13 @@ class CreateBookPostDetailsTable extends Migration
     public function up()
     {
         Schema::create('book_post_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('book_post_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('book_post_id')->unsigned()->nullable();
             $table->foreign('book_post_id')->references('id')->on('book_posts')->onDelete('cascade');
-            $table->string('number',20)->nullable();
+            $table->bigInteger('number')->nullable();
             $table->string('location')->nullable();
             $table->boolean('is_not_available')->default(0);
-            $table->integer('book_condition_id')->unsigned()->nullable();
+            $table->bigInteger('book_condition_id')->unsigned()->nullable();
             $table->foreign('book_condition_id')->references('id')->on('book_conditions')->onDelete('cascade');
             $table->text('remarks')->nullable();
             $table->text('options')->nullable();

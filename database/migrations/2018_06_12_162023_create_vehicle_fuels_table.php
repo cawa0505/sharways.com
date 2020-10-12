@@ -14,13 +14,12 @@ class CreateVehicleFuelsTable extends Migration
     public function up()
     {
         Schema::create('vehicle_fuels', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('vehicle_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('vehicle_id')->unsigned()->nullable();
             $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('cascade');
             $table->decimal('quantity',25,5)->default(0);
             $table->decimal('price_per_unit',25,5)->default(0);
-            $table->integer('vehicle_fuel_type_id')->unsigned()->nullable();
+            $table->bigInteger('vehicle_fuel_type_id')->unsigned()->nullable();
             $table->foreign('vehicle_fuel_type_id')->references('id')->on('vehicle_fuel_types')->onDelete('cascade');
             $table->date('date_of_fueling')->nullable();
             $table->text('description')->nullable();

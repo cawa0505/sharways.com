@@ -14,9 +14,8 @@ class CreateVehicleLogsTable extends Migration
     public function up()
     {
         Schema::create('vehicle_logs', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('vehicle_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('vehicle_id')->unsigned()->nullable();
             $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('cascade');
             $table->integer('log')->default(0);
             $table->date('date_of_log')->nullable();

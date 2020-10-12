@@ -14,10 +14,9 @@ class CreateVisitorLogsTable extends Migration
     public function up()
     {
         Schema::create('visitor_logs', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('visiting_purpose_id')->unsigned()->nullable();
+            $table->bigInteger('visiting_purpose_id')->unsigned()->nullable();
             $table->foreign('visiting_purpose_id')->references('id')->on('visiting_purposes')->onDelete('cascade');
             $table->string('type',20)->nullable();
             $table->string('name')->nullable();
@@ -29,9 +28,9 @@ class CreateVisitorLogsTable extends Migration
             $table->date('date_of_visit')->nullable();
             $table->time('entry_time')->nullable();
             $table->time('exit_time')->nullable();
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->text('remarks')->nullable();
             $table->uuid('upload_token')->nullable();
@@ -49,6 +48,7 @@ class CreateVisitorLogsTable extends Migration
     {
         Schema::table('visitor_logs', function(Blueprint $table)
         {
+            $table->dropForeign('visitor_logs_visiting_purpose_id_foreign');
             $table->dropForeign('visitor_logs_student_id_foreign');
             $table->dropForeign('visitor_logs_employee_id_foreign');
         });

@@ -14,14 +14,13 @@ class CreateAccountTransfersTable extends Migration
     public function up()
     {
         Schema::create('account_transfers', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('from_account_id')->unsigned()->nullable();
+            $table->bigInteger('from_account_id')->unsigned()->nullable();
             $table->foreign('from_account_id')->references('id')->on('accounts')->onDelete('cascade');
-            $table->integer('to_account_id')->unsigned()->nullable();
+            $table->bigInteger('to_account_id')->unsigned()->nullable();
             $table->foreign('to_account_id')->references('id')->on('accounts')->onDelete('cascade');
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('date_of_account_transfer')->nullable();
             $table->decimal('amount',25,5)->nullable();

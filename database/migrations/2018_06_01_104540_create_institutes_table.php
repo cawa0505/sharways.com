@@ -14,8 +14,7 @@ class CreateInstitutesTable extends Migration
     public function up()
     {
         Schema::create('institutes', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('contact_number',20)->nullable();
             $table->string('alternate_contact_number',20)->nullable();

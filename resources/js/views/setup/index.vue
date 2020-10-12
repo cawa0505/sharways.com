@@ -2,7 +2,7 @@
   <div class="container-fluid">
       <div class="card">
           <div class="card-body">
-              <button type="button" v-tooltip="trans('configuration.hide_setup_wizard')" @click="hideSetupWizard" class="btn btn-danger pull-right"><i class="fa fa-times"></i></button>
+              <button type="button" v-tooltip="trans('configuration.hide_setup_wizard')" @click="hideSetupWizard" class="btn btn-danger pull-right m-2"><i class="fa fa-times"></i></button>
               <div class="clearfix"></div>
 
               <form-wizard color="#55CE63" :title="trans('configuration.setup_title')" :subtitle="trans('configuration.setup_subtitle')" :nextButtonText="trans('configuration.setup_next_button_content')" :backButtonText="trans('configuration.setup_previous_button_content')" :finishButtonText="trans('configuration.setup_finish_button_content')" @on-complete="finish">
@@ -15,6 +15,9 @@
                  <tab-content :title="trans('configuration.mail_configuration')" :before-change="storeMailConfiguration">
                     <mail-configuration-form :setup-wizard="true" class="m-b-20" ref="mail" :configurations="configurations"></mail-configuration-form>
                  </tab-content>
+                 <tab-content :title="trans('configuration.menu_configuration')" :before-change="storeMenuConfiguration">
+                    <menu-configuration-form :setup-wizard="true" class="m-b-20" ref="menu" :configurations="configurations"></menu-configuration-form>
+                 </tab-content>
                  <tab-content :title="trans('academic.academic_session')">
                     <academic-session-form :setup-wizard="true" class="m-b-20" ref="session"></academic-session-form>
                  </tab-content>
@@ -25,15 +28,14 @@
 </template>
 
 <script>
-    import {FormWizard, TabContent} from 'vue-form-wizard'
-    import 'vue-form-wizard/dist/vue-form-wizard.min.css'
     import basicConfigurationForm from '../configuration/basic/form'
     import systemConfigurationForm from '../configuration/system/form'
     import mailConfigurationForm from '../configuration/mail/form'
+    import menuConfigurationForm from '../configuration/menu/form'
     import academicSessionForm from '../academic/session/form'
     
     export default {
-        components: {FormWizard,TabContent,basicConfigurationForm,systemConfigurationForm,mailConfigurationForm,academicSessionForm},
+        components: {basicConfigurationForm,systemConfigurationForm,mailConfigurationForm,academicSessionForm,menuConfigurationForm},
         methods: {
         },
         data() {
@@ -82,6 +84,9 @@
           },
           storeMailConfiguration(){
             return this.$refs.mail.submit();
+          },
+          storeMenuConfiguration(){
+            return this.$refs.menu.submit();
           },
           finish(){
             this.$refs.session.store();

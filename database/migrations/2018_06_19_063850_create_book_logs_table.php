@@ -14,12 +14,11 @@ class CreateBookLogsTable extends Migration
     public function up()
     {
         Schema::create('book_logs', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('student_record_id')->unsigned()->nullable();
+            $table->bigInteger('student_record_id')->unsigned()->nullable();
             $table->foreign('student_record_id')->references('id')->on('student_records')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->date('date_of_issue')->nullable();
             $table->text('issue_remarks')->nullable();

@@ -49,12 +49,9 @@
 </template>
 
 <script>
-    import uuid from 'uuid/v4'
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
 
 	export default {
-		components: {datepicker,vSelect},
+		components: {},
 		props: ['uuid','did'],
 		data(){
 			return {
@@ -74,7 +71,7 @@
 			}
 		},
 		mounted(){
-            this.designationForm.upload_token = uuid();
+            this.designationForm.upload_token = this.$uuid.v4();
 
 			this.getPreRequisite();
 
@@ -103,13 +100,12 @@
 			},
 			storeDesignation(){
 				let loader = this.$loading.show();
-				this.designationForm.date_effective = helper.toDate(this.designationForm.date_effective);
 				this.designationForm.post('/api/employee/'+this.uuid+'/designation')
 					.then(response => {
 						toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
 						this.$emit('completed');
-                        this.designationForm.upload_token = uuid();
+                        this.designationForm.upload_token = this.$uuid.v4();
 						loader.hide();
 					})
 					.catch(error => {
@@ -140,7 +136,6 @@
             },
             updateDesignation(){
                 let loader = this.$loading.show();
-				this.designationForm.date_effective = helper.toDate(this.designationForm.date_effective);
                 this.designationForm.patch('/api/employee/'+this.uuid+'/designation/'+this.did)
                     .then(response => {
                         toastr.success(response.message);

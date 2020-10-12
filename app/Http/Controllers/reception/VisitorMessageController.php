@@ -40,6 +40,8 @@ class VisitorMessageController extends Controller
 
         $visitor_messages = $this->repo->paginate($this->request->all());
 
+        $filters = array();
+
         return $this->success(compact('visitor_messages', 'filters'));
     }
 

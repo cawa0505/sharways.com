@@ -1,4 +1,48 @@
-{
+{	
+	"complaint_types": [
+		{
+			"name": "Study",
+			"description": "",
+			"options": "[]"
+		},
+		{
+			"name": "Fee",
+			"description": "",
+			"options": "[]"
+		},
+		{
+			"name": "Trasport",
+			"description": "",
+			"options": "[]"
+		},
+		{
+			"name": "Uniform",
+			"description": "",
+			"options": "[]"
+		}
+	],
+	"calling_purposes": [
+		{
+			"name": "Study",
+			"description": "",
+			"options": "[]"
+		},
+		{
+			"name": "Fee Reminder",
+			"description": "",
+			"options": "[]"
+		},
+		{
+			"name": "Trasport",
+			"description": "",
+			"options": "[]"
+		},
+		{
+			"name": "Circular",
+			"description": "",
+			"options": "[]"
+		}
+	],
 	"enquiry_types": [
 		{
 			"name": "Self Enquiry",

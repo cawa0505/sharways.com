@@ -212,7 +212,7 @@ class VehicleDocumentRepository
         $vehicle_id               = gv($params, 'vehicle_id');
         $vehicle_document_type_id = gv($params, 'vehicle_document_type_id');
         $title                    = gv($params, 'title');
-        $date_of_expiry           = gv($params, 'date_of_expiry');
+        $date_of_expiry           = toDate(gv($params, 'date_of_expiry'));
         $description              = gv($params, 'description');
 
         if (! $this->vehicle->findActive($vehicle_id)) {
@@ -237,15 +237,25 @@ class VehicleDocumentRepository
             'vehicle_id'               => $vehicle_id,
             'vehicle_document_type_id' => $vehicle_document_type_id,
             'title'                    => $title,
-            'date_of_expiry'           => $date_of_expiry,
+            'date_of_expiry'           => toDate($date_of_expiry),
             'description'              => $description
         ];
+
+        $options['insurance'] = array(
+            'policy_number'                  => gv($params, 'policy_number'),
+            'insurance_date'                 => gv($params, 'insurance_date'),
+            'insurance_amount'               => gv($params, 'insurance_amount'),
+            'insured_amount'                 => gv($params, 'insured_amount'),
+            'insurance_company_name'         => gv($params, 'insurance_company_name'),
+            'insurance_agent_name'           => gv($params, 'insurance_agent_name'),
+            'insurance_agent_contact_number' => gv($params, 'insurance_agent_contact_number')
+        );
 
         if (! $vehicle_document_id) {
             $formatted['upload_token'] = gv($params, 'upload_token');
         }
 
-        $formatted['options'] = [];
+        $formatted['options'] = $options;
         return $formatted;
     }
 

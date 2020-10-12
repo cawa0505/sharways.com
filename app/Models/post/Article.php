@@ -17,7 +17,7 @@ class Article extends Model
                             'options',
                             'user_id'
                         ];
-    protected $casts = ['options' => 'array'];
+    protected $casts = ['options' => 'array', 'date_of_article' => 'date'];
     protected $primaryKey = 'id';
     protected $table = 'articles';
     protected static $logName = 'article';
@@ -113,7 +113,7 @@ class Article extends Model
         }
 
         return $q->where(function ($q1) use ($keyword) {
-            $q1->where('title', 'like', '%'.$keyword.'%')->where('description', 'like', '%'.$keyword.'%');
+            $q1->where('title', 'like', '%'.$keyword.'%')->orWhere('description', 'like', '%'.$keyword.'%');
         });
     }
 

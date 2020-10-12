@@ -46,6 +46,7 @@
                 </div>
             </div>
         </div>
+        <custom-field :fields="custom_fields" :customValues="custom_values" :clear="clearCustomField" :formErrors="customFieldFormErrors" @updateCustomValues="updateCustomValues"></custom-field>
         <div class="card-footer text-right">
             <button type="submit" class="btn btn-info waves-effect waves-light">{{trans('general.save')}}</button>
         </div>
@@ -53,12 +54,9 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
 	export default {
 		props: ['registration'],
-		components: {datepicker,vSelect },
+		components: {},
 		data() {
 			return {
 				registrationForm: new Form({
@@ -66,7 +64,8 @@
 					date_of_registration: '',
 					registration_remarks: '',
                     previous_institute_id: '',
-					registration_fee: 0
+					registration_fee: 0,
+                    custom_values: [],
 				}),
 				courses: [],
                 course_details: [],
@@ -75,7 +74,11 @@
                 selected_previous_institute: null,
                 default_currency: helper.getConfig('default_currency'),
                 registration_fee: 0,
-                enable_registration_fee: 0
+                enable_registration_fee: 0,
+                custom_fields: [],
+                custom_values: [],
+                clearCustomField: false,
+                customFieldFormErrors: {}
 			}
 		},
 		mounted(){
@@ -88,6 +91,7 @@
             this.registrationForm.date_of_registration = this.registration.date_of_registration;
             this.registrationForm.registration_remarks = this.registration.registration_remarks;
             this.registrationForm.registration_fee = this.registration.registration_fee;
+            this.custom_values = this.registration.options && this.registration.options.hasOwnProperty('custom_values') ? this.registration.options.custom_values : [];
             // this.setRegistration(this.registration.course_id);
 		},
 		methods: {
@@ -98,6 +102,7 @@
                         this.courses = response.courses;
                         this.course_details = response.course_details;
                         this.previous_institutes = response.previous_institutes;
+                        this.custom_fields = response.custom_fields;
                         loader.hide();
                     })
                     .catch(error => {
@@ -105,10 +110,11 @@
                         helper.showErrorMsg(error);
                     })
             },
+            updateCustomValues(value) {
+                this.registrationForm.custom_values = value;
+            },
 			submit(){
                 let loader = this.$loading.show();
-                this.registrationForm.date_of_registration = moment(this.registrationForm.date_of_registration).format('YYYY-MM-DD');
-                
 				this.registrationForm.patch('/api/registration/'+this.registration.id)
 					.then(response => {
 						toastr.success(response.message);
@@ -118,6 +124,7 @@
 					})
 					.catch(error => {
                         loader.hide();
+                        this.customFieldFormErrors = error;
 						helper.showErrorMsg(error);
 					})
 

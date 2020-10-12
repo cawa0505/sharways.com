@@ -82,10 +82,8 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-
 	export default {
-        components: {switches},
+        components: {},
 		props: ['id','uuid','rid'],
 		data() {
 			return {

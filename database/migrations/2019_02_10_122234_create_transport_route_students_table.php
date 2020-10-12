@@ -14,11 +14,10 @@ class CreateTransportRouteStudentsTable extends Migration
     public function up()
     {
         Schema::create('transport_route_students', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('transport_route_detail_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('transport_route_detail_id')->unsigned()->nullable();
             $table->foreign('transport_route_detail_id','trs_transport_route_detail_id_foreign')->references('id')->on('transport_route_details')->onDelete('cascade');
-            $table->integer('student_record_id')->unsigned()->nullable();
+            $table->bigInteger('student_record_id')->unsigned()->nullable();
             $table->foreign('student_record_id','trs_student_record_id_foreign')->references('id')->on('student_records')->onDelete('cascade');
             $table->text('options')->nullable();
             $table->timestamps();

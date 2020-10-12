@@ -88,10 +88,9 @@
 <script>
     import menuForm from './form'
     import menuTable from './table'
-    import draggable from 'vuedraggable'
 
     export default {
-        components : { menuForm, draggable, menuTable},
+        components : { menuForm, menuTable},
         data() {
             return {
                 menus: [],

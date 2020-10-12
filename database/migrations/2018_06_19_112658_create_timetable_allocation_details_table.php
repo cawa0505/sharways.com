@@ -14,13 +14,12 @@ class CreateTimetableAllocationDetailsTable extends Migration
     public function up()
     {
         Schema::create('timetable_allocation_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('timetable_allocation_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('timetable_allocation_id')->unsigned()->nullable();
             $table->foreign('timetable_allocation_id')->references('id')->on('timetable_allocations')->onDelete('cascade');
-            $table->integer('class_timing_session_id')->unsigned()->nullable();
+            $table->bigInteger('class_timing_session_id')->unsigned()->nullable();
             $table->foreign('class_timing_session_id')->references('id')->on('class_timing_sessions')->onDelete('cascade');
-            $table->integer('subject_id')->unsigned()->nullable();
+            $table->bigInteger('subject_id')->unsigned()->nullable();
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('set null');
             $table->text('options')->nullable();
             $table->timestamps();

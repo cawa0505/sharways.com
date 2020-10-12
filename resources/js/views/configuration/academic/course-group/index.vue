@@ -109,10 +109,9 @@
 
 <script>
     import courseGroupForm from './form'
-    import draggable from 'vuedraggable'
 
     export default {
-        components : { courseGroupForm,draggable },
+        components : { courseGroupForm },
         data() {
             return {
                 course_groups: {

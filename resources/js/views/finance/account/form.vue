@@ -42,11 +42,6 @@
                             <switches class="m-l-20" v-model="accountForm.is_active" theme="bootstrap" color="success"></switches> {{trans('finance.account_is_active')}}
                         </div>
                     </div>
-                    <div class="col-12">
-                        <div class="form-group">
-                            <switches class="m-l-20" v-model="accountForm.is_default" theme="bootstrap" color="success"></switches> {{trans('finance.account_is_default')}}
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="col-12 col-sm-6" v-if="accountForm.type == 'bank'">
@@ -95,11 +90,8 @@
 
 
 <script>
-    import switches from 'vue-switches'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {datepicker,switches},
+        components: {},
         data() {
             return {
                 accountForm: new Form({
@@ -111,8 +103,7 @@
                     bank_name: '',
                     bank_identification_code: '',
                     branch_name: '',
-                    is_active: false,
-                    is_default: 0
+                    is_active: false
                 }),
                 default_currency: helper.getConfig('default_currency')
             };
@@ -155,7 +146,6 @@
                         this.accountForm.branch_name = response.branch_name;
                         this.accountForm.bank_identification_code = response.bank_identification_code;
                         this.accountForm.is_active = response.is_active;
-                        this.accountForm.is_default = response.is_default;
                         loader.hide();
                     })
                     .catch(error => {

@@ -14,8 +14,7 @@ class CreateVendorsTable extends Migration
     public function up()
     {
         Schema::create('vendors', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('phone')->nullable();
             $table->string('alternate_phone')->nullable();

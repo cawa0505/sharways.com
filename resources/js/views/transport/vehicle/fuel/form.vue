@@ -70,12 +70,9 @@
 
 
 <script>
-    import uuid from 'uuid/v4'
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components:{vSelect,datepicker},
+        components:{},
         props: ['id'],
         data() {
             return {
@@ -95,7 +92,7 @@
             };
         },
         mounted() {
-            this.vehicleFuelForm.upload_token = uuid();
+            this.vehicleFuelForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
 
@@ -123,14 +120,12 @@
             },
             storeFuel(){
                 let loader = this.$loading.show();
-                this.vehicleFuelForm.date_of_fueling = helper.toDate(this.vehicleFuelForm.date_of_fueling);
-
                 this.vehicleFuelForm.post('/api/vehicle/fuel')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
                         this.$emit('completed');
-                        this.vehicleFuelForm.upload_token = uuid();
+                        this.vehicleFuelForm.upload_token = this.$uuid.v4();
                         this.selected_vehicle = null;
                         loader.hide();
                     })

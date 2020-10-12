@@ -14,11 +14,10 @@ class CreateEventCourseTable extends Migration
     public function up()
     {
         Schema::create('event_course', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('event_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('event_id')->unsigned()->nullable();
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
-            $table->integer('course_id')->unsigned()->nullable();
+            $table->bigInteger('course_id')->unsigned()->nullable();
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
         });
     }

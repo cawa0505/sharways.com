@@ -14,9 +14,8 @@ class CreateRoomsTable extends Migration
     public function up()
     {
         Schema::create('rooms', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('building_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('building_id')->unsigned()->nullable();
             $table->foreign('building_id')->references('id')->on('buildings')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->integer('floor_number')->default(0);

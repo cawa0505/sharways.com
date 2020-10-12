@@ -19,7 +19,7 @@ let pageLoader;
 let routes = [
     {
         path: '/',                      // all the routes which can be access without authentication
-        component: () => import('@layouts/frontend-page' /* webpackChunkName: "js/frontend-page" */),
+        component: () => import(/* webpackChunkName: "js/frontendPage" */ '@layouts/frontend-page'),
         meta: { validate: ['is_frontend_website'] },
         children: [
             ...frontendRoutes,
@@ -27,7 +27,7 @@ let routes = [
     },
     {
         path: '/',                      // all the routes which can be access without authentication
-        component: () => import('@layouts/guest-page' /* webpackChunkName: "js/guest-page" */),
+        component: () => import(/* webpackChunkName: "js/guestPage" */ '@layouts/guest-page'),
         meta: { validate: ['is_guest'] },
         children: [
             ...guestRoutes,
@@ -35,7 +35,7 @@ let routes = [
     },
     {
         path: '/',                                       // all the routes which needs authentication + two factor authentication + lock screen
-        component: () => import('@layouts/default-page' /* webpackChunkName: "js/default-page" */),
+        component: () => import(/* webpackChunkName: "js/defaultPage" */ '@layouts/default-page'),
         meta: { validate: ['is_auth','two_factor_security','is_screen_locked','has_valid_license'] },
         children: [
             ...authRoutes,
@@ -43,7 +43,7 @@ let routes = [
     },
     {
         path: '/',                                       // all the routes which needs authentication + two factor authentication + lock screen
-        component: () => import('@layouts/default-page' /* webpackChunkName: "js/default-page" */),
+        component: () => import(/* webpackChunkName: "js/defaultPage" */ '@layouts/default-page'),
         meta: { validate: ['is_auth','two_factor_security','is_screen_locked','has_valid_license','has_academic_session'] },
         children: [
             ...authWithAcademicSessionRoutes,
@@ -51,7 +51,7 @@ let routes = [
     },
     {
         path: '/',                                       // all the routes which needs authentication + two factor authentication + lock screen
-        component: () => import('@layouts/default-page' /* webpackChunkName: "js/default-page" */),
+        component: () => import(/* webpackChunkName: "js/defaultPage" */ '@layouts/default-page'),
         meta: { validate: ['is_auth','two_factor_security','is_screen_locked'] },
         children: [
             ...licenseRoutes,
@@ -59,7 +59,7 @@ let routes = [
     },
     {
         path: '/',
-        component: () => import('@layouts/guest-page' /* webpackChunkName: "js/guest-page" */),
+        component: () => import(/* webpackChunkName: "js/guestPage" */ '@layouts/guest-page'),
         meta: { validate: ['is_auth'] },
         children: [
             ...authSecurityRoutes,
@@ -67,7 +67,7 @@ let routes = [
     },
     {
         path: '/',
-        component : require('@layouts/error-page'),
+        component : require('@layouts/error-page').default,
         children: [
             ...errorRoutes
         ]

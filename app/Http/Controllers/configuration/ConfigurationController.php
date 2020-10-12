@@ -36,10 +36,7 @@ class ConfigurationController extends Controller
      */
     public function clearCache()
     {
-        \Artisan::call('config:clear');
-        \Artisan::call('route:clear');
-        \Artisan::call('view:clear');
-        \Artisan::call('cache:clear');
+        \Artisan::call('clean');
 
         return 'Cache cleared!';
     }
@@ -104,6 +101,7 @@ class ConfigurationController extends Controller
         $type = request('type') ? : 'system';
 
         $system_variables = getVar('system');
+        $list = getVar('list');
 
         if ($type === 'mail') {
             $mail_drivers = gv($system_variables, 'mail_drivers', []);
@@ -111,9 +109,15 @@ class ConfigurationController extends Controller
         }
 
         if ($type === 'library') {
-            $list = getVar('list');
             $late_fee_frequencies = generateNormalTranslatedSelectOption(isset($list['frequency']) ? $list['frequency'] : []);
             return $this->success(compact('late_fee_frequencies'));
+        }
+
+        if ($type === 'menu') {
+            $data = $this->repo->getModules();
+            $modules = gv($data, 'modules', []);
+            $menus = gv($data, 'menus', []);
+            return $this->success(compact('modules','menus'));
         }
 
         $color_themes = gv($system_variables, 'color_themes', []);
@@ -141,8 +145,9 @@ class ConfigurationController extends Controller
         }
 
         $currencies = generateNormalSelectOption($currencies);
+        $days = generateNormalTranslatedSelectOption(isset($list['day']) ? $list['day'] : []);
 
-        return $this->success(compact('color_themes', 'directions', 'date_formats', 'time_formats', 'notification_positions', 'timezones', 'locales', 'sidebar', 'currencies'));
+        return $this->success(compact('color_themes', 'directions', 'date_formats', 'time_formats', 'notification_positions', 'timezones', 'locales', 'sidebar', 'currencies','days'));
     }
 
     /**

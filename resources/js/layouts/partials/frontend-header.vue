@@ -23,8 +23,12 @@
                             <li class="nav-item" v-else>
                                 <router-link :to="item.options.is_default ? `/${item.slug}` : `/page/${item.slug}`" exact class="nav-link">{{ item.name }}</router-link>
                             </li>
+
                         </template>
 
+                        <li class="nav-item" v-if="getConfig('online_registration')">
+                            <router-link to="/online-registration" exact class="nav-link">{{ trans('student.online_registration') }}</router-link>
+                        </li>
                         <li class="nav-item dropdown" v-if="isAuth()">
                             <router-link to="/dashboard" class="nav-link dropdown-toggle btn nav-btn success" id="authDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-home"></i> {{trans('general.dashboard')}}</router-link>
 

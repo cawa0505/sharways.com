@@ -10,10 +10,10 @@
                 <ul class="navbar-nav mt-md-0 ">
                     <li class="nav-item"> <a class="nav-link nav-toggler hidden-md-up text-muted waves-effect waves-dark" href="javascript:void(0)"><i class="fas fa-bars"></i></a> </li>
                     <li class="nav-item" v-tooltip.right="trans('general.toggle_sidebar')"> <a class="nav-link sidebartoggler hidden-sm-down text-muted waves-effect waves-dark" href="javascript:void(0)"><i class="icon-arrow-left-circle fas"></i></a> </li>
-                    <li class="nav-item d-none d-sm-inline text-white pt-3 pl-2" style="font-size: 18px;">{{getConfig('institute_name')}}</li>
 
                     <li class="nav-item d-none d-sm-inline" v-if="getConfig('maintenance_mode')"><span class="mt-4 badge badge-danger m-b-10">{{trans('configuration.under_maintenance')}}</span></li>
                     <li class="nav-item d-none d-sm-inline" v-if="!getConfig('mode')"><span class="mt-4 badge badge-danger m-b-10">{{trans('configuration.test_mode')}}</span></li>
+
                 </ul>
                 <ul class="navbar-nav flex-filler"></ul>
                 <ul class="navbar-nav my-lg-0">
@@ -53,7 +53,7 @@
                                 <li>
                                     <div class="dw-user-box">
                                         <div class="u-text">
-                                            <h6>{{trans('general.greeting')+', '+getAuthUser('email')}}</h6>
+                                            <h6>{{trans('general.greeting')+', '+getAuthUser('name')+' ('+getAuthUserRoles+')'}}</h6>
                                         </div>
                                     </div>
                                 </li>
@@ -119,6 +119,9 @@
             },
             getDefaultAcademicSession(){
                 return helper.getDefaultAcademicSession();
+            },
+            getAuthUserRoles() {
+                return helper.ucword(this.$store.getters.getAuthUserRoles);
             }
         }
     }

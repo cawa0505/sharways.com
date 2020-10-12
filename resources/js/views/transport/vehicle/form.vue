@@ -114,6 +114,104 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12 col-sm-3">
+                <div class="form-group">
+                    <div>{{trans('transport.vehicle_advance_info')}}</div>
+                    <switches class="m-t-10" v-model="vehicleForm.advance_info" theme="bootstrap" color="success"></switches>
+                </div>
+            </div>
+            <template v-if="vehicleForm.advance_info">
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_chasis_number')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.chasis_number" name="chasis_number" :placeholder="trans('transport.vehicle_chasis_number')">
+                        <show-error :form-name="vehicleForm" prop-name="chasis_number"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_engine_number')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.engine_number" name="engine_number" :placeholder="trans('transport.vehicle_engine_number')">
+                        <show-error :form-name="vehicleForm" prop-name="engine_number"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_cubic_capacity')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.cubic_capacity" name="cubic_capacity" :placeholder="trans('transport.vehicle_cubic_capacity')">
+                        <show-error :form-name="vehicleForm" prop-name="cubic_capacity"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_class')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.class" name="class" :placeholder="trans('transport.vehicle_class')">
+                        <show-error :form-name="vehicleForm" prop-name="class"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_registration_place')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.registration_place" name="registration_place" :placeholder="trans('transport.vehicle_registration_place')">
+                        <show-error :form-name="vehicleForm" prop-name="registration_place"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_registration_date')}}</label>
+                        <datepicker v-model="vehicleForm.registration_date" :bootstrapStyling="true" @selected="vehicleForm.errors.clear('registration_date')" :placeholder="trans('transport.vehicle_registration_date')"></datepicker>
+                        <show-error :form-name="vehicleForm" prop-name="registration_date"></show-error>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="row">
+            <div class="col-12 col-sm-3">
+                <div class="form-group">
+                    <div>{{trans('transport.vehicle_disposal_info')}}</div>
+                    <switches class="m-t-10" v-model="vehicleForm.disposal_info" theme="bootstrap" color="success"></switches>
+                </div>
+            </div>
+            <template v-if="vehicleForm.disposal_info">
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_sale_date')}}</label>
+                        <datepicker v-model="vehicleForm.sale_date" :bootstrapStyling="true" @selected="vehicleForm.errors.clear('sale_date')" :placeholder="trans('transport.vehicle_sale_date')"></datepicker>
+                        <show-error :form-name="vehicleForm" prop-name="sale_date"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_selling_price')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.selling_price" name="selling_price" :placeholder="trans('transport.vehicle_selling_price')">
+                        <show-error :form-name="vehicleForm" prop-name="selling_price"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_buyer_name')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.buyer_name" name="buyer_name" :placeholder="trans('transport.vehicle_buyer_name')">
+                        <show-error :form-name="vehicleForm" prop-name="buyer_name"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_buyer_contact_number')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.buyer_contact_number" name="buyer_contact_number" :placeholder="trans('transport.vehicle_buyer_contact_number')">
+                        <show-error :form-name="vehicleForm" prop-name="buyer_contact_number"></show-error>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_buyer_address')}}</label>
+                        <input class="form-control" type="text" v-model="vehicleForm.buyer_address" name="buyer_address" :placeholder="trans('transport.vehicle_buyer_address')">
+                        <show-error :form-name="vehicleForm" prop-name="buyer_address"></show-error>
+                    </div>
+                </div>
+            </template>
+        </div>
+
         <div class="card-footer text-right">
             <router-link to="/transport/vehicle" class="btn btn-danger waves-effect waves-light " v-show="id">{{trans('general.cancel')}}</router-link>
             <button v-if="!id" type="button" class="btn btn-danger waves-effect waves-light " @click="$emit('cancel')">{{trans('general.cancel')}}</button>
@@ -127,13 +225,8 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import VueMonthlyPicker from 'vue-monthly-picker'
-    import switches from 'vue-switches'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {datepicker,switches,VueMonthlyPicker,vSelect},
+        components: {},
         data() {
             return {
                 vehicleForm: new Form({
@@ -150,7 +243,20 @@
                     owner_email: '',
                     vehicle_fuel_type_id: '',
                     max_fuel_capacity: '',
-                    is_active: false
+                    is_active: false,
+                    advance_info: false,
+                    disposal_info: false,
+                    chasis_number: '',
+                    engine_number: '',
+                    cubic_capacity: '',
+                    class: '',
+                    registration_date: '',
+                    registration_place: '',
+                    sale_date: '',
+                    selling_price: '',
+                    buyer_name: '',
+                    buyer_contact_number: '',
+                    buyer_address: ''
                 }),
                 vehicle_fuel_types: [],
                 selected_vehicle_fuel_type: null
@@ -215,6 +321,33 @@
                         this.selected_vehicle_fuel_type = response.vehicle_fuel_type_id ? {id: response.vehicle_fuel_type_id, name: response.vehicle_fuel_type.name} : null;
                         this.vehicleForm.max_fuel_capacity = response.max_fuel_capacity;
                         this.vehicleForm.is_active = response.is_active;
+
+                        let advance_info = response.options && response.options.hasOwnProperty("advance") ? response.options.advance : {
+                            chasis_number: '',
+                            engine_number: '',
+                            cubic_capacity: '',
+                            class: '',
+                            registration_date: '',
+                            registration_place: ''
+                        };
+                        let disposal_info = response.options && response.options.hasOwnProperty("disposal") ? response.options.disposal : {
+                            sale_date: '',
+                            selling_price: '',
+                            buyer_name: '',
+                            buyer_contact_number: '',
+                            buyer_address: ''
+                        };
+                        this.vehicleForm.chasis_number = advance_info.chasis_number; 
+                        this.vehicleForm.engine_number = advance_info.engine_number; 
+                        this.vehicleForm.cubic_capacity = advance_info.cubic_capacity; 
+                        this.vehicleForm.class = advance_info.class; 
+                        this.vehicleForm.registration_date = advance_info.registration_date; 
+                        this.vehicleForm.registration_place = advance_info.registration_place; 
+                        this.vehicleForm.sale_date = disposal_info.sale_date; 
+                        this.vehicleForm.selling_price = disposal_info.selling_price; 
+                        this.vehicleForm.buyer_name = disposal_info.buyer_name; 
+                        this.vehicleForm.buyer_contact_number = disposal_info.buyer_contact_number; 
+                        this.vehicleForm.buyer_address = disposal_info.buyer_address; 
                         loader.hide();
                     })
                     .catch(error => {

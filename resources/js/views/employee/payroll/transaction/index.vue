@@ -135,12 +135,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import payrollTransactionForm from './form'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : {payrollTransactionForm,datepicker,vSelect},
+        components : {payrollTransactionForm},
         data() {
             return {
                 payroll_transactions: {

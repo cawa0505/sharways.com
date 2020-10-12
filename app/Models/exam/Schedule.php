@@ -25,6 +25,7 @@ class Schedule extends Model
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['updated_at'];
+    protected $appends = ['schedule_date'];
     
     public function exam()
     {
@@ -56,6 +57,23 @@ class Schedule extends Model
         return array_get($this->options, $option);
     }
 
+    public function getScheduleDateAttribute()
+    {
+        $exam_records = $this->records;
+
+        $exam_records->sortBy('date');
+
+        $start_date = optional($exam_records->firstWhere('date','!=',null))->date;
+        $end_date = optional($exam_records->last())->date;
+
+        return compact('start_date', 'end_date');
+    }
+
+    public function getEndDateAttribute()
+    {
+
+    }
+
     public function scopeInfo($q)
     {
         return $q->with([
@@ -65,6 +83,8 @@ class Schedule extends Model
             'assessment',
             'assessment.details',
             'exam',
+            'exam.term',
+            'exam.term.courseGroup',
             'records' => function($q1) {
                 $q1->orderBy('date','asc');
             },

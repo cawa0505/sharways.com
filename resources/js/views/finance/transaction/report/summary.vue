@@ -42,6 +42,16 @@
                                     </v-select>
                                 </div>
                             </div>
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label for="">{{trans('finance.payment_method')}}</label>
+                                    <v-select label="name" v-model="selected_payment_method" name="payment_method_id" id="payment_method_id" :options="payment_methods" :placeholder="trans('finance.select_payment_method')" @select="onPaymentMethodSelect" @close="" @remove="filter.payment_method_id = ''">
+                                        <div class="multiselect__option" slot="afterList" v-if="!payment_methods.length">
+                                            {{trans('general.no_option_found')}}
+                                        </div>
+                                    </v-select>
+                                </div>
+                            </div>
                             <div class="col-12 col-sm-6">
                                 <div class="form-group">
                                     <date-range-picker :start-date.sync="filter.start_date" :end-date.sync="filter.end_date" :label="trans('general.date_between')"></date-range-picker>
@@ -66,6 +76,7 @@
                                     <th>{{trans('finance.date')}}</th>
                                     <th>{{trans('finance.payment')}}</th>
                                     <th>{{trans('finance.receipt')}}</th>
+                                    <th>{{trans('finance.fee_concession')}}</th>
                                     <th>{{trans('general.description')}}</th>
                                     <th>{{trans('finance.payment_method')}}</th>
                                     <th>{{trans('general.entry_by')}}</th>
@@ -73,11 +84,12 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(item, index) in list.data">
-                                    <td>{{index+1}}</td>
+                                    <td>{{item.sno}}</td>
                                     <td>{{item.voucher_number}}</td>
                                     <td>{{item.date | moment}}</td>
                                     <td>{{item.type == 'payment' ? item.amount : '-'}}</td>
                                     <td>{{item.type == 'receipt' ? item.amount : '-'}}</td>
+                                    <td>{{item.fee_concession}}</td>
                                     <td>{{item.head}}</td>
                                     <td>
                                         {{item.payment_method}} <p v-if="item.payment_method_detail" v-html="item.payment_method_detail"></p>
@@ -90,11 +102,17 @@
                                     <th colspan="3"></th>
                                     <th>{{footer.total_payments}}</th>
                                     <th>{{footer.total_receipts}}</th>
+                                    <th>{{footer.total_concessions}}</th>
                                     <th colspan="4"></th>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
+
+                    <h4 v-if="footer.fee_summary" style="margin-left: 20px;">{{trans('finance.fee_summary_report')}}</h4>
+                    <ul style="list-style: none;">
+                        <li v-for="(fee_head,index) in footer.fee_summary">{{index}}: {{fee_head}}</li>
+                    </ul>
                     <module-info v-if="!list.total" module="finance" title="transaction_summary_report_module_title" description="transaction_summary_report_module_description" icon="list">
                     </module-info>
                     <pagination-record :page-length.sync="filter.page_length" :records="list" @updateRecords="getReport"></pagination-record>
@@ -106,11 +124,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components : { vSelect, datepicker },
+        components : {},
         data() {
             return {
                 list: {
@@ -122,6 +137,7 @@
                     sort_by : 'date',
                     order: 'desc',
                     account_id: '',
+                    payment_method_id: '',
                     start_date: '',
                     end_date: '',
                     page_length: helper.getConfig('page_length')
@@ -133,7 +149,9 @@
                     }
                 ],
                 accounts: [],
+                payment_methods: [],
                 selected_account: null,
+                selected_payment_method: null,
                 showFilterPanel: true,
                 help_topic: ''
             };
@@ -145,7 +163,7 @@
             }
             this.getPreRequisite();
 
-            this.filter.start_date = moment().format('YYYY-MM-DD');
+            this.filter.start_date = helper.today();
             this.filter.end_date = moment().add(1,'month').format('YYYY-MM-DD');
         },
         methods: {
@@ -157,6 +175,7 @@
                 axios.get('/api/transaction/report/pre-requisite')
                     .then(response => {
                         this.accounts = response.accounts;
+                        this.payment_methods = response.payment_methods;
                         this.getReport();
                         loader.hide();
                     })
@@ -170,7 +189,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
-                this.filter.date = helper.toDate(this.filter.date);
+                this.filter.start_date = helper.toDate(this.filter.start_date);
+                this.filter.end_date = helper.toDate(this.filter.end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/transaction/report/summary?page=' + page + url)
                     .then(response => {
@@ -213,6 +233,9 @@
             },
             onAccountSelect(selectedOption){
                 this.filter.account_id = selectedOption.id;
+            },
+            onPaymentMethodSelect(selectedOption){
+                this.filter.payment_method_id = selectedOption.id;
             }
         },
         filters: {

@@ -168,12 +168,9 @@
 
 <script>
     import eventTypeForm from '../../configuration/calendar/event-type/form'
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {datepicker,vSelect,eventTypeForm},
+        components: {eventTypeForm},
         data() {
             return {
                 eventForm: new Form({
@@ -226,11 +223,6 @@
                 this.$router.push('/dashboard');
             }
 
-            if(this.uuid)
-                this.get();
-            else
-                this.eventForm.upload_token = uuid();
-
             this.getPreRequisite();
         },
         methods: {
@@ -248,6 +240,12 @@
                         this.batches = response.batches;
                         this.departments = response.departments;
                         this.employee_categories = response.employee_categories;
+                        
+                        if(this.uuid)
+                            this.get();
+                        else
+                            this.eventForm.upload_token = this.$uuid.v4();
+
                         loader.hide();
                     })
                     .catch(error => {
@@ -262,8 +260,6 @@
                     this.store();
             },
             store(){
-                this.eventForm.start_date = helper.toDate(this.eventForm.start_date);
-                this.eventForm.end_date   = helper.toDate(this.eventForm.end_date);
                 this.eventForm.start_time = helper.toTime(this.start_time);
                 this.eventForm.end_time   = helper.toTime(this.end_time);
                 let loader = this.$loading.show();
@@ -271,7 +267,7 @@
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.eventForm.upload_token = uuid();
+                        this.eventForm.upload_token = this.$uuid.v4();
                         this.selected_event_type = null;
                         this.selected_courses = null;
                         this.selected_batches = null;
@@ -299,9 +295,13 @@
                         this.eventForm.audience = response.event.audience;
                         this.eventForm.no_time = response.event.start_time ? 0 : 1;
                         this.selected_courses = response.event.audience == 'selected_course' ? response.selected_audience : [];
+                        this.eventForm.course_id = response.event.audience == 'selected_course' ? this.setMultiSelect(response.selected_audience) : [];
                         this.selected_batches = response.event.audience == 'selected_batch' ? response.selected_audience : [];
+                        this.eventForm.batch_id = response.event.audience == 'selected_batch' ? this.setMultiSelect(response.selected_audience) : [];
                         this.selected_departments = response.event.audience == 'selected_department' ? response.selected_audience : [];
+                        this.eventForm.department_id = response.event.audience == 'selected_department' ? this.setMultiSelect(response.selected_audience) : [];
                         this.selected_employee_categories = response.event.audience == 'selected_employee_category' ? response.selected_audience : [];
+                        this.eventForm.employee_category_id = response.event.audience == 'selected_employee_category' ? this.setMultiSelect(response.selected_audience) : [];
                         this.start_time = response.start_time;
                         this.end_time = response.end_time;
                         this.eventForm.upload_token = response.event.upload_token;
@@ -322,8 +322,6 @@
                     });
             },
             update(){
-                this.eventForm.start_date = helper.toDate(this.eventForm.start_date);
-                this.eventForm.end_date   = helper.toDate(this.eventForm.end_date);
                 this.eventForm.start_time = helper.toTime(this.start_time);
                 this.eventForm.end_time   = helper.toTime(this.end_time);
                 let loader = this.$loading.show();
@@ -368,6 +366,14 @@
             },
             onEmployeeCategoryRemove(removedOption){
                 this.eventForm.employee_category_id.splice(this.eventForm.employee_category_id.indexOf(removedOption.id), 1);
+            },
+            setMultiSelect(options) {
+                let data = [];
+                options.forEach(option => {
+                    data.push(option.id);
+                })
+
+                return data;
             }
         }
     }

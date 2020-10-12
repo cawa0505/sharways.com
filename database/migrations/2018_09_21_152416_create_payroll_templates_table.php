@@ -14,8 +14,7 @@ class CreatePayrollTemplatesTable extends Migration
     public function up()
     {
         Schema::create('payroll_templates', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
             $table->string('name')->nullable();
             $table->boolean('is_active')->nullable();

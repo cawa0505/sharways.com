@@ -133,12 +133,9 @@
 
 <script>
     import transactionCategoryForm from '../../../configuration/finance/transaction/category/form'
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {datepicker,vSelect,transactionCategoryForm},
+        components: {transactionCategoryForm},
         data() {
             return {
                 expenseForm: new Form({
@@ -179,7 +176,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.expenseForm.upload_token = uuid();
+                this.expenseForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
         },
@@ -210,13 +207,12 @@
                     this.store();
             },
             store(){
-                this.expenseForm.date_of_expense = helper.toDate(this.expenseForm.date_of_expense);
                 let loader = this.$loading.show();
                 this.expenseForm.post('/api/expense')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.expenseForm.upload_token = uuid();
+                        this.expenseForm.upload_token = this.$uuid.v4();
                         this.selected_transaction_category = null;
                         this.selected_account = null;
                         this.selected_payment_method = null;
@@ -258,7 +254,6 @@
                     });
             },
             update(){
-                this.expenseForm.date_of_expense = helper.toDate(this.expenseForm.date_of_expense);
                 let loader = this.$loading.show();
                 this.expenseForm.patch('/api/expense/'+this.uuid)
                     .then(response => {

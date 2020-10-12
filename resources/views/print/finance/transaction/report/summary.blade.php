@@ -42,4 +42,12 @@
             </tr>
         </tfoot>
     </table>
+
+
+    <h4 style="margin-left: 20px;">{{trans('finance.fee_summary_report')}}</h4>
+    <ul style="list-style: none;">
+        @foreach (gv($footer, 'fee_summary') as $fee_head => $summary)
+            <li>{{$fee_head}}: {{$summary}}</li>
+        @endforeach
+    </ul>
 @include('print.print-layout.footer')

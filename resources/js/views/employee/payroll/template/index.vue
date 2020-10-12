@@ -90,12 +90,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import payrollTemplateDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : {payrollTemplateDetail,datepicker,vSelect},
+        components : {payrollTemplateDetail},
         data() {
             return {
                 payroll_templates: {

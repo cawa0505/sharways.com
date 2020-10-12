@@ -14,8 +14,7 @@ class CreateVehiclesTable extends Migration
     public function up()
     {
         Schema::create('vehicles', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('registration_number')->nullable();
             $table->string('make',20)->nullable();

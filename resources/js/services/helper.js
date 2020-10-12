@@ -14,6 +14,10 @@ export default {
                     .then(response => {
                         store.dispatch('resetConfig');
                         response.loaded = true;
+
+                        if(!response.authenticated) {
+                            this.clearSession();
+                        }
                         store.dispatch('setConfig',response);
                         resolve();
                     }).catch(error => {
@@ -110,10 +114,30 @@ export default {
         return store.getters.getDefaultAcademicSession;
     },
 
+    getDayInInteger(day){
+        if (day == 'sunday') {
+            return 0;
+        } else if (day == 'monday') {
+            return 1;
+        } else if (day == 'tuesday') {
+            return 2;
+        } else if (day == 'wednesday') {
+            return 3;
+        } else if (day == 'thursday') {
+            return 4;
+        } else if (day == 'friday') {
+            return 5;
+        } else if (day == 'saturday') {
+            return 6;
+        } else {
+            return 0;
+        }
+    },
+
     // to get Auth user detail
     getAuthUser(name){
-        if(name === 'full_name')
-            return store.getters.getAuthUser('first_name')+' '+store.getters.getAuthUser('last_name');
+        if(name === 'name')
+            return store.getters.getAuthUser('name');
         else if(name === 'avatar'){
             if(store.getters.getAuthUser('avatar'))
                 return '/'+store.getters.getAuthUser('avatar');
@@ -287,12 +311,10 @@ export default {
 
     // returns vehicle document status
     getVehicleDocumentStatus(document){
-        if (moment(document.date_of_expiry,'YYYY-MM-DD').startOf('day') < moment().startOf('day'))
+        if (helper.toDate(document.date_of_expiry) < helper.today())
             return {status: 'vehicle_document_status_expired', color:'danger', day: 0};
         else {
-            let today = moment().startOf('day');
-            let expiry_date = moment(document.date_of_expiry,'YYYY-MM-DD').startOf('day');
-            let day = expiry_date.diff(today, 'days');
+            let day = this.getDateDiff(helper.toDate(document.date_of_expiry)) + 1;
 
             let color = '';
             if (day < 15) {
@@ -305,6 +327,24 @@ export default {
         }
     },
 
+    // returns vehicle document status
+    getInstituteDocumentStatus(document){
+        if (helper.toDate(document.date_of_expiry) < helper.today())
+            return {status: 'document_status_expired', color:'danger', day: 0};
+        else {
+            let day = this.getDateDiff(helper.toDate(document.date_of_expiry)) + 1;
+
+            let color = '';
+            if (day < 15) {
+                color = 'warning';
+            } else {
+                color = 'success';
+            }
+
+            return {status: 'document_status_expire_in_day', color:color, day: day};
+        }
+    },
+
     getDateDiff(date1, date2){
         if (date2 == 'undefined') 
             date2 = moment().startOf('day');
@@ -312,6 +352,16 @@ export default {
         date1 = moment(date1,'YYYY-MM-DD').startOf('day');
         let day = date1.diff(date2, 'days');
         return Math.abs(day);
+    },
+
+    getCustomFieldValue(custom_values, id) {
+        let custom_value = custom_values.find(o => o.id == id);
+
+        if (typeof custom_value == 'undefined') {
+            return;
+        }
+
+        return custom_value.value;
     },
 
     getLateFee(fee_installment, late_day){
@@ -374,9 +424,20 @@ export default {
         return moment(date).format(date_format+' '+time_format);
     },
 
+    formatDateWithDay(date) {
+        if(!date)
+            return;
+
+        return moment(date).format('YYYY-MM-DD ddd');
+    },
+
     // to get time in desired format
     defaultDateTime(){
         return moment(new Date).format(this.getConfig('date_format')+' '+this.getConfig('time_format'));
+    },
+
+    today() {
+        return this.getConfig('current_date') || moment().format('YYYY-MM-DD');
     },
 
     // to get time in desired format
@@ -408,7 +469,7 @@ export default {
     },
 
     toTime(time){
-        return (time.hour && time.minute) ? helper.formatWithPadding(time.hour,2)+':'+helper.formatWithPadding(time.minute,2)+' '+time.meridiem : '';
+        return (time.hour >=0 && time.minute >= 0) ? helper.formatWithPadding(time.hour,2)+':'+helper.formatWithPadding(time.minute,2)+' '+time.meridiem : '';
     },
 
     // to change first character of every word to upper case
@@ -522,10 +583,34 @@ export default {
     formatCurrency(price){
         var currency = helper.getConfig('default_currency');
         let decimal_place = currency.decimal_place || 2;
+        let amount = (currency.format == 'indian') ? this.indianCurrencyString(this.roundNumber(price,decimal_place)) : price.format(decimal_place, 3, ',', '.');
         if(currency.position === 'prefix')
-            return currency.symbol+''+this.roundNumber(price,decimal_place);
+            return currency.symbol+''+ amount;
         else
-            return this.roundNumber(price,decimal_place)+' '+currency.symbol;
+            return amount+' '+currency.symbol;
+    },
+
+    indianCurrencyString(x) {
+        if (Number.isInteger(x)) {
+            x=x.toString();
+            var lastThree = x.substring(x.length-3);
+            var otherNumbers = x.substring(0,x.length-3);
+            if(otherNumbers != '')
+                lastThree = ',' + lastThree;
+            return otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+        } else {
+            x=x.toString();
+            var afterPoint = '';
+            if(x.indexOf('.') > 0)
+            afterPoint = x.substring(x.indexOf('.'),x.length);
+            x = Math.floor(x);
+            x=x.toString();
+            var lastThree = x.substring(x.length-3);
+            var otherNumbers = x.substring(0,x.length-3);
+            if(otherNumbers != '')
+                lastThree = ',' + lastThree;
+            return otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree + afterPoint;
+        }
     },
 
     getLateFeeFrequencyName(frequency){
@@ -563,6 +648,11 @@ export default {
         return admission.prefix ? admission.prefix+''+number : number;
     },
 
+    getTransferCertificateNumber(transfer_certificate){
+        let number = this.formatWithPadding(transfer_certificate.number,this.getConfig('transfer_certificate_digit'));
+        return transfer_certificate.prefix ? transfer_certificate.prefix+''+number : number;
+    },
+
     getEmployeeCode(employee){
         return employee.prefix+''+this.formatWithPadding(employee.code,this.getConfig('employee_code_digit'))
     },
@@ -576,7 +666,7 @@ export default {
     },
 
     getEmployeeDesignationOnDate(employee, date){
-        date = (typeof date == 'undefined') ? moment().format('YYYY-MM-DD') : moment(date).format('YYYY-MM-DD');
+        date = (typeof date == 'undefined') ? this.today() : this.toDate(date);
 
         if(!employee.hasOwnProperty('employee_designations'))
             return '-';
@@ -626,7 +716,7 @@ export default {
     },
 
     amIClassTeacherOnDate(class_teachers, date){
-        date = (typeof date == 'undefined') ? moment().format('YYYY-MM-DD') : moment(date).format('YYYY-MM-DD');
+        date = (typeof date == 'undefined') ? this.today() : this.toDate(date);
 
         let class_teacher = class_teachers.find(o => o.date_effective <= date && o.is_me);
 
@@ -662,7 +752,7 @@ export default {
     },
 
     getStudentBatchOnDate(student, date){
-        date = moment(date).format('YYYY-MM-DD');
+        date = this.toDate(date);
 
         if(!student.hasOwnProperty('student_records'))
             return '-';
@@ -709,38 +799,38 @@ export default {
     },
 
     showDemoNotification(items){
-        if(this.getConfig('mode'))
-            return;
+        // if(this.getConfig('mode'))
+        //     return;
 
-        if(Vue.cookie.get('hide_instikit_tour'))
-            return;
+        // if(Vue.cookie.get('hide_instikit_tour'))
+        //     return;
 
-        for (let i = 0; i < items.length; i++) {
-            let item = items[i];
+        // for (let i = 0; i < items.length; i++) {
+        //     let item = items[i];
 
-            let cookie_name = 'instikit_notification_' + item;
+        //     let cookie_name = 'instikit_notification_' + item;
 
-            if (Vue.cookie.get(cookie_name))
-                continue;
+        //     if (Vue.cookie.get(cookie_name))
+        //         continue;
 
-            if(!notificationJSON.hasOwnProperty(item))
-                continue;
+        //     if(!notificationJSON.hasOwnProperty(item))
+        //         continue;
 
-            Vue.notify({
-              group: 'demo',
-              clean: true
-            });
+        //     Vue.notify({
+        //       group: 'demo',
+        //       clean: true
+        //     });
             
-            Vue.notify({
-              group: 'demo',
-              title: notificationJSON[item].title,
-              nextUrl: '/student/admission',
-              text: notificationJSON[item].message,
-              duration: 120000
-            })
+        //     Vue.notify({
+        //       group: 'demo',
+        //       title: notificationJSON[item].title,
+        //       nextUrl: '/student/admission',
+        //       text: notificationJSON[item].message,
+        //       duration: 120000
+        //     })
 
-            Vue.cookie.set(cookie_name, this.randomString(20) , {expires: '30m'});
-            break;
-        }
+        //     Vue.cookie.set(cookie_name, this.randomString(20) , {expires: '30m'});
+        //     break;
+        // }
     }
 }

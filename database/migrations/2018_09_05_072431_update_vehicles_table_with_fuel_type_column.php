@@ -14,7 +14,7 @@ class UpdateVehiclesTableWithFuelTypeColumn extends Migration
     public function up()
     {
         Schema::table('vehicles', function ($table) {
-            $table->integer('vehicle_fuel_type_id')->unsigned()->nullable()->after('owner_email');
+            $table->bigInteger('vehicle_fuel_type_id')->unsigned()->nullable()->after('owner_email');
             $table->foreign('vehicle_fuel_type_id')->references('id')->on('vehicle_fuel_types')->onDelete('set null');
             $table->decimal('max_fuel_capacity',25,5)->default(0)->after('vehicle_fuel_type_id');
         });

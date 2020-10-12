@@ -58,10 +58,8 @@
 
 
 <script>
-    import switches from 'vue-switches'
-
     export default {
-        components:{switches},
+        components:{},
         data() {
             return {
                 accountForm: new Form({

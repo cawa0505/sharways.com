@@ -97,10 +97,9 @@
 
 <script>
     import createHoliday from './create'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { createHoliday,datepicker },
+        components : { createHoliday },
         data() {
             return {
                 holidays: {
@@ -154,6 +153,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_start_date = helper.toDate(this.filter.date_start_date);
+                this.filter.date_end_date = helper.toDate(this.filter.date_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/holiday?page=' + page + url)
                     .then(response => {

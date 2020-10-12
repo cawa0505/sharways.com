@@ -20,6 +20,18 @@ class AcademicSessionPolicy
     }
 
     /**
+     * Determine whether the user can fetch academic session pre requisite
+     *
+     * @param  \App\User  $user
+     * @param  \App\Models\Academic\AcademicSession  $academic_session
+     * @return mixed
+     */
+    public function preRequisite(User $user)
+    {
+        return $user->can('create-academic-session') || $user->can('edit-academic-session');
+    }
+
+    /**
      * Determine whether the user can list all the academic session.
      *
      * @param  \App\User  $user

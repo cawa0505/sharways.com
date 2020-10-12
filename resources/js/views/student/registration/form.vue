@@ -20,7 +20,7 @@
                 <div class="col-12 col-sm-6" v-if="registrationForm.student_type != 'new'">
                     <div class="col-12 col-sm-8" v-if="registrationForm.student_id">
                         <div class="form-group">
-                            <div v-if="registrationForm.student_id">{{trans('student.name')+': '+getStudentName(selected_student)}} {{trans('student.father_name')+': '+selected_student.parent.father_name}}</div>
+                            <div v-if="registrationForm.student_id">{{trans('student.name')+': '+getStudentName(selected_student)}} {{trans('student.first_guardian_name')+': '+selected_student.parent.first_guardian_name}}</div>
                         </div>
                     </div>
                     <div class="col-12 col-sm-4">
@@ -119,31 +119,71 @@
                     </div>
                 </div>
                 <template v-if="registrationForm.parent_type == 'new'">
-                    <div class="col-12 col-sm-3">
-                        <div class="form-group">
-                            <label for="">{{trans('student.father_name')}}</label>
-                            <input class="form-control" type="text" v-model="registrationForm.father_name" name="father_name" :placeholder="trans('student.father_name')">
-                            <show-error :form-name="registrationForm" prop-name="father_name"></show-error>
+                    <div class="col-12 col-sm-6">
+                        <div class="row">
+                            <div class="col-12 col-sm-6">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.first_guardian_name')}}</label>
+                                    <input class="form-control" type="text" v-model="registrationForm.first_guardian_name" name="first_guardian_name" :placeholder="trans('student.first_guardian_name')">
+                                    <show-error :form-name="registrationForm" prop-name="first_guardian_name"></show-error>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <div class="form-group">
+                                    <label for="">{{trans('general.relation')}}</label>
+                                    <select v-model="registrationForm.first_guardian_relation" class="custom-select col-12" name="first_guardian_relation" @change="registrationForm.errors.clear('first_guardian_relation')">
+                                      <option value="">{{trans('general.select_one')}}</option>
+                                      <option v-for="relation in guardian_relations" v-bind:value="relation.id">
+                                        {{ relation.name }}
+                                      </option>
+                                    </select>
+                                    <show-error :form-name="registrationForm" prop-name="first_guardian_relation"></show-error>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="">{{trans('student.mother_name')}}</label>
-                            <input class="form-control" type="text" v-model="registrationForm.mother_name" name="mother_name" :placeholder="trans('student.mother_name')">
-                            <show-error :form-name="registrationForm" prop-name="mother_name"></show-error>
+                        <div class="row">
+                            <div class="col-12 col-sm-6">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.second_guardian_name')}}</label>
+                                    <input class="form-control" type="text" v-model="registrationForm.second_guardian_name" name="second_guardian_name" :placeholder="trans('student.second_guardian_name')">
+                                    <show-error :form-name="registrationForm" prop-name="second_guardian_name"></show-error>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.second_guardian_relation')}}</label>
+                                    <select v-model="registrationForm.second_guardian_relation" class="custom-select col-12" name="second_guardian_relation" @change="registrationForm.errors.clear('second_guardian_relation')">
+                                      <option value="">{{trans('general.select_one')}}</option>
+                                      <option v-for="relation in guardian_relations" v-bind:value="relation.id">
+                                        {{ relation.name }}
+                                      </option>
+                                    </select>
+                                    <show-error :form-name="registrationForm" prop-name="second_guardian_relation"></show-error>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-12 col-sm-3">
-                        <div class="form-group">
-                            <label for="">{{trans('student.father_contact_number')}}</label>
-                            <input class="form-control" type="text" v-model="registrationForm.father_contact_number_1" name="father_contact_number_1" :placeholder="trans('student.father_contact_number')">
-                            <show-error :form-name="registrationForm" prop-name="father_contact_number_1"></show-error>
+                        <div class="row">
+                            <div class="col-12 col-sm-6">
+                                <div class="form-group">
+                                    <label for="">{{trans('student.first_guardian_contact_number')}}</label>
+                                    <input class="form-control" type="text" v-model="registrationForm.first_guardian_contact_number_1" name="first_guardian_contact_number_1" :placeholder="trans('student.first_guardian_contact_number')">
+                                    <show-error :form-name="registrationForm" prop-name="first_guardian_contact_number_1"></show-error>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>
                 <template v-else>
                     <div class="col-12 col-sm-3" v-if="registrationForm.student_parent_id">
                         <div class="form-group">
-                            <div v-if="registrationForm.student_parent_id">{{trans('student.father_name')+': '+selected_parent.father_name}}</div>
-                            <div v-if="registrationForm.student_parent_id">{{trans('student.mother_name')+': '+selected_parent.mother_name}}</div>
+                            <div v-if="registrationForm.student_parent_id">
+                                {{trans('student.first_guardian_name')+': '+selected_parent.first_guardian_name}}
+                                <span v-if="selected_parent.first_guardian_relation">({{trans('list.'+selected_parent.first_guardian_relation)}})</span>
+                            </div>
+                            <div v-if="registrationForm.student_parent_id">
+                                {{trans('student.second_guardian_name')+': '+selected_parent.second_guardian_name}}
+                                <span v-if="selected_parent.second_guardian_relation">({{trans('list.'+selected_parent.second_guardian_relation)}})</span>
+                            </div>
                         </div>
                     </div>
                     <div class="col-12 col-sm-1">
@@ -176,6 +216,8 @@
                     </div>
                 </div>
             </div>
+            <custom-field :fields="custom_fields" :customValues="custom_values" :clear="clearCustomField" :formErrors="customFieldFormErrors" @updateCustomValues="updateCustomValues"></custom-field>
+
             <div class="card-footer text-right">
                 <button type="button" class="btn btn-danger waves-effect waves-light " @click="$emit('cancel')">{{trans('general.cancel')}}</button>
                 <button type="submit" class="btn btn-info waves-effect waves-light">{{trans('general.save')}}</button>
@@ -189,13 +231,11 @@
 
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
     import searchParent from './search-parent'
     import searchStudent from './search-student'
 
     export default {
-        components: {datepicker,vSelect,searchParent,searchStudent},
+        components: {searchParent,searchStudent},
         data() {
             return {
                 registrationForm: new Form({
@@ -206,17 +246,21 @@
                     student_type: 'new',
                     student_id: '',
                     student_parent_id: '',
-                    father_name: '',
-                    mother_name: '',
-                    father_contact_number_1: '',
+                    first_guardian_name: '',
+                    first_guardian_relation: '',
+                    second_guardian_name: '',
+                    second_guardian_relation: '',
+                    first_guardian_contact_number_1: '',
                     date_of_birth: '',
                     gender: '',
                     course_id: '',
-                    contact_number: '',
+                	contact_number: '',
                     date_of_registration: '',
                     registration_remarks: '',
-                    previous_institute_id: ''
+                    previous_institute_id: '',
+                    custom_values: [],
                 }),
+                guardian_relations: [],
                 courses: [],
                 course_details: [],
                 previous_institutes: [],
@@ -228,7 +272,11 @@
                 registration_fee: 0,
                 enable_registration_fee: 0,
                 selected_parent: {},
-                selected_student: {}
+                selected_student: {},
+                custom_fields: [],
+                custom_values: [],
+                clearCustomField: false,
+                customFieldFormErrors: {}
             };
         },
         mounted() {
@@ -246,6 +294,8 @@
                         this.genders = response.genders;
                         this.course_details = response.course_details;
                         this.previous_institutes = response.previous_institutes;
+                        this.custom_fields = response.custom_fields;
+                        this.guardian_relations = response.guardian_relations;
                         loader.hide();
                     })
                     .catch(error => {
@@ -253,10 +303,11 @@
                         helper.showErrorMsg(error);
                     })
             },
+            updateCustomValues(value) {
+                this.registrationForm.custom_values = value;
+            },
             submit(){
                 let loader = this.$loading.show();
-                this.registrationForm.date_of_birth = helper.toDate(this.registrationForm.date_of_birth);
-                this.registrationForm.date_of_registration = helper.toDate(this.registrationForm.date_of_registration);
                 this.registrationForm.post('/api/registration')
                     .then(response => {
                         toastr.success(response.message);
@@ -265,10 +316,13 @@
                         this.selected_parent = {};
                         this.selected_previous_institute = null;
                         this.registrationForm.parent_type = 'new';
+                        this.registrationForm.student_type = 'new';
+                        this.clearCustomField = true;
                         loader.hide();
                     })
                     .catch(error => {
                         loader.hide();
+                        this.customFieldFormErrors = error;
                         helper.showErrorMsg(error);
                     });
             },

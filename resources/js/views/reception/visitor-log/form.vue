@@ -137,11 +137,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components: {vSelect,datepicker},
+        components: {},
         data() {
             return {
                 visitorLogForm: new Form({
@@ -208,7 +205,7 @@
                         this.visiting_purposes = response.visiting_purposes;
                         this.students = response.students;
                         this.employees = response.employees;
-                        this.visitorLogForm.date_of_visit = moment().format('YYYY-MM-DD');
+                        this.visitorLogForm.date_of_visit = helper.today();
                         if(!this.uuid)
                             this.loaded = true;
                         loader.hide();

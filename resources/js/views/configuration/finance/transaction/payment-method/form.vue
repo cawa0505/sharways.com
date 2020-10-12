@@ -45,11 +45,6 @@
                     <switches class="m-t-20" v-model="paymentMethodForm.requires_reference_number" theme="bootstrap" color="success"></switches>
                 </div>
             </div>
-            <div class="col-12 col-sm-3">
-                <div class="form-group">
-                    <switches class="m-l-20" v-model="paymentMethodForm.is_default" theme="bootstrap" color="success"></switches> {{trans('finance.payment_method_is_default')}}
-                </div>
-            </div>
         </div>
 
         <div class="card-footer text-right">
@@ -65,10 +60,8 @@
 
 
 <script>
-    import switches from 'vue-switches'
-
     export default {
-        components: {switches},
+        components: {},
         data() {
             return {
                 paymentMethodForm: new Form({
@@ -78,8 +71,7 @@
                     requires_instrument_date: false,
                     requires_instrument_clearing_date: false,
                     requires_instrument_bank_detail: false,
-                    requires_reference_number: false,
-                    is_default: 0
+                    requires_reference_number: false
                 })
             };
         },
@@ -114,7 +106,6 @@
                     .then(response => {
                         this.paymentMethodForm.name = response.name;
                         this.paymentMethodForm.description = response.description;
-                        this.paymentMethodForm.is_default = response.is_default;
                         this.paymentMethodForm.requires_instrument_number = response.options.requires_instrument_number;
                         this.paymentMethodForm.requires_instrument_date = response.options.requires_instrument_date;
                         this.paymentMethodForm.requires_instrument_clearing_date = response.options.requires_instrument_clearing_date;

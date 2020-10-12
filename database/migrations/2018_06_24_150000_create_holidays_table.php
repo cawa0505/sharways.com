@@ -14,8 +14,7 @@ class CreateHolidaysTable extends Migration
     public function up()
     {
         Schema::create('holidays', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->date('date')->nullable();
             $table->text('description')->nullable();
             $table->text('options')->nullable();

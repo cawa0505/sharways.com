@@ -108,11 +108,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import vehicleLogForm from './form'
 
     export default {
-        components : { vehicleLogForm,vSelect },
+        components : { vehicleLogForm },
         data() {
             return {
                 vehicle_logs: {
@@ -173,12 +172,12 @@
             },
             getVehicleLogs(page){
                 let loader = this.$loading.show();
-                this.filter.start_date = helper.toDate(this.filter.start_date);
-                this.filter.end_date = helper.toDate(this.filter.end_date);
 
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.start_date = helper.toDate(this.filter.start_date);
+                this.filter.end_date = helper.toDate(this.filter.end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/vehicle/log?page=' + page + url)
                     .then(response => {

@@ -14,8 +14,7 @@ class CreateEmployeeLeaveTypesTable extends Migration
     public function up()
     {
         Schema::create('employee_leave_types', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('alias')->nullable();
             $table->boolean('is_active')->nullable();

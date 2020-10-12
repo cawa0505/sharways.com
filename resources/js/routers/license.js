@@ -1,6 +1,6 @@
 export default [
     {
         path: '/license',
-        component: () => import('@views/license/index' /* webpackChunkName: "js/license/index" */),
+        component: () => import(/* webpackChunkName: "js/license/index" */ '@views/license/index'),
     }
 ]

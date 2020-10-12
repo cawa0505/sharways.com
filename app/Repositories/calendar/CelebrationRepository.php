@@ -35,8 +35,8 @@ class CelebrationRepository
      */
     public function getBirthday($params = array())
     {
-        $start_date = gv($params, 'start_date') ? : date('Y-m-d');
-        $end_date = gv($params, 'end_date') ? : date('Y-m-d');
+        $start_date = gv($params, 'start_date') ? toDate(gv($params, 'start_date')) : date('Y-m-d');
+        $end_date = gv($params, 'end_date') ? toDate(gv($params, 'end_date')) : date('Y-m-d');
 
         if (dateDiff($end_date, $start_date) > 365) {
             throw ValidationException::withMessages(['message' => trans('calendar.max_selection_period_is_one_year')]);
@@ -45,25 +45,44 @@ class CelebrationRepository
         $type = gv($params, 'type', 'student');
 
         if ($type == 'student') {
+
+            $student_ids = $this->student->whereBetween(\DB::raw('DATE_FORMAT(date_of_birth, "%c-%d")'), [\DB::raw('DATE_FORMAT(?, "%c-%d")'), \DB::raw('DATE_FORMAT(?, "%c-%d")')])
+                ->orWhere(function($q) {
+                    $q->whereRaw('MONTH(?) > MONTH(?)')
+                    ->where(function($q1) {
+                        $q1->whereRaw('MONTH(date_of_birth) >= MONTH(?)')
+                        ->orWhereRaw('MONTH(date_of_birth) <= MONTH(?)');
+                    });
+                })->setBindings([$start_date, $end_date, $start_date, $end_date, $start_date, $end_date])->get()->pluck('id')->all();
+
+            if (\Auth::user()->hasRole(config('system.default_role.student'))) {
+                $student_id = \Auth::user()->student->id;
+                $student_ids = in_array($student_id, $student_ids) ? [$student_id] : [];
+            } else if (\Auth::user()->hasRole(config('system.default_role.parent'))) {
+                $parent_student_ids = \Auth::user()->parent->students->pluck('id')->all();
+                $student_ids = array_intersect($parent_student_ids, $student_ids);
+            }
+
             $query = $this->student->with(['studentRecords','studentRecords.batch','studentRecords.batch.course','parent'])->whereHas('studentRecords', function ($q){
                 $q->whereNull('date_of_exit')->filterBySession();
-            });
+            })->whereIn('id', $student_ids);
         } else {
+            $employee_ids = $this->employee->whereBetween(\DB::raw('DATE_FORMAT(date_of_birth, "%c-%d")'), [\DB::raw('DATE_FORMAT(?, "%c-%d")'), \DB::raw('DATE_FORMAT(?, "%c-%d")')])
+                ->orWhere(function($q) {
+                    $q->whereRaw('MONTH(?) > MONTH(?)')
+                    ->where(function($q1) {
+                        $q1->whereRaw('MONTH(date_of_birth) >= MONTH(?)')
+                        ->orWhereRaw('MONTH(date_of_birth) <= MONTH(?)');
+                    });
+                })->setBindings([$start_date, $end_date, $start_date, $end_date, $start_date, $end_date])->get()->pluck('id')->all();
+
+            if (\Auth::user()->hasAnyRole([config('system.default_role.student'), config('system.default_role.parent')])) {
+                $employee_ids = [];
+            }
+
             $query = $this->employee->with(['employeeDesignations','employeeDesignations.designation','employeeDesignations.designation.employeeCategory'])->whereHas('employeeTerms', function ($q) use($start_date, $end_date) {
                 $q->whereNull('date_of_leaving');
-            });
-        }
-
-        if (date('Y',strtotime($start_date)) < date('Y',strtotime($end_date))) {
-            $query->where(function($q) use($start_date, $end_date){
-                $q->where(function($q1) use($start_date, $end_date) {
-                    $q1->whereRaw('DAYOFYEAR(date_of_birth) >= ?', Carbon::parse($start_date)->dayOfYear)->whereRaw('DAYOFYEAR(date_of_birth) <= ?', Carbon::parse($start_date)->endOfYear()->dayOfYear);
-                })->orWhere(function($q2) use($start_date, $end_date){
-                    $q2->whereRaw('DAYOFYEAR(date_of_birth) >= ?', 1)->whereRaw('DAYOFYEAR(date_of_birth) <= ?', Carbon::parse($end_date)->dayOfYear);
-                }); 
-            }); 
-        } else {
-            $query->whereRaw('DAYOFYEAR(date_of_birth) >= ?', Carbon::parse($start_date)->dayOfYear)->whereRaw('DAYOFYEAR(date_of_birth) <= ?', Carbon::parse($end_date)->dayOfYear);
+            })->whereIn('id', $employee_ids);
         }
 
         return $query->orderBy(\DB::raw('MONTH(date_of_birth)'),'asc')->orderBy(\DB::raw('DAYOFMONTH(date_of_birth)'),'asc');
@@ -100,28 +119,25 @@ class CelebrationRepository
      */
     public function getAnniversary($params = array())
     {
-        $start_date = gv($params, 'start_date') ? : date('Y-m-d');
-        $end_date = gv($params, 'end_date') ? : date('Y-m-d');
+        $start_date = gv($params, 'start_date') ? toDate(gv($params, 'start_date')) : date('Y-m-d');
+        $end_date = gv($params, 'end_date') ? toDate(gv($params, 'end_date')) : date('Y-m-d');
 
         if (dateDiff($end_date, $start_date) > 365) {
             throw ValidationException::withMessages(['message' => trans('calendar.max_selection_period_is_one_year')]);
         }
 
+        $employee_ids = $this->employee->whereBetween(\DB::raw('DATE_FORMAT(date_of_anniversary, "%c-%d")'), [\DB::raw('DATE_FORMAT(?, "%c-%d")'), \DB::raw('DATE_FORMAT(?, "%c-%d")')])
+            ->orWhere(function($q) {
+                $q->whereRaw('MONTH(?) > MONTH(?)')
+                ->where(function($q1) {
+                    $q1->whereRaw('MONTH(date_of_anniversary) >= MONTH(?)')
+                    ->orWhereRaw('MONTH(date_of_anniversary) <= MONTH(?)');
+                });
+            })->setBindings([$start_date, $end_date, $start_date, $end_date, $start_date, $end_date])->get()->pluck('id')->all();
+
         $query = $this->employee->with(['employeeDesignations','employeeDesignations.designation','employeeDesignations.designation.employeeCategory'])->whereHas('employeeTerms', function ($q) use($start_date, $end_date) {
             $q->whereNull('date_of_leaving');
-        });
-
-        if (date('Y',strtotime($start_date)) < date('Y',strtotime($end_date))) {
-            $query->where(function($q) use($start_date, $end_date){
-                $q->where(function($q1) use($start_date, $end_date) {
-                    $q1->whereRaw('DAYOFYEAR(date_of_anniversary) >= ?', Carbon::parse($start_date)->dayOfYear)->whereRaw('DAYOFYEAR(date_of_anniversary) <= ?', Carbon::parse($start_date)->endOfYear()->dayOfYear);
-                })->orWhere(function($q2) use($start_date, $end_date){
-                    $q2->whereRaw('DAYOFYEAR(date_of_anniversary) >= ?', 1)->whereRaw('DAYOFYEAR(date_of_anniversary) <= ?', Carbon::parse($end_date)->dayOfYear);
-                }); 
-            }); 
-        } else {
-            $query->whereRaw('DAYOFYEAR(date_of_anniversary) >= ?', Carbon::parse($start_date)->dayOfYear)->whereRaw('DAYOFYEAR(date_of_anniversary) <= ?', Carbon::parse($end_date)->dayOfYear);
-        }
+        })->whereIn('id', $employee_ids);
 
         return $query->orderBy(\DB::raw('MONTH(date_of_anniversary)'),'asc')->orderBy(\DB::raw('DAYOFMONTH(date_of_anniversary)'),'asc');
     }
@@ -157,26 +173,21 @@ class CelebrationRepository
      */
     public function getWorkAnniversary($params = array())
     {
-        $start_date = gv($params, 'start_date') ? : date('Y-m-d');
-        $end_date = gv($params, 'end_date') ? : date('Y-m-d');
+        $start_date = gv($params, 'start_date') ? toDate(gv($params, 'start_date')) : date('Y-m-d');
+        $end_date = gv($params, 'end_date') ? toDate(gv($params, 'end_date')) : date('Y-m-d');
 
         if (dateDiff($end_date, $start_date) > 365) {
             throw ValidationException::withMessages(['message' => trans('calendar.max_selection_period_is_one_year')]);
         }
 
-        $query = $this->employee_term->with('employee','employee.employeeDesignations','employee.employeeDesignations.designation','employee.employeeDesignations.designation.employeeCategory')->whereNull('date_of_leaving');
-
-        if (date('Y',strtotime($start_date)) < date('Y',strtotime($end_date))) {
-            $query->where(function($q) use($start_date, $end_date){
-                $q->where(function($q1) use($start_date, $end_date) {
-                    $q1->whereRaw('DAYOFYEAR(date_of_joining) >= ?', Carbon::parse($start_date)->dayOfYear)->whereRaw('DAYOFYEAR(date_of_joining) <= ?', Carbon::parse($start_date)->endOfYear()->dayOfYear);
-                })->orWhere(function($q2) use($start_date, $end_date){
-                    $q2->whereRaw('DAYOFYEAR(date_of_joining) >= ?', 1)->whereRaw('DAYOFYEAR(date_of_joining) <= ?', Carbon::parse($end_date)->dayOfYear);
-                }); 
-            }); 
-        } else {
-            $query->whereRaw('DAYOFYEAR(date_of_joining) >= ?', Carbon::parse($start_date)->dayOfYear)->whereRaw('DAYOFYEAR(date_of_joining) <= ?', Carbon::parse($end_date)->dayOfYear);
-        }
+        $query = $this->employee_term->with('employee','employee.employeeDesignations','employee.employeeDesignations.designation','employee.employeeDesignations.designation.employeeCategory')->whereNull('date_of_leaving')->whereBetween(\DB::raw('DATE_FORMAT(date_of_joining, "%c-%d")'), [\DB::raw('DATE_FORMAT(?, "%c-%d")'), \DB::raw('DATE_FORMAT(?, "%c-%d")')])
+            ->orWhere(function($q) {
+                $q->whereRaw('MONTH(?) > MONTH(?)')
+                ->where(function($q1) {
+                    $q1->whereRaw('MONTH(date_of_joining) >= MONTH(?)')
+                    ->orWhereRaw('MONTH(date_of_joining) <= MONTH(?)');
+                });
+            })->setBindings([$start_date, $end_date, $start_date, $end_date, $start_date, $end_date]);
 
         return $query->orderBy(\DB::raw('MONTH(date_of_joining)'),'asc')->orderBy(\DB::raw('DAYOFMONTH(date_of_joining)'),'asc');
     }

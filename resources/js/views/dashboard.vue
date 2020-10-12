@@ -33,6 +33,16 @@
 
                     <div class="card border-right">
                         <div class="card-body p-4">
+                            <template v-if="hasAnyRole(['admin','manager','principal'])">
+                                <h4 class="card-title">{{trans('student.total_strength', {total: total_strength})}}
+                                    <span class="pull-right">
+                                        <button v-if="strength_chart_type == 'batch'" class="btn btn-sm btn-info" @click="strength_chart_type = 'course'">{{trans('academic.course_wise')}}</button>
+                                        <button v-if="strength_chart_type == 'course'" class="btn btn-sm btn-info" @click="strength_chart_type = 'batch'">{{trans('academic.batch_wise')}}</button>
+                                    </span>
+                                </h4>
+                                <bar-chart :chart="chart.strength"></bar-chart>
+                            </template>
+
                             <calendar></calendar>
                         </div>
                     </div>
@@ -70,7 +80,7 @@
                             </div>
                         </div>
                     </div>
-                    <div :class="['card widget', hasAnyRole(['student','parent']) ? 'm-t-20' : '']">
+                    <div :class="['card widget', hasAnyRole(['student','parent']) ? 'm-t-20' : '']" v-if="hasPermission('access-todo')">
                         <div class="card-body">
                             <div class="row border-bottom">
                                 <div class="col-12">
@@ -153,14 +163,18 @@
     import NoticeHighlight from '@components/notice-highlight'
     import EventsList from '@js/widgets/events-list'
     import ArticlesList from '@js/widgets/articles-list'
+    import barChart from './chart/bar-chart'
+    import calendar from './calendar/calendar'
+    import todoWidget from './utility/todo/widget'
 
     export default {
         components: {
             NoticeHighlight,
             EventsList,
             ArticlesList,
-            'calendar': () => import('./calendar/calendar' /* webpackChunkName: "js/calendar/calendar" */),
-            'todo-widget': () => import('./utility/todo/widget' /* webpackChunkName: "js/todo-widget" */)
+            barChart,
+            calendar,
+            todoWidget
         },
         data() {
             return {
@@ -181,6 +195,14 @@
                     sidebar: helper.getConfig('user_sidebar') || helper.getConfig('sidebar')
                 },
                 showModal: false,
+                chart: {
+                    strength: {
+                        labels: [],
+                        datasets: []
+                    }
+                },
+                total_strength: 0,
+                strength_chart_type: 'course',
                 birthday_count: 0,
                 anniversary_count: 0,
                 work_anniversary_count: 0,
@@ -199,6 +221,10 @@
             helper.showDemoNotification(['dashboard_academic','dashboard_student','dashboard_student_attendance','dashboard_employee','dashboard_finance','dashboard_transport','dashboard_frontend','dashboard_post','dashboard_calendar','dashboard_thanks']);
 
             this.getData();
+
+            if (this.hasAnyRole(['admin','manager','principal'])) {
+                this.getStudentStrengthChartData();
+            }
 
             this.showTourVideo = this.$cookie.get('hide_tour_video') ? false : true;
 
@@ -243,6 +269,19 @@
                         }
                         this.articles = response.articles;
                         this.events = response.events;
+                        loader.hide();
+                    })
+                    .catch(error => {
+                        loader.hide();
+                        helper.showErrorMsg(error);
+                    })
+            },
+            getStudentStrengthChartData(){
+                let loader = this.$loading.show();
+                axios.post('/api/dashboard/student/strength/chart', {strength_chart_type: this.strength_chart_type})
+                    .then(response => {
+                        this.chart.strength = response.strength;
+                        this.total_strength = response.total;
                         loader.hide();
                     })
                     .catch(error => {
@@ -303,6 +342,9 @@
           }
         },
         watch: {
+            strength_chart_type(val){
+                this.getStudentStrengthChartData();
+            }
         }
     }
 </script>

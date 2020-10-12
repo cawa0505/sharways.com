@@ -69,7 +69,7 @@
                                                 <show-error :form-name="feeAllocationForm" :prop-name="getLateFeeFrequencyName(fee_group.fee_group_id,index)"></show-error>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-sm-4" v-if="installment.late_fee_applicable && installment.late_fee_frequency !== 500">
+                                        <div class="col-12 col-sm-4" v-if="installment.late_fee_applicable">
                                             <div class="form-group">
                                                 <label for="">{{trans('finance.late_fee')}}</label>
                                                 <input class="form-control" type="text" v-model="installment.late_fee" :name="getLateFeeName(fee_group.fee_group_id,index)" :placeholder="trans('finance.late_fee')">
@@ -123,13 +123,9 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import switches from 'vue-switches'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components : { vSelect,switches,datepicker },
+        components : {},
         props:['uuid','ruuid'],
         data() {
             return {
@@ -190,7 +186,7 @@
                 let heads = this.addFeeHead(fee_group_id);
 
                 fee_group.installments.push({
-                    uuid: uuid(),
+                    uuid: this.$uuid.v4(),
                     due_date: '',
                     title: '',
                     fee_heads: heads,

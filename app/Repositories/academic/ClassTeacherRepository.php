@@ -64,6 +64,48 @@ class ClassTeacherRepository
     }
 
     /**
+     * Get batch wise class teacher list.
+     *
+     * @return Array
+     */
+    public function getBatchWiseList($params = array())
+    {
+        $batch_id = gv($params, 'batch_id');
+        $page_length = gv($params, 'page_length', config('config.page_length'));
+
+        $batch_id = is_array($batch_id) ? $batch_id : ($batch_id ? explode(',', $batch_id) : []);
+
+        $query = $this->batch->filterBySession();
+
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $student_batch_ids = getAuthUserBatchId();
+            $batch_id = $batch_id ? array_intersect($student_batch_ids, $batch_id) : $student_batch_ids;
+        }
+        
+        if (count($batch_id)) {
+            $query->whereIn('id', $batch_id);
+        }
+
+        $batches = $query->orderBy('name', 'asc')->paginate($page_length);
+        $batches->load(['course','classTeachers','classTeachers.employee','classTeachers.employee.employeeDesignations','classTeachers.employee.employeeDesignations.designation','classTeachers.employee.employeeDesignations.designation.employeeCategory']);
+
+        $batches->sortBy('course.position');
+
+        return $batches;
+    }
+
+    public function getFilters()
+    {
+        $courses = $this->course_group->getBatchOption();
+
+        return compact('courses');
+    }
+
+    /**
      * Get class teacher list.
      *
      * @return Array
@@ -80,6 +122,14 @@ class ClassTeacherRepository
 
         if (count($course_id)) {
             $query->whereIn('course_id', $course_id);
+        }
+
+        if (\Auth::user()->hasAnyRole([
+                config('system.default_role.parent'),
+                config('system.default_role.student'),
+            ])
+        ) {
+            $query->whereIn('id', getAuthUserBatchId());
         }
 
         $batches = $query->orderBy('name', 'asc')->get();
@@ -176,7 +226,7 @@ class ClassTeacherRepository
                 throw ValidationException::withMessages(['message' => trans('academic.could_not_find_batch')]);
             }
 
-            $date_effective = gv($batch, 'date_effective');
+            $date_effective = toDate(gv($batch, 'date_effective'));
 
             if (! $date_effective) {
                 throw ValidationException::withMessages([$index.'_date_effective' => trans('validation.required', ['attribute' => trans('academic.date_effective')])]);

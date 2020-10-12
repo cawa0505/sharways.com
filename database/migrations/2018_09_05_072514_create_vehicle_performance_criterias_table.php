@@ -14,9 +14,8 @@ class CreateVehiclePerformanceCriteriasTable extends Migration
     public function up()
     {
         Schema::create('vehicle_performance_criterias', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('vehicle_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('vehicle_id')->unsigned()->nullable();
             $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('set null');
             $table->date('date_effective')->nullable();
             $table->decimal('min_mileage',25,5)->default(0);

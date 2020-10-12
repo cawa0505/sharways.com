@@ -147,12 +147,9 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components : { vSelect,datepicker },
+        components : {},
         props:['uuid'],
         data() {
             return {
@@ -218,7 +215,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.payrollTransactionForm.upload_token = uuid();
+                this.payrollTransactionForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
         },
@@ -315,13 +312,12 @@
             },
             store(){
                 let loader = this.$loading.show();
-                this.payrollTransactionForm.date_of_transaction = helper.toDate(this.payrollTransactionForm.date_of_transaction);
                 this.payrollTransactionForm.post('/api/employee/payroll/transaction')
                     .then(response => {
                         toastr.success(response.message);
                         loader.hide();
                         this.clearAttachment = !this.clearAttachment;
-                        this.payrollTransactionForm.upload_token = uuid();
+                        this.payrollTransactionForm.upload_token = this.$uuid.v4();
                         this.selected_employee = null;
                         this.selected_transaction_category = null;
                         this.selected_account = null;
@@ -367,7 +363,6 @@
             },
             update(){
                 let loader = this.$loading.show();
-                this.payrollTransactionForm.date_of_transaction = helper.toDate(this.payrollTransactionForm.date_of_transaction);
                 this.payrollTransactionForm.patch('/api/employee/payroll/transaction/'+this.uuid)
                     .then(response => {
                         toastr.success(response.message);

@@ -6,10 +6,166 @@ Skype           : ScriptMint
 Website         : https://scriptmint.com
 Support         : http://support.scriptmint.com
 Product Website : https://instikit.com
-Demo            : https://demo.instikit.com
+Demo            : https://in.instikit.com
 --------------------------------------------
 
 To read installation guidelines, please visit http://support.scriptmint.com/support/solutions/folders/42000099005
+
+Version 2.5.2 Released on 18 March 2020
+
+* Student list card view
+* Student profile view with Attendance & Exam report
+* Employee list card view
+* Employee profile view
+
+Version 2.5.1 Released on 15 March 2020
+
+* Minor Bugs Fixed
+
+Version 2.5.0 Released on 10 March 2020
+
+* Laravel 7 Upgrade
+* Native Android Mobile App Compatible
+
+Version 2.4.4 Released on 4 February 2020
+
+* Multiple Biometric Device Support
+* Currency separator
+* Additional Fee included in the transaction summary report
+* Order of student name fixed
+* Full-width print layout for topper report
+* Event order in website fixed
+
+Version 2.4.3 Released on 28 January 2020
+
+* Minor Bugs Fixed
+
+Version 2.4.2 Released on 24 January 2020
+
+* Minor Bugs Fixed
+* Student Attendance Performance Improved
+
+Version 2.4.1 Released on 20 January 2020
+
+Minor Bugs Fixed
+
+Version 2.4.0 Released on 16 January 2020
+
+Updates
+
+* Student to enroll multiple courses at a time.
+* First day of Week selection.
+* Additional Fee Charge/Discount at the time of Fee Payment
+* Choosing First Guardian & Second Guardian of students
+* Batch-wise Student Holiday
+* More columns in Student Import
+* Biometric Once a day Attendance of Student
+
+Version 2.3.0 Released on 28 November 2019
+
+Updates
+
+* Custom Fields in Student, Employee
+* Online Exam
+* Send Email (Communication)
+* School Documents
+* Subject-wise, Session-wise Attendance
+* Export Employee & Student Report
+* Import Employee
+* Print Transaction Receipts/Payment
+* Barcode Priting in Library
+
+Version 2.2.0 Released on 6 October 2019
+
+Updates
+
+* Configuration -> Module -> Asset -> Building
+* Configuration -> Module -> Asset -> Room
+* Inventory -> Stock Category
+* Inventory -> Stock Item
+* Inventory -> Vendor
+* Inventory -> Stock Purchase
+* Inventory -> Stock Transfer
+
+Version 2.1.0 Released on 29 September 2019
+
+Updates
+
+* Online Registration added
+* ID Cards for Student & Employee added
+* Reception -> Call Log added
+* Reception -> Gate Pass added
+* Reception -> Complaint added
+* Reception -> Postal Record added
+* Reception -> Visitor Pass print function added
+
+Bug Fix
+
+* Currency to word issue fixed
+* Other minor issues fixed
+
+Version 2.0.0 Released on 15 September 2019
+
+Updates
+
+* Laravel 6.0 Upgrade
+* OTP login implemented
+
+Version 1.9.2 Released on 22 July 2019
+
+Updates
+
+* Finance Report updated
+
+Version 1.9.1 Released on 24 June 2019
+
+Updates
+
+* Minor bugs fixed
+
+Version 1.9.0 Released on 4 June 2019
+
+Updates
+
+* Vehicle module advance information added
+* Transfer Certificate generation & print
+* Admit card generation & print
+
+Version 1.8.7 Released on 24 May 2019
+
+Updates
+
+* Made dashboard calendar translatable
+* Issue with sidebar menu link fixed
+* Payroll access restricted to desired employee
+
+Version 1.8.6 Released on 25 April 2019
+
+Updates
+
+* Minor issues related to student fixed
+
+Version 1.8.5 Released on 16 April 2019
+
+Updates
+
+* Change Student Parent
+* Re-register student if terminated
+* Minor bugs fixed
+
+Version 1.8.4 Released on 17 February 2019
+
+Updates
+
+* Transport route & stoppage added
+* Student bulk image upload
+* Student sort by name during record marks
+
+Bug Fixed
+
+* Employee login role issue fixed
+* Roll number issue fixed
+* Student attendance for parent & student issue
 
 Version 1.8.3 (Hotfix) Released on 7 February 2019
 

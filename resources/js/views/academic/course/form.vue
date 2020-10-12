@@ -27,7 +27,7 @@
                         <show-error :form-name="courseForm" prop-name="description"></show-error>
                     </div>
                 </div>
-                <div class="col-12 col-sm-3">
+                <!-- <div class="col-12 col-sm-3">
                     <div class="form-group">
                         <label for="">{{trans('student.attendance_type')}}</label>
                         <select v-model="courseForm.attendance_type" class="custom-select col-12" name="attendance_type" @change="courseForm.errors.clear('attendance_type')">
@@ -37,7 +37,7 @@
                         </select>
                         <show-error :form-name="courseForm" prop-name="attendance_type"></show-error>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-12 col-sm-3">
                     <div class="form-group">
                         <div>{{trans('student.enable_registration')}}</div>
@@ -96,12 +96,10 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import switches from 'vue-switches'
     import courseGroupForm from '../../configuration/academic/course-group/form'
 
     export default {
-        components: {switches, vSelect, courseGroupForm},
+        components: {courseGroupForm},
         data() {
             return {
                 courseForm: new Form({

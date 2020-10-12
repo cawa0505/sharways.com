@@ -1,5 +1,1 @@
-            <p style="margin-top:20px; text-align: right; font-size: 12px;">{{trans('general.report_date_time').' '.showDateTime(now())}}</p>
-        </div>
-    </div>
-</body>
-</html>
+@includeFirst(['custom-print.print-layout.footer','print.print-layout.default_footer'])

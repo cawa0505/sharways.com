@@ -14,11 +14,10 @@ class CreateRegistrationsTable extends Migration
     public function up()
     {
         Schema::create('registrations', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->integer('course_id')->unsigned()->nullable();
+            $table->bigInteger('course_id')->unsigned()->nullable();
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->date('date_of_registration')->nullable();
             $table->text('registration_remarks')->nullable();
@@ -26,7 +25,7 @@ class CreateRegistrationsTable extends Migration
             $table->string('registration_fee_status',10)->nullable();
             $table->string('status')->nullable();   // pending/allotted/cancelled
             $table->text('rejection_remarks')->nullable();
-            $table->integer('previous_institute_id')->unsigned()->nullable();
+            $table->bigInteger('previous_institute_id')->unsigned()->nullable();
             $table->foreign('previous_institute_id')->references('id')->on('institutes')->onDelete('set null');
             $table->text('options')->nullable();
             $table->timestamps();

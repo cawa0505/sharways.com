@@ -14,16 +14,15 @@ class CreateEmployeeLeaveRequestDetailsTable extends Migration
     public function up()
     {
         Schema::create('employee_leave_request_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('employee_leave_request_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('employee_leave_request_id')->unsigned()->nullable();
             $table->foreign('employee_leave_request_id','elrd_employee_leave_request_id_foreign')->references('id')->on('employee_leave_requests')->onDelete('cascade');
-            $table->integer('designation_id')->unsigned()->nullable();
+            $table->bigInteger('designation_id')->unsigned()->nullable();
             $table->foreign('designation_id','elrd_designation_id_foreign')->references('id')->on('designations')->onDelete('cascade');
             $table->date('date_of_action')->nullable();
             $table->string('status',20)->nullable();
             $table->text('comment')->nullable();
-            $table->integer('approver_user_id')->unsigned()->nullable();
+            $table->bigInteger('approver_user_id')->unsigned()->nullable();
             $table->foreign('approver_user_id','elrd_approver_user_id_foreign')->references('id')->on('users')->onDelete('cascade');
             $table->text('options')->nullable();
             $table->timestamps();

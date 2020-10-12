@@ -14,11 +14,10 @@ class CreateStudentSiblingsTable extends Migration
     public function up()
     {
         Schema::create('student_siblings', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->integer('sibling_student_id')->unsigned()->nullable();
+            $table->bigInteger('sibling_student_id')->unsigned()->nullable();
             $table->foreign('sibling_student_id')->references('id')->on('students')->onDelete('cascade');
             $table->text('options')->nullable();
             $table->timestamps();

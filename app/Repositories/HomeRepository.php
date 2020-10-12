@@ -88,16 +88,22 @@ class HomeRepository
         $articles = \Auth::user()->can('list-article') ? $this->article->with('articleType')->filterBySession()->orderBy('date_of_article', 'desc')->take(5)->get() : [];
 
 
+        $events = array();
         if (\Auth::user()->can('list-event')) {
-            $event_query =  $this->event->with('eventType')->filterBySession()->where('start_date','>=',date('Y-m-d'))->orderBy('start_date', 'asc');
+            $event_query =  $this->event->with('eventType')->filterBySession()->where('start_date','>=',date('Y-m-d'));
 
             if (\Auth::user()->hasAnyRole([config('system.default_role.student'), config('system.default_role.parent')])) {
                 $event_query->whereIn('audience',['everyone','selected_course','selected_batch']);
             }
 
-            $events = $event_query->take(5)->get();
+            $events = $event_query->orderBy('start_date', 'asc')->take(5)->get();
         }
-
+        
+        $books = array();
+        $book_log_stats = array();
+        $total_book_count = 0;
+        $pending_return_book_count = 0;
+        $overdue_return_book_count = 0;
         if (\Auth::user()->hasRole(config('system.default_role.librarian'))) {
             $total_book_count = $this->book_post_detail->count();
             $pending_return_book_count = $this->book_log_detail->whereNotNull('date_of_return')->orWhere('is_non_returnable',1)->count();

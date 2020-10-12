@@ -123,11 +123,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-
     export default {
-        components : { datepicker,vSelect},
+        components : {},
         data() {
             return {
                 certificates: {
@@ -194,6 +191,8 @@
                 if (typeof page !== 'number') {
                     page = 1;
                 }
+                this.filter.date_of_certificate_start_date = helper.toDate(this.filter.date_of_certificate_start_date);
+                this.filter.date_of_certificate_end_date = helper.toDate(this.filter.date_of_certificate_end_date);
                 let url = helper.getFilterURL(this.filter);
                 axios.get('/api/certificate?page=' + page + url)
                     .then(response => {

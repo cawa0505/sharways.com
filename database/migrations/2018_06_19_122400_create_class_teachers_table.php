@@ -14,11 +14,10 @@ class CreateClassTeachersTable extends Migration
     public function up()
     {
         Schema::create('class_teachers', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->date('date_effective')->nullable();
             $table->text('description')->nullable();

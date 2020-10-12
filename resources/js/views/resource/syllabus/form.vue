@@ -113,12 +113,9 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         data() {
             return {
                 syllabusForm: new Form({
@@ -151,7 +148,7 @@
             else {
                 this.addDetailRow();
                 this.addTopicRow();
-                this.syllabusForm.upload_token = uuid();
+                this.syllabusForm.upload_token = this.$uuid.v4();
             }
 
             this.getPreRequisite();
@@ -245,7 +242,7 @@
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.syllabusForm.upload_token = uuid();
+                        this.syllabusForm.upload_token = this.$uuid.v4();
                         this.selected_batch = null;
                         this.selected_subject = null;
                         this.syllabusForm.details = [];

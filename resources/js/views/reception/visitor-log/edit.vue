@@ -14,7 +14,7 @@
         </div>
         <div class="container-fluid">
             <div class="card card-form">
-                <div class="card-body">
+                <div class="card-body p-t-20">
                     <visitor-log-form :uuid="uuid"></visitor-log-form>
                 </div>
             </div>

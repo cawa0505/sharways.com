@@ -2,12 +2,10 @@
 
 namespace App\Exceptions;
 
-use Exception;
+use Throwable;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Auth\Access\AuthorizationException;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
-use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -39,10 +37,10 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param  \Exception  $exception
+     * @param  \Throwable  $exception
      * @return void
      */
-    public function report(Exception $exception)
+    public function report(Throwable $exception)
     {
         if (app()->bound('sentry') && $this->shouldReport($exception)) {
             app('sentry')->captureException($exception);
@@ -54,13 +52,15 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
+     * @param  \Throwable  $exception
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Throwable $exception)
     {
         if ($exception instanceof FileNotFoundException) {
             return response()->view('errors.file-not-found', compact('exception'), 500);
+        } else if ($exception instanceof AuthenticationException) {
+            return response()->json(['message' => trans('auth.session_expired'), 'login' => 1], 401);
         } else if ($exception instanceof AuthorizationException) {
             return response()->json(['message' => trans('user.permission_denied')], 403);
         } else if ($exception instanceof UnauthorizedException) {

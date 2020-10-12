@@ -14,10 +14,9 @@ class CreateUploadsTable extends Migration
     public function up()
     {
         Schema::create('uploads', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('module')->nullable();
             $table->integer('module_id')->nullable();

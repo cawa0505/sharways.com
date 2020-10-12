@@ -228,7 +228,9 @@
         "name": "EUR",
         "symbol": "€",
         "position": "prefix",
-        "decimal_place": 2
+        "decimal_place": 2,
+        "number_value": "Euro",
+        "decimal_value": "Cent"
     },
     {
         "description": "Falkland Islands (Malvinas) Pound",
@@ -312,7 +314,10 @@
         "name": "INR",
         "symbol": "₹",
         "position": "prefix",
-        "decimal_place": 2
+        "decimal_place": 2,
+        "number_value": "Rupee",
+        "decimal_value": "Paise",
+        "format": "indian"
     },
     {
         "description": "Indonesia Rupiah",
@@ -753,6 +758,13 @@
         "name": "ZWD",
         "symbol": "Z$",
         "position": "prefix",
+        "decimal_place": 2
+    },
+    {
+        "description": "Kenya Shilling",
+        "name": "Shilling",
+        "symbol": "KES",
+        "position": "suffix",
         "decimal_place": 2
     }
 ]

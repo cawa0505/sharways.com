@@ -14,16 +14,15 @@ class CreateStudentFeeRecordsTable extends Migration
     public function up()
     {
         Schema::create('student_fee_records', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_record_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_record_id')->unsigned()->nullable();
             $table->foreign('student_record_id')->references('id')->on('student_records')->onDelete('cascade');
-            $table->integer('fee_installment_id')->unsigned()->nullable();
+            $table->bigInteger('fee_installment_id')->unsigned()->nullable();
             $table->foreign('fee_installment_id')->references('id')->on('fee_installments')->onDelete('cascade');
-            $table->integer('transport_circle_id')->unsigned()->nullable();
+            $table->bigInteger('transport_circle_id')->unsigned()->nullable();
             $table->foreign('transport_circle_id')->references('id')->on('transport_circles')->onDelete('set null');
             $table->integer('transport_fee')->default(0);
-            $table->integer('fee_concession_id')->unsigned()->nullable();
+            $table->bigInteger('fee_concession_id')->unsigned()->nullable();
             $table->foreign('fee_concession_id')->references('id')->on('fee_concessions')->onDelete('set null');
             $table->string('status',20)->nullable();
             $table->date('due_date')->nullable();

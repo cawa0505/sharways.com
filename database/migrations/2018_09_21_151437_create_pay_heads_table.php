@@ -14,8 +14,7 @@ class CreatePayHeadsTable extends Migration
     public function up()
     {
         Schema::create('pay_heads', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('alias')->nullable();
             $table->boolean('is_active')->default(0);

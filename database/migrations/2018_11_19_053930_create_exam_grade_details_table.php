@@ -14,9 +14,8 @@ class CreateExamGradeDetailsTable extends Migration
     public function up()
     {
         Schema::create('exam_grade_details', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('exam_grade_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('exam_grade_id')->unsigned()->nullable();
             $table->foreign('exam_grade_id','egd_exam_grade_id_foreign')->references('id')->on('exam_grades')->onDelete('cascade');
             $table->decimal('min_percentage',25,5)->default(0);
             $table->decimal('max_percentage',25,5)->default(0);

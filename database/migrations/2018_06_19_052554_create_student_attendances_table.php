@@ -14,11 +14,10 @@ class CreateStudentAttendancesTable extends Migration
     public function up()
     {
         Schema::create('student_attendances', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
-            $table->integer('subject_id')->unsigned()->nullable();
+            $table->bigInteger('subject_id')->unsigned()->nullable();
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
             $table->date('date_of_attendance')->nullable();
             $table->longText('attendance')->nullable();

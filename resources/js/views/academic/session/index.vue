@@ -163,11 +163,9 @@
 
 <script>
     import academicSessionForm from './form'
-    import switches from 'vue-switches'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { academicSessionForm,switches,datepicker },
+        components : { academicSessionForm},
         data() {
             return {
                 academic_sessions: {

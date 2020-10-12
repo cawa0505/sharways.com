@@ -22,6 +22,15 @@
                                     <show-error :form-name="configForm" prop-name="employee_code_digit"></show-error>
                                 </div>
                             </div>
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label class="custom-control custom-checkbox m-t-20">
+                                        <input type="checkbox" class="custom-control-input" v-model="configForm.allow_employee_date_of_joining_out_of_session" value="1" name="allow_employee_date_of_joining_out_of_session">
+                                        <span class="custom-control-label">{{trans('employee.allow_employee_date_of_joining_out_of_session')}}</span>
+                                    </label>
+                                    <show-error :form-name="configForm" prop-name="allow_employee_date_of_joining_out_of_session"></show-error>
+                                </div>
+                            </div>
                         </div>
                         <h4 class="card-title">{{trans('employee.leave_configuration')}}</h4>
 
@@ -80,6 +89,7 @@
                     leave_holiday_calculation_mode: '',
                     per_day_salary_calculation_basis: '',
                     user_defined_per_day_salary_calculation_basis: '',
+                    allow_employee_date_of_joining_out_of_session: '',
                     config_type: ''
                 },false),
                 leave_holiday_calculation_modes: [

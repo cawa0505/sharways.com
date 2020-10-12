@@ -101,11 +101,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import feeHeadForm from './form'
 
     export default {
-        components : { feeHeadForm,vSelect },
+        components : { feeHeadForm },
         data() {
             return {
                 fee_heads: {

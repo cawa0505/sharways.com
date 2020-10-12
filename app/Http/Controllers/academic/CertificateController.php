@@ -116,9 +116,8 @@ class CertificateController extends Controller
         $this->authorize('list', Certificate::class);
 
         $certificate = $this->repo->findByUuidOrFail($uuid);
-        $print_options = array('no_border' => true, 'no_header' => true);
 
-        return view('print.academic.selected-certificate',compact('certificate','print_options'));
+        return view('print.academic.selected-certificate',compact('certificate'));
     }
 
     /**

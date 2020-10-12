@@ -57,11 +57,8 @@
 
 
 <script>
-    import switches from 'vue-switches'
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components: {vSelect, switches},
+        components: {},
         data() {
             return {
                 designationForm: new Form({

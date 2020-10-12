@@ -14,16 +14,15 @@ class CreateIncomesTable extends Migration
     public function up()
     {
         Schema::create('incomes', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('transaction_category_id')->unsigned()->nullable();
+            $table->bigInteger('transaction_category_id')->unsigned()->nullable();
             $table->foreign('transaction_category_id')->references('id')->on('transaction_categories')->onDelete('cascade');
-            $table->integer('student_record_id')->unsigned()->nullable();
+            $table->bigInteger('student_record_id')->unsigned()->nullable();
             $table->foreign('student_record_id')->references('id')->on('student_records')->onDelete('cascade');
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('date_of_income')->nullable();
             $table->decimal('amount',25,5)->nullable();

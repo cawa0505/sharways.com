@@ -118,12 +118,8 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-
 	export default {
-        components: {vSelect, datepicker, switches},
+        components: {},
 		data(){
 			return {
 				classTeacherForm: new Form({
@@ -240,7 +236,7 @@
                 return class_teacher.length ? helper.getEmployeeDesignationOnDate(class_teacher[0].employee, class_teacher.date_effective) : '';
             },
             getCurrentClassTeacher(class_teachers){
-                let class_teacher = class_teachers.find(o => o.date_effective <= moment().format('YYYY-MM-DD'));
+                let class_teacher = class_teachers.find(o => o.date_effective <= helper.today());
 
                 if (typeof class_teacher == 'undefined')
                     class_teacher = class_teachers[0];

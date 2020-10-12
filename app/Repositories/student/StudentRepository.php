@@ -3,14 +3,17 @@
 namespace App\Repositories\Student;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Models\Academic\Batch;
 use App\Models\Student\Student;
 use App\Models\Student\Admission;
 use App\Models\Academic\ClassTeacher;
 use App\Models\Student\StudentParent;
+use App\Models\Student\StudentRecord;
 use Illuminate\Validation\ValidationException;
 use App\Repositories\Configuration\Misc\CasteRepository;
+use App\Repositories\Configuration\CustomFieldRepository;
 use App\Repositories\Configuration\Misc\CategoryRepository;
 use App\Repositories\Configuration\Misc\ReligionRepository;
 use App\Repositories\Configuration\Misc\BloodGroupRepository;
@@ -31,6 +34,8 @@ class StudentRepository
     protected $batch;
     protected $admission;
     protected $class_teacher;
+    protected $custom_field;
+    protected $student_record;
 
     /**
      * Instantiate a new instance.
@@ -49,7 +54,9 @@ class StudentRepository
         StudentGroupRepository $student_group,
         Batch $batch,
         Admission $admission,
-        ClassTeacher $class_teacher
+        ClassTeacher $class_teacher,
+        CustomFieldRepository $custom_field,
+        StudentRecord $student_record
     ) {
         $this->student = $student;
         $this->caste = $caste;
@@ -63,6 +70,8 @@ class StudentRepository
         $this->batch = $batch;
         $this->admission = $admission;
         $this->class_teacher = $class_teacher;
+        $this->custom_field = $custom_field;
+        $this->student_record = $student_record;
     }
 
     /**
@@ -117,7 +126,7 @@ class StudentRepository
         $data = array();
         foreach ($students as $student) {
             $data[] = array(
-                'name' => $student->name.' ('.$student->Parent->father_name.' '.$student->contact_number.')',
+                'name' => ($student->Parent) ? $student->name.' ('.$student->Parent->first_guardian_name.' '.$student->contact_number.')' : $student->name,
                 'id' => $student->id
             );
         }
@@ -177,14 +186,40 @@ class StudentRepository
      */
     public function getPreRequisite()
     {
+        if (request('form_type') == 'termination') {
+            $data = getVar('data');
+            $student_termination_reasons = gv($data, 'student_termination_reasons', []);
+
+            $termination_reasons = array();
+            foreach ($student_termination_reasons as $student_termination_reason) {
+                $termination_reasons[] = array(
+                    'text' => trans('student.termination_reason_'.$student_termination_reason),
+                    'value' => $student_termination_reason
+                );
+            }
+
+            return compact('termination_reasons');
+        }
+
         $castes = $this->caste->selectAll();
         $categories = $this->category->selectAll();
         $religions = $this->religion->selectAll();
         $blood_groups = $this->blood_group->selectAll();
         $list = getVar('list');
         $genders = generateTranslatedSelectOption(isset($list['gender']) ? $list['gender'] : []);
+        $guardian_relations = generateTranslatedSelectOption(isset($list['relations']) ? $list['relations'] : []);
+        $parents = $this->student_parent->all();
+        $student_parents = array();
 
-        return compact('castes', 'categories', 'religions', 'blood_groups', 'genders');
+        foreach ($parents as $parent) {
+            $student_parents[] = array('id' => $parent->id, 'name' => $parent->first_guardian_name.' ('.$parent->first_guardian_contact_number_1.')');
+        }
+
+        $form_type = in_array(request('form_type'), ['student_basic', 'student_parent', 'student_contact']) ? request('form_type') : 'student_basic';
+
+        $custom_fields = $this->custom_field->listAllByForm($form_type);
+
+        return compact('castes', 'categories', 'religions', 'blood_groups', 'genders', 'student_parents', 'custom_fields','guardian_relations');
     }
 
     /**
@@ -195,18 +230,19 @@ class StudentRepository
      */
     public function getData($params)
     {
-        $sort_by        = gv($params, 'sort_by', 'created_at');
-        $order          = gv($params, 'order', 'desc');
-        $batch_id       = gv($params, 'batch_id');
-        $blood_group_id = gv($params, 'blood_group_id');
-        $religion_id    = gv($params, 'religion_id');
-        $caste_id       = gv($params, 'caste_id');
-        $category_id    = gv($params, 'category_id');
-        $first_name     = gv($params, 'first_name');
-        $last_name      = gv($params, 'last_name');
-        $father_name    = gv($params, 'father_name');
-        $mother_name    = gv($params, 'mother_name');
-        $student_group_id = gv($params, 'student_group_id');
+        $sort_by              = gv($params, 'sort_by', 'first_name');
+        $order                = gv($params, 'order', 'asc');
+        $batch_id             = gv($params, 'batch_id');
+        $blood_group_id       = gv($params, 'blood_group_id');
+        $religion_id          = gv($params, 'religion_id');
+        $caste_id             = gv($params, 'caste_id');
+        $category_id          = gv($params, 'category_id');
+        $first_name           = gv($params, 'first_name');
+        $last_name            = gv($params, 'last_name');
+        $first_guardian_name  = gv($params, 'first_guardian_name');
+        $second_guardian_name = gv($params, 'second_guardian_name');
+        $student_group_id     = gv($params, 'student_group_id');
+        $gender               = gv($params, 'gender', []);
 
         $date_of_birth_start_date     = gv($params, 'date_of_birth_start_date');
         $date_of_birth_end_date       = gv($params, 'date_of_birth_end_date');
@@ -215,14 +251,23 @@ class StudentRepository
 
         $this->admission->whereNull('prefix')->update(['prefix' => config('config.admission_number_prefix')]);
 
-        $batch_id       = is_array($batch_id) ? $batch_id : ($batch_id ? explode(',', $batch_id) : $this->batch->filterBySession()->get()->pluck('id')->all());
-        $blood_group_id = is_array($blood_group_id) ? $blood_group_id : ($blood_group_id ? explode(',', $blood_group_id) : []);
-        $religion_id    = is_array($religion_id) ? $religion_id : ($religion_id ? explode(',', $religion_id) : []);
-        $caste_id       = is_array($caste_id) ? $caste_id : ($caste_id ? explode(',', $caste_id) : []);
-        $category_id    = is_array($category_id) ? $category_id : ($category_id ? explode(',', $category_id) : []);
+        $batch_id         = is_array($batch_id) ? $batch_id : ($batch_id ? explode(',', $batch_id) : $this->batch->filterBySession()->get()->pluck('id')->all());
+        $blood_group_id   = is_array($blood_group_id) ? $blood_group_id : ($blood_group_id ? explode(',', $blood_group_id) : []);
+        $religion_id      = is_array($religion_id) ? $religion_id : ($religion_id ? explode(',', $religion_id) : []);
+        $caste_id         = is_array($caste_id) ? $caste_id : ($caste_id ? explode(',', $caste_id) : []);
+        $category_id      = is_array($category_id) ? $category_id : ($category_id ? explode(',', $category_id) : []);
+        $gender          = is_array($gender) ? $gender : ($gender ? explode(',', $gender) : []);
         $student_group_id = is_array($student_group_id) ? $student_group_id : ($student_group_id ? explode(',', $student_group_id) : []);
         
         $auth_user = \Auth::user();
+
+        $student_user_id = [];
+        $student_user_ids = [];
+        if ($auth_user->hasRole(config('system.default_role.student'))) {
+            $student_user_id = $auth_user->student->id;
+        } else if ($auth_user->hasRole(config('system.default_role.parent'))) {
+            $student_user_ids = $auth_user->parent->students->pluck('id');
+        }
 
         if (! $auth_user->can('list-student') && $auth_user->can('list-class-teacher-wise-student')) {
             $employee_id = $auth_user->Employee->id;
@@ -236,55 +281,78 @@ class StudentRepository
             }
         }
 
-        $query = $this->student->with(['studentRecords' => function ($q) {
-            $q->where('academic_session_id', config('config.default_academic_session.id'));
-        } ,'studentRecords.admission','studentRecords.batch','studentRecords.batch.course','bloodGroup','religion','caste','category','parent'])->whereHas('studentRecords', function ($q) use ($batch_id, $date_of_admission_start_date, $date_of_admission_end_date) {
-            $q->whereNull('date_of_exit')->filterBySession()->whereIn('batch_id',$batch_id)->dateOfAdmissionBetween([
-                    'start_date' => $date_of_admission_start_date,
-                    'end_date' => $date_of_admission_end_date
-                ])->orderBy('date_of_entry', 'desc');
-        })->filterByFirstName($first_name)->filterByLastName($last_name)->dateOfBirthBetween([
-                'start_date' => $date_of_birth_start_date,
-                'end_date' => $date_of_birth_end_date
-            ]);
-
-        if (count($blood_group_id)) {
-            $query->whereIn('blood_group_id',$blood_group_id);
-        }
-
-        if (count($religion_id)) {
-            $query->whereIn('religion_id',$religion_id);
-        }
-
-        if (count($caste_id)) {
-            $query->whereIn('caste_id',$caste_id);
-        }
-
-        if (count($category_id)) {
-            $query->whereIn('category_id',$category_id);
-        }
-
-        if ($auth_user->hasRole(config('system.default_role.student'))) {
-            $query->filterById($auth_user->Student->id);
-        }
-
-        if ($auth_user->hasRole(config('system.default_role.parent'))) {
-            $query->whereIn('id', $auth_user->Parent->Students->pluck('id')->all());
-        }
-
-        if ($father_name || $mother_name) {
-            $query->whereHas('parent', function ($q1) use ($father_name, $mother_name) {
-                $q1->filterByFatherName($father_name)->filterByMotherName($mother_name);
+        $query = $this->student_record->with('student','admission','batch','batch.course','student.bloodGroup','student.religion','student.caste','student.category','student.parent')
+            ->whereNull('date_of_exit')
+            ->filterbySession()
+            ->whereIn('batch_id', $batch_id)
+            ->dateOfAdmissionBetween([
+                'start_date' => $date_of_admission_start_date,
+                'end_date' => $date_of_admission_end_date
+            ])->whereHas('student', function($q) use(
+                $first_name,
+                $last_name,
+                $date_of_birth_start_date,
+                $date_of_birth_end_date,
+                $blood_group_id,
+                $religion_id,
+                $caste_id,
+                $category_id,
+                $gender,
+                $first_guardian_name,
+                $second_guardian_name,
+                $student_group_id,
+                $student_user_id,
+                $student_user_ids
+            ) {
+                $q->filterByFirstName($first_name)
+                ->filterByLastName($last_name)
+                ->dateOfBirthBetween([
+                    'start_date' => $date_of_birth_start_date,
+                    'end_date' => $date_of_birth_end_date
+                ])->when($blood_group_id, function ($query, $blood_group_id) {
+                    return $query->whereIn('blood_group_id', $blood_group_id);
+                })->when($religion_id, function ($query, $religion_id) {
+                    return $query->whereIn('religion_id', $religion_id);
+                })->when($caste_id, function ($query, $caste_id) {
+                    return $query->whereIn('caste_id', $caste_id);
+                })->when($category_id, function ($query, $category_id) {
+                    return $query->whereIn('category_id', $category_id);
+                })->when($gender, function ($query, $gender) {
+                    return $query->whereIn('gender', $gender);
+                })->when($student_user_id, function ($query, $student_user_id) {
+                    return $query->filterById($student_user_id);
+                })->when($student_user_ids, function ($query, $student_user_ids) {
+                    return $query->whereIn('id', $student_user_ids);
+                })->when($first_guardian_name, function ($query, $first_guardian_name) {
+                    return $query->whereHas('parent', function($q1) use($first_guardian_name) {
+                        $q1->filterByFirstGuardianName($first_guardian_name);
+                    });
+                })->when($second_guardian_name, function ($query, $second_guardian_name) {
+                    return $query->whereHas('parent', function($q1) use($second_guardian_name) {
+                        $q1->filterBySecondGuardianName($second_guardian_name);
+                    });
+                })->when($student_group_id, function ($query, $student_group_id) {
+                    return $query->whereHas('studentGroups', function($q2) use($student_group_id) {
+                        $q2->whereIn('student_group_id', $student_group_id);
+                    });
+                });
             });
+
+        if ($sort_by == 'first_guardian_name') {
+            $query->select('student_records.*', \DB::raw('(SELECT first_guardian_name FROM student_parents,students WHERE student_records.student_id = students.id and students.student_parent_id = student_parents.id ) as sort_by'));
+        } else if ($sort_by == 'second_guardian_name') {
+            $query->select('student_records.*', \DB::raw('(SELECT second_guardian_name FROM student_parents,students WHERE student_records.student_id = students.id and students.student_parent_id = student_parents.id ) as sort_by'));
+        } else if ($sort_by == 'first_name') {
+            $query->select('student_records.*', \DB::raw('(SELECT first_name FROM students WHERE student_records.student_id = students.id ) as sort_by'));
+        } else if ($sort_by == 'last_name') {
+            $query->select('student_records.*', \DB::raw('(SELECT last_name FROM students WHERE student_records.student_id = students.id ) as sort_by'));
+        } else if ($sort_by == 'date_of_birth') {
+            $query->select('student_records.*', \DB::raw('(SELECT date_of_birth FROM students WHERE student_records.student_id = students.id ) as sort_by'));
+        } else {
+            $query->select('student_records.*', 'date_of_entry as sort_by');
         }
 
-        if (count($student_group_id)) {
-            $query->whereHas('studentGroups', function ($q) use ($student_group_id) {
-                $q->whereIn('student_group_id', $student_group_id);
-            });
-        }
-
-        return $query->orderBy($sort_by, $order);
+        return $query->orderBy('sort_by', $order);
     }
 
     /**
@@ -297,7 +365,83 @@ class StudentRepository
     {
         $page_length = gv($params, 'page_length', config('config.page_length'));
 
-        return $this->getData($params)->paginate($page_length);
+        $query = $this->getData($params);
+
+        if (request('action') == 'excel') {
+            return $this->exportExcel($query->get());
+        }
+
+        return $query->paginate($page_length);
+    }
+
+    /**
+     * Export student data
+     * @param  array  $students
+     * @return array
+     */
+    private function exportExcel($student_records = array())
+    {
+        $data = array();
+        $data[] = array(
+            trans('student.admission_number_short'),
+            trans('student.roll_number'),
+            trans('student.first_name'),
+            trans('student.middle_name'),
+            trans('student.last_name'),
+            trans('student.gender'),
+            trans('student.first_guardian_name'),
+            trans('student.second_guardian_name'),
+            trans('student.date_of_birth'),
+            trans('student.date_of_admission'),
+            trans('student.date_of_promotion'),
+            trans('student.contact_number'),
+            trans('academic.course'),
+            trans('academic.batch'),
+            trans('student.nationality'),
+            trans('misc.blood_group'),
+            trans('misc.religion'),
+            trans('misc.caste'),
+            trans('misc.category'),
+            trans('student.unique_identification_number'),
+            trans('student.first_guardian_contact_number_1'),
+            trans('student.second_guardian_contact_number_1'),
+            trans('student.emergency_contact_name'),
+            trans('student.emergency_contact_number'),
+            trans('student.present_address'),
+            trans('student.permanent_address')
+        );
+        foreach ($student_records as $student_record) {
+            $data[] = array(
+                $student_record->admission->admission_number,
+                getRollNumber($student_record),
+                $student_record->student->first_name,
+                $student_record->student->middle_name,
+                $student_record->student->last_name,
+                trans('list.'.$student_record->student->gender),
+                optional($student_record->student->parent)->first_guardian_name,
+                optional($student_record->student->parent)->second_guardian_name,
+                showDate($student_record->student->date_of_birth),
+                $student_record->admission->date_of_admission,
+                $student_record->date_of_entry,
+                $student_record->student->contact_number,
+                $student_record->batch->course->name,
+                $student_record->batch->name,
+                $student_record->student->nationality,
+                optional($student_record->student->bloodGroup)->name,
+                optional($student_record->student->religion)->name,
+                optional($student_record->student->caste)->name,
+                optional($student_record->student->category)->name,
+                $student_record->student->unique_identification_number,
+                $student_record->student->parent->first_guardian_contact_number_1,
+                $student_record->student->parent->second_guardian_contact_number_1,
+                $student_record->student->emergency_contact_name,
+                $student_record->student->emergency_contact_number,
+                $student_record->student->present_address,
+                $student_record->student->permanent_address,
+            );
+        }
+
+        return $data;
     }
 
     /**
@@ -324,8 +468,10 @@ class StudentRepository
         $castes = $this->caste->selectAll();
         $categories = $this->category->selectAll();
         $student_groups = $this->student_group->selectAll();
+        $list = getVar('list');
+        $genders = generateTranslatedSelectOption(isset($list['gender']) ? $list['gender'] : []);
 
-        return compact('batches', 'blood_groups', 'religions', 'castes', 'categories', 'student_groups');
+        return compact('batches', 'blood_groups', 'religions', 'castes', 'categories', 'student_groups','genders');
     }
 
     /**
@@ -348,32 +494,45 @@ class StudentRepository
      */
     public function validateInput($params = array(), $id = null)
     {
+        $existing_student = $this->getExistingStudent($params, $id);
+
+        if ($existing_student) {
+            throw ValidationException::withMessages(['message' => trans('student.student_exists')]);
+        }
+    }
+
+    public function getExistingStudent($params = array(), $id = null)
+    {
         $first_name    = gv($params, 'first_name');
         $middle_name   = gv($params, 'middle_name');
         $last_name     = gv($params, 'last_name');
-        $date_of_birth = gv($params, 'date_of_birth');
+        $date_of_birth = toDate(gv($params, 'date_of_birth'));
 
         $student_exist_query = ($id) ? $this->student->where('id', '!=', $id) : $this->student->whereNotNull('id');
 
-        if ($student_exist_query->filterByFirstName($first_name, 1)->filterByMiddleName($middle_name, 1)->filterByLastName($last_name, 1)->filterByDateOfBirth($date_of_birth)->count()) {
-            throw ValidationException::withMessages(['message' => trans('student.student_exists')]);
-        }
+        return $student_exist_query->filterByFirstName($first_name, 1)->filterByMiddleName($middle_name, 1)->filterByLastName($last_name, 1)->filterByDateOfBirth($date_of_birth)->first();
     }
 
     /**
      * Validate student for registration
      * @param  Student $student
+     * @param  array $params
      * @return void
      */
-    public function validateStudentForRegistration(Student $student)
+    public function validateStudentForRegistration(Student $student, $params = array())
     {
-        $valid_student = $this->student->whereNotNull('id')->filterByUuid($student->uuid)->where(function($q1) {
-                $q1->whereHas('studentRecords', function($q2) {
-                    $q2->filterBySession()->whereNotNull('date_of_exit');
-                })->doesntHave('studentRecords', 'or');
-            })->first();
+        $course_id = gv($params, 'course_id');
+        $date_of_registration = toDate(gv($params, 'date_of_registration'));
 
-        if (! $valid_student) {
+        $existing_student = $this->student_record->filterBySession()->where('student_id', $student->id)->whereHas('batch', function($q) use($course_id) {
+            $q->where('course_id', $course_id);
+        })->where(function($q1) use($date_of_registration) {
+            $q1->whereNull('date_of_exit')->orWhere(function($q2) use($date_of_registration) {
+                $q2->whereNotNull('date_of_exit')->where('date_of_exit', '>=', $date_of_registration);
+            });
+        })->first();
+
+        if ($existing_student) {
             throw ValidationException::withMessages(['message' => trans('student.could_not_find_for_registration')]);
         }
     }
@@ -387,13 +546,19 @@ class StudentRepository
     private function formatParams($params)
     {
         $formatted = [
-            'first_name'        => gv($params, 'first_name'),
-            'last_name'         => gv($params, 'last_name'),
-            'date_of_birth'     => gv($params, 'date_of_birth'),
-            'middle_name'       => gv($params, 'middle_name'),
-            'contact_number'    => gv($params, 'contact_number'),
-            'gender'            => gv($params, 'gender'),
-            'student_parent_id' => gv($params, 'student_parent_id')
+            'first_name'             => gv($params, 'first_name'),
+            'last_name'              => gv($params, 'last_name'),
+            'date_of_birth'          => toDate(gv($params, 'date_of_birth')),
+            'middle_name'            => gv($params, 'middle_name'),
+            'contact_number'         => gv($params, 'contact_number'),
+            'gender'                 => gv($params, 'gender'),
+            'student_parent_id'      => gv($params, 'student_parent_id'),
+            'present_address_line_1' => gv($params, 'address_line_1'),
+            'present_address_line_2' => gv($params, 'address_line_2'),
+            'present_city'           => gv($params, 'city'),
+            'present_state'          => gv($params, 'state'),
+            'present_zipcode'        => gv($params, 'zipcode'),
+            'present_country'        => gv($params, 'country')
         ];
 
 
@@ -415,8 +580,18 @@ class StudentRepository
         $type = gv($params, 'type', 'basic');
 
         if ($type == 'basic') {
+            $custom_values = $this->custom_field->validateCustomValues('student_basic', gv($params, 'custom_values', []));
+
             $student->forceFill($this->updateBasic($student, $params))->save();
+
+            $options = $student->options;
+            $options['custom_values'] = mergeByKey($student->getOption('custom_values'), $custom_values);
+            $student->options = $options;
+            $student->save();
+
         } elseif ($type == 'parent') {
+            $custom_values = $this->custom_field->validateCustomValues('student_parent', gv($params, 'custom_values', []));
+
             $parent = $student->Parent;
 
             if (! $parent) {
@@ -426,12 +601,40 @@ class StudentRepository
             } else {
                 $parent->forceFill($this->updateParent($params))->save();
             }
+            
+            $options = $parent->options;
+            $options['custom_values'] = mergeByKey($parent->getOption('custom_values'), $custom_values);
+            $parent->options = $options;
+            $parent->save();
         } elseif ($type == 'contact') {
+            $custom_values = $this->custom_field->validateCustomValues('student_contact', gv($params, 'custom_values', []));
+
             $student->forceFill($this->updateContact($params))->save();
+
+            $options = $student->options;
+            $options['custom_values'] = mergeByKey($student->getOption('custom_values'), $custom_values);
+            $student->options = $options;
+            $student->save();
         } else {
         }
 
         return  $student;
+    }
+
+    /**
+     * Update given student's parennt.
+     *
+     * @param Student $student
+     * @param array $params
+     *
+     * @return Student
+     */
+    public function updateParentId(Student $student, $params)
+    {
+        $student_parent_id = gv($params, 'student_parent_id');
+
+        $student->student_parent_id = $student_parent_id;
+        $student->save();
     }
 
     /**
@@ -468,7 +671,7 @@ class StudentRepository
         return [
             'first_name'                   => gv($params, 'first_name'),
             'last_name'                    => gv($params, 'last_name'),
-            'date_of_birth'                => gv($params, 'date_of_birth'),
+            'date_of_birth'                => toDate(gv($params, 'date_of_birth')),
             'middle_name'                  => gv($params, 'middle_name'),
             'gender'                       => gv($params, 'gender'),
             'mother_tongue'                => gv($params, 'mother_tongue'),
@@ -491,24 +694,26 @@ class StudentRepository
     private function updateParent($params)
     {
         return [
-            'father_name'                         => gv($params, 'father_name'),
-            'mother_name'                         => gv($params, 'mother_name'),
-            'father_date_of_birth'                => gv($params, 'father_date_of_birth'),
-            'mother_date_of_birth'                => gv($params, 'mother_date_of_birth'),
-            'father_qualification'                => gv($params, 'father_qualification'),
-            'mother_qualification'                => gv($params, 'mother_qualification'),
-            'father_occupation'                   => gv($params, 'father_occupation'),
-            'mother_occupation'                   => gv($params, 'mother_occupation'),
-            'father_annual_income'                => gv($params, 'father_annual_income'),
-            'mother_annual_income'                => gv($params, 'mother_annual_income'),
-            'father_email'                        => gv($params, 'father_email'),
-            'mother_email'                        => gv($params, 'mother_email'),
-            'father_contact_number_1'             => gv($params, 'father_contact_number_1'),
-            'mother_contact_number_1'             => gv($params, 'mother_contact_number_1'),
-            'father_contact_number_2'             => gv($params, 'father_contact_number_2'),
-            'mother_contact_number_2'             => gv($params, 'mother_contact_number_2'),
-            'father_unique_identification_number' => gv($params, 'father_unique_identification_number'),
-            'mother_unique_identification_number' => gv($params, 'mother_unique_identification_number')
+            'first_guardian_name'                          => gv($params, 'first_guardian_name'),
+            'first_guardian_relation'                      => gv($params, 'first_guardian_relation'),
+            'second_guardian_name'                         => gv($params, 'second_guardian_name'),
+            'second_guardian_relation'                     => gv($params, 'second_guardian_relation'),
+            'first_guardian_date_of_birth'                 => toDate(gv($params, 'first_guardian_date_of_birth')),
+            'second_guardian_date_of_birth'                => toDate(gv($params, 'second_guardian_date_of_birth')),
+            'first_guardian_qualification'                 => gv($params, 'first_guardian_qualification'),
+            'second_guardian_qualification'                => gv($params, 'second_guardian_qualification'),
+            'first_guardian_occupation'                    => gv($params, 'first_guardian_occupation'),
+            'second_guardian_occupation'                   => gv($params, 'second_guardian_occupation'),
+            'first_guardian_annual_income'                 => gv($params, 'first_guardian_annual_income'),
+            'second_guardian_annual_income'                => gv($params, 'second_guardian_annual_income'),
+            'first_guardian_email'                         => gv($params, 'first_guardian_email'),
+            'second_guardian_email'                        => gv($params, 'second_guardian_email'),
+            'first_guardian_contact_number_1'              => gv($params, 'first_guardian_contact_number_1'),
+            'second_guardian_contact_number_1'             => gv($params, 'second_guardian_contact_number_1'),
+            'first_guardian_contact_number_2'              => gv($params, 'first_guardian_contact_number_2'),
+            'second_guardian_contact_number_2'             => gv($params, 'second_guardian_contact_number_2'),
+            'first_guardian_unique_identification_number'  => gv($params, 'first_guardian_unique_identification_number'),
+            'second_guardian_unique_identification_number' => gv($params, 'second_guardian_unique_identification_number')
         ];
     }
 
@@ -670,8 +875,12 @@ class StudentRepository
      */
     public function searchByName($params)
     {
+        if (strlen(request('name')) < 3) {
+            throw ValidationException::withMessages(['message' => trans('general.type_min_3_char_for_search')]);
+        }
+
         $name = gv($params, 'name');
-        $date = gv($params, 'date');
+        $date = toDate(gv($params, 'date'));
         $array_of_name = explode(' ', $name);
         $first_name = gv($array_of_name, 0);
         $middle_name = (str_word_count($name) > 2) ? gv($array_of_name, 1) : '';
@@ -681,7 +890,7 @@ class StudentRepository
 
         return $this->student->with(['studentRecords' => function ($q) {
             $q->where('academic_session_id', config('config.default_academic_session.id'));
-        } ,'studentRecords.admission','studentRecords.batch','studentRecords.batch.course','parent','caste','category','religion'])->filterByFirstName($first_name)->filterByMiddleName($middle_name)->filterByLastName($last_name)->whereHas('studentRecords', function ($q) {
+        } ,'studentRecords.admission','studentRecords.batch','studentRecords.batch.course','parent'])->filterByFirstName($first_name)->filterByMiddleName($middle_name)->filterByLastName($last_name)->whereHas('studentRecords', function ($q) {
             $q->whereNull('date_of_exit')->filterBySession();
         })->orderBy('first_name', 'asc')->orderBy('last_name', 'asc')->paginate($page_length);
     }
@@ -695,7 +904,7 @@ class StudentRepository
     public function searchForRegistration($params)
     {
         $name = gv($params, 'name');
-        $date = gv($params, 'date');
+        $date = toDate(gv($params, 'date'));
         $array_of_name = explode(' ', $name);
         $first_name = gv($array_of_name, 0);
         $middle_name = (str_word_count($name) > 2) ? gv($array_of_name, 1) : '';
@@ -781,11 +990,12 @@ class StudentRepository
     }
 
     /**
-     * Get authenticated student's batch
+     * Get authenticated student's record
      *
-     * @return integer $batch_id
+     * @param  integer batch_id
+     * @return StudentRecord $student_record
      */
-    public function getAuthStudentBatch()
+    public function getAuthStudentRecord($batch_id)
     {
         $student = $this->student->with('studentRecords')->filterById(\Auth::user()->Student->id)->first();
 
@@ -793,31 +1003,6 @@ class StudentRepository
             return null;
         }
 
-        return optional($student->studentRecords->where('academic_session_id', config('config.default_academic_session.id'))->sortByDesc('date_of_entry')->first())->batch_id;
-    }
-
-    /**
-     * Get authenticated parent's batch
-     *
-     * @return integer $batch_id
-     */
-    public function getAuthParentStudentsBatch()
-    {
-        $student_ids = \Auth::user()->Parent->Students->pluck('id')->all();
-        $students = $this->student->with('studentRecords')->whereIn('id', $student_ids)->get();
-
-        if (! $students) {
-            return null;
-        }
-
-        $batch_id = array();
-        foreach ($students as $student) {
-            $student_record = $student->studentRecords->where('academic_session_id', config('config.default_academic_session.id'))->where('date_of_exit',null)->first();
-            if ($student_record) {
-                $batch_id[] = $student_record->batch_id;
-            }
-        }
-
-        return $batch_id;
+        return $student->studentRecords->where('academic_session_id', config('config.default_academic_session.id'))->where('batch_id', $batch_id)->first();
     }
 }

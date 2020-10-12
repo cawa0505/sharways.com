@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Utility;
 
-use JWTAuth;
 use Illuminate\Http\Request;
 use App\Repositories\Utility\BackupRepository;
 use App\Http\Controllers\Controller;

@@ -46,6 +46,7 @@ class TwoFactorSecurity extends Notification
         return (new MailMessage)
             ->subject('Two Factor Auth | '.config('config.institute_name'))
                     ->line('Your one time two factor security code is: '.$this->code.'.')
+                    ->line('This code is only valid for next 10 minutes.')
                     ->line('Thank you for using our application!');
     }
 

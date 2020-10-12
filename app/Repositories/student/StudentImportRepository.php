@@ -85,13 +85,18 @@ class StudentImportRepository
 			[ 'text' => trans('student.last_name'), 'value' => "last_name"],
 			[ 'text' => trans('student.date_of_birth'), 'value' => "date_of_birth"],
             [ 'text' => trans('student.contact_number'), 'value' => "contact_number"],
+            [ 'text' => trans('student.email'), 'value' => "email"],
 			[ 'text' => trans('academic.course'), 'value' => "course"],
 			[ 'text' => trans('academic.batch'), 'value' => "batch"],
             [ 'text' => trans('finance.fee_concession'), 'value' => "fee_concession"],
             [ 'text' => trans('transport.transport_circle'), 'value' => "transport_circle"],
-			[ 'text' => trans('student.father_name'), 'value' => "father_name"],
-			[ 'text' => trans('student.father_contact_number'), 'value' => "father_contact_number"],
-			[ 'text' => trans('student.mother_name'), 'value' => "mother_name"],
+			[ 'text' => trans('student.first_guardian_name'), 'value' => "first_guardian_name"],
+            [ 'text' => trans('student.first_guardian_relation'), 'value' => "first_guardian_relation"],
+            [ 'text' => trans('student.first_guardian_email'), 'value' => "first_guardian_email"],
+			[ 'text' => trans('student.first_guardian_contact_number'), 'value' => "first_guardian_contact_number"],
+			[ 'text' => trans('student.second_guardian_name'), 'value' => "second_guardian_name"],
+            [ 'text' => trans('student.second_guardian_relation'), 'value' => "second_guardian_relation"],
+            [ 'text' => trans('student.second_guardian_email'), 'value' => "second_guardian_email"],
             [ 'text' => trans('student.gender'), 'value' => "gender"],
             [ 'text' => trans('student.nationality'), 'value' => "nationality"],
             [ 'text' => trans('misc.blood_group'), 'value' => "blood_group"],
@@ -130,6 +135,11 @@ class StudentImportRepository
         $path = request()->file('file')->getRealPath();
         $items = array_map('str_getcsv', file($path));
 
+        if (count($items) <= 1) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('student.no_import_data_found')]);
+        }
+
         if (count($items) > 500) {
             $this->deleteFile($uuid);
             throw ValidationException::withMessages(['message' => trans('student.max_import_limit', ['number' => 500])]);
@@ -162,7 +172,6 @@ class StudentImportRepository
             $column_value = gv($value, 'name');
 
             if (! $column_value) {
-                $this->deleteFile($uuid);
                 throw ValidationException::withMessages(['message' => trans('student.null_column_found')]);
             }
 
@@ -175,26 +184,25 @@ class StudentImportRepository
     	}
 
     	if (count($columns) != count(array_unique($columns))) {
-            $this->deleteFile($uuid);
     		throw ValidationException::withMessages(['message' => trans('student.column_contains_duplicate_field')]);
     	}
 
     	if (count(array_diff($options, $columns))) {
-            $this->deleteFile($uuid);
     		throw ValidationException::withMessages(['message' => trans('student.invalid_column_found')]);
     	}
 
         if (! \Storage::exists($this->path.$uuid.'.csv')) {
-            $this->deleteFile($uuid);
             throw ValidationException::withMessages(['message' => trans('student.could_not_find_import_file')]);
         }
 
+        $list = getVar('list');
+        $guardian_relations = gv($list, 'relations', []);
     	$items = array_map('str_getcsv', file(storage_path('app/'.$this->path.$uuid.'.csv')));
 
     	$courses = $this->course->with('batches')->filterBySession()->get();
     	$students = $this->student->select(['id','first_name','middle_name','last_name','contact_number'])->get();
     	$admissions = $this->admission->select(['id','prefix','number'])->get();
-        $student_parents = $this->parent->select(['id','father_name','father_contact_number_1'])->get();
+        $student_parents = $this->parent->select(['id','first_guardian_name','first_guardian_relation','first_guardian_contact_number_1'])->get();
         $blood_groups = $this->blood_group->get();
         $religions = $this->religion->get();
         $categories = $this->category->get();
@@ -216,54 +224,76 @@ class StudentImportRepository
     		array_push($existing_student_names, $student->name.' '.$student->contact_number);
     	}
 
-        $student_names                      = [];
-        $student_courses                    = [];
-        $student_batches                    = [];
-        $invalid_date_of_birth              = [];
-        $invalid_date_of_admission          = [];
-        $date_of_birth_gt_date_of_admission = [];
-        $date_of_admission_gt_session_end   = [];
-        $missing_father_name                = [];
-        $missing_father_contact_number      = [];
-        $unknown_courses                    = [];
-        $unknown_batches                    = [];
-        $duplicate_admission_numbers        = [];
-        $unknown_blood_groups               = [];
-        $unknown_religions                  = [];
-        $unknown_categories                 = [];
-        $unknown_castes                     = [];
-        $unknown_genders                    = [];
-        $unknown_fee_concessions            = [];
-        $unknown_transport_circles          = [];
+        $student_names                         = [];
+        $invalid_student_email                 = [];
+        $student_courses                       = [];
+        $student_batches                       = [];
+        $invalid_date_of_birth                 = [];
+        $invalid_date_of_admission             = [];
+        $date_of_birth_gt_date_of_admission    = [];
+        $date_of_admission_gt_session_end      = [];
+        $missing_first_guardian_name           = [];
+        $missing_first_guardian_relation       = [];
+        $unknown_first_guardian_relation       = [];
+        $invalid_first_guardian_email          = [];
+        $missing_second_guardian_relation      = [];
+        $unknown_second_guardian_relation      = [];
+        $invalid_second_guardian_email         = [];
+        $duplicate_guardian_relation           = [];
+        $missing_first_guardian_contact_number = [];
+        $unknown_courses                       = [];
+        $unknown_batches                       = [];
+        $unknown_blood_groups                  = [];
+        $unknown_religions                     = [];
+        $unknown_categories                    = [];
+        $unknown_castes                        = [];
+        $unknown_genders                       = [];
+        $unknown_fee_concessions               = [];
+        $unknown_transport_circles             = [];
+        $admission_numbers                     = [];
 
         foreach ($items as $index => $item) {
             if ($index == 0) {
                 continue;
             }
 
-            $first_name              = gv($item, array_search('first_name', $columns));
-            $middle_name             = gv($item, array_search('middle_name', $columns));
-            $last_name               = gv($item, array_search('last_name', $columns));
-            $contact_number          = gv($item, array_search('contact_number', $columns));
-            $course                  = gv($item, array_search('course', $columns));
-            $batch                   = gv($item, array_search('batch', $columns));
-            $date_of_birth           = gv($item, array_search('date_of_birth', $columns));
-            $date_of_admission       = gv($item, array_search('date_of_admission', $columns));
-            $father_name             = gv($item, array_search('father_name', $columns));
-            $father_contact_number   = gv($item, array_search('father_contact_number', $columns));
-            $admission_number_prefix = gv($item, array_search('admission_number_prefix', $columns));
-            $admission_number        = gv($item, array_search('admission_number', $columns));
-            $blood_group             = gv($item, array_search('blood_group', $columns));
-            $religion                = gv($item, array_search('religion', $columns));
-            $category                = gv($item, array_search('category', $columns));
-            $caste                   = gv($item, array_search('caste', $columns));
-            $gender                  = gv($item, array_search('gender', $columns));
-            $fee_concession          = gv($item, array_search('fee_concession', $columns));
-            $transport_circle        = gv($item, array_search('transport_circle', $columns));
+            $first_name                    = gv($item, array_search('first_name', $columns));
+            $middle_name                   = gv($item, array_search('middle_name', $columns));
+            $last_name                     = gv($item, array_search('last_name', $columns));
+            $contact_number                = gv($item, array_search('contact_number', $columns));
+            $email                         = gv($item, array_search('email', $columns));
+            $course                        = gv($item, array_search('course', $columns));
+            $batch                         = gv($item, array_search('batch', $columns));
+            $date_of_birth                 = gv($item, array_search('date_of_birth', $columns));
+            $date_of_admission             = gv($item, array_search('date_of_admission', $columns));
+            $first_guardian_name           = gv($item, array_search('first_guardian_name', $columns));
+            $first_guardian_relation       = strtolower(gv($item, array_search('first_guardian_relation', $columns)));
+            $first_guardian_email          = strtolower(gv($item, array_search('first_guardian_email', $columns)));
+            $first_guardian_contact_number = gv($item, array_search('first_guardian_contact_number', $columns));
+            $second_guardian_name          = gv($item, array_search('second_guardian_name', $columns));
+            $second_guardian_relation      = strtolower(gv($item, array_search('second_guardian_relation', $columns)));
+            $second_guardian_email         = strtolower(gv($item, array_search('second_guardian_email', $columns)));
+            $admission_number_prefix       = gv($item, array_search('admission_number_prefix', $columns));
+            $admission_number              = gv($item, array_search('admission_number', $columns));
+            $blood_group                   = gv($item, array_search('blood_group', $columns));
+            $religion                      = gv($item, array_search('religion', $columns));
+            $category                      = gv($item, array_search('category', $columns));
+            $caste                         = gv($item, array_search('caste', $columns));
+            $gender                        = gv($item, array_search('gender', $columns));
+            $fee_concession                = gv($item, array_search('fee_concession', $columns));
+            $transport_circle              = gv($item, array_search('transport_circle', $columns));
 
         	$name = $first_name.' '.($middle_name ? ($middle_name.' ') : '').$last_name;
         	$student_names[] = $name.' '.$contact_number;
         	$student_batches[] = $batch; 
+
+            $admission = $admission_number_prefix.str_pad($admission_number, config('config.admission_number_digit'), '0', STR_PAD_LEFT);
+            $admission_numbers[] = $admission;
+
+            if (in_array($admission, $existing_admission_numbers)) {
+                 $this->deleteFile($uuid);
+                throw ValidationException::withMessages(['message' => trans('student.admission_number_already_registered', ['name' => $name])]);
+            }
 
         	if (in_array($name.' '.$contact_number, $existing_student_names)) {
                 $this->deleteFile($uuid);
@@ -278,6 +308,18 @@ class StudentImportRepository
         		array_push($invalid_date_of_admission, $name);
         	}
 
+            if ($email && ! validateEmail($email)) {
+                array_push($invalid_student_email, $name);
+            }
+
+            if ($first_guardian_email && ! validateEmail($first_guardian_email)) {
+                array_push($invalid_first_guardian_email, $name);
+            }
+
+            if ($second_guardian_email && ! validateEmail($second_guardian_email)) {
+                array_push($invalid_second_guardian_email, $name);
+            }
+
         	if (validateDate($date_of_birth) && validateDate($date_of_admission) && toDate($date_of_birth) > toDate($date_of_admission))  {
         		array_push($date_of_birth_gt_date_of_admission, $name);
         	}
@@ -286,13 +328,33 @@ class StudentImportRepository
         		array_push($date_of_admission_gt_session_end, $name);
         	}
 
-        	if (! $father_name) {
-        		array_push($missing_father_name, $name);
+        	if (! $first_guardian_name) {
+        		array_push($missing_first_guardian_name, $name);
         	}
 
-        	if (! $father_contact_number) {
-        		array_push($missing_father_contact_number, $name);
+            if (! $first_guardian_relation) {
+                array_push($missing_first_guardian_relation, $name);
+            }
+
+            if (! in_array($first_guardian_relation, $guardian_relations)) {
+                array_push($unknown_first_guardian_relation, $name);
+            }
+
+        	if (! $first_guardian_contact_number) {
+        		array_push($missing_first_guardian_contact_number, $name);
         	}
+
+            if ($second_guardian_name && ! $second_guardian_relation) {
+                array_push($missing_second_guardian_relation, $name);
+            }
+
+            if ($second_guardian_name && ! in_array($second_guardian_relation, $guardian_relations)) {
+                array_push($unknown_second_guardian_relation, $name);
+            }
+
+            if ($second_guardian_name && $first_guardian_relation == $second_guardian_relation) {
+                array_push($duplicate_guardian_relation, $name);
+            }
 
 	    	if (! in_array($course, $courses->pluck('name')->all())) {
 	    		array_push($unknown_courses, $course);
@@ -320,7 +382,7 @@ class StudentImportRepository
                 array_push($unknown_castes, $caste);
             }
 
-            if ($gender && ! in_array($gender, $genders)) {
+            if ($gender && ! in_array(strtolower($gender), $genders)) {
                 array_push($unknown_genders, $gender);
             }
 
@@ -331,101 +393,154 @@ class StudentImportRepository
             if ($transport_circle && ! in_array($transport_circle, $transport_circles->pluck('name')->all())) {
                 array_push($unknown_transport_circles, $transport_circle);
             }
+        }
 
-	    	$admission = $admission_number_prefix.str_pad($admission_number, config('config.admission_number_digit'), '0', STR_PAD_LEFT);
-	    	if (in_array($admission, $existing_admission_numbers)) {
-	    		array_push($duplicate_admission_numbers, $admission);
-	    	}
+        $student_names = array_count_values($student_names);
+
+        $duplicate_records = array();
+        foreach($student_names as $key => $value) {
+            if ($value > 1) {
+                $duplicate_records[] = $key;
+            }
+        }
+
+        $admission_numbers = array_count_values($admission_numbers);
+
+        $duplicate_admission_numbers = array();
+        foreach($admission_numbers as $key => $value) {
+            if ($value > 1) {
+                $duplicate_admission_numbers[] = $key;
+            }
         }
 
         if ($unknown_courses) {
             $this->deleteFile($uuid);
-        	throw ValidationException::withMessages(['message' => trans('student.unknown_course_found', ['name' => implode(',', array_unique($unknown_courses))])]);
+        	throw ValidationException::withMessages(['message' => trans('student.unknown_course_found', ['name' => moreThanErrorMsg($unknown_courses)])]);
         }
 
     	if ($unknown_batches) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.unknown_batch_found', ['name' => implode(',', array_unique($unknown_batches))])]);
+    		throw ValidationException::withMessages(['message' => trans('student.unknown_batch_found', ['name' => moreThanErrorMsg($unknown_batches)])]);
     	}
 
         if ($unknown_blood_groups) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_blood_group_found', ['name' => implode(',', array_unique($unknown_blood_groups))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_blood_group_found', ['name' => moreThanErrorMsg($unknown_blood_groups)])]);
         }
 
         if ($unknown_religions) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_religion_found', ['name' => implode(',', array_unique($unknown_religions))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_religion_found', ['name' => moreThanErrorMsg($unknown_religions)])]);
         }
 
         if ($unknown_categories) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_category_found', ['name' => implode(',', array_unique($unknown_categories))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_category_found', ['name' => moreThanErrorMsg($unknown_categories)])]);
         }
 
         if ($unknown_castes) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_caste_found', ['name' => implode(',', array_unique($unknown_castes))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_caste_found', ['name' => moreThanErrorMsg($unknown_castes)])]);
         }
 
         if ($unknown_fee_concessions) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_fee_concession_found', ['name' => implode(',', array_unique($unknown_fee_concessions))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_fee_concession_found', ['name' => moreThanErrorMsg($unknown_fee_concessions)])]);
         }
 
         if ($unknown_transport_circles) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_transport_circle_found', ['name' => implode(',', array_unique($unknown_transport_circles))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_transport_circle_found', ['name' => moreThanErrorMsg($unknown_transport_circles)])]);
         }
 
         if ($unknown_castes) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_caste_found', ['name' => implode(',', array_unique($unknown_castes))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_caste_found', ['name' => moreThanErrorMsg($unknown_castes)])]);
         }
 
         if ($unknown_genders) {
             $this->deleteFile($uuid);
-            throw ValidationException::withMessages(['message' => trans('student.unknown_gender_found', ['name' => implode(',', array_unique($unknown_genders))])]);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_gender_found', ['name' => moreThanErrorMsg($unknown_genders)])]);
         }
 
-    	if (count($student_names) != count(array_unique($student_names))) {
+    	if ($duplicate_records) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.duplicate_student_found')]);
+    		throw ValidationException::withMessages(['message' => trans('student.duplicate_record', ['name' => moreThanErrorMsg($duplicate_records)])]);
     	}
 
     	if ($invalid_date_of_birth) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.invalid_date_of_birth_found', ['name' => implode(',', array_unique($invalid_date_of_birth))])]);
+    		throw ValidationException::withMessages(['message' => trans('student.invalid_date_of_birth_found', ['name' => moreThanErrorMsg($invalid_date_of_birth)])]);
     	}
+
+        if ($invalid_student_email) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('validation.email', ['attribute' => moreThanErrorMsg($invalid_student_email)])]);
+        }
 
     	if ($invalid_date_of_admission) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.invalid_date_of_admission_found', ['name' => implode(',', array_unique($invalid_date_of_admission))])]);
+    		throw ValidationException::withMessages(['message' => trans('student.invalid_date_of_admission_found', ['name' => moreThanErrorMsg($invalid_date_of_admission)])]);
     	}
 
     	if ($date_of_birth_gt_date_of_admission) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.date_of_birth_gt_date_of_admission', ['name' => implode(',', array_unique($date_of_birth_gt_date_of_admission))])]);
+    		throw ValidationException::withMessages(['message' => trans('student.date_of_birth_gt_date_of_admission', ['name' => moreThanErrorMsg($date_of_birth_gt_date_of_admission)])]);
     	}
 
     	if ($date_of_admission_gt_session_end) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.date_of_admission_gt_session_end', ['name' => implode(',', array_unique($date_of_admission_gt_session_end))])]);
+    		throw ValidationException::withMessages(['message' => trans('student.date_of_admission_gt_session_end', ['name' => moreThanErrorMsg($date_of_admission_gt_session_end)])]);
     	}
 
-    	if ($missing_father_name) {
+    	if ($missing_first_guardian_name) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.missing_father_name', ['name' => implode(',', array_unique($missing_father_name))])]);
+    		throw ValidationException::withMessages(['message' => trans('student.missing_guardian_name', ['name' => moreThanErrorMsg($missing_first_guardian_name), 'type' => trans('list.first')])]);
     	}
 
-    	if ($missing_father_contact_number) {
+        if ($missing_first_guardian_relation) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.missing_father_contact_number', ['name' => implode(',', array_unique($missing_father_contact_number))])]);
+            throw ValidationException::withMessages(['message' => trans('student.missing_guardian_relation', ['name' => moreThanErrorMsg($missing_first_guardian_relation), 'type' => trans('list.first')])]);
+        }
+
+        if ($unknown_first_guardian_relation) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_guardian_relation', ['name' => moreThanErrorMsg($unknown_first_guardian_relation), 'type' => trans('list.first')])]);
+        }
+
+        if ($invalid_first_guardian_email) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('validation.email', ['attribute' => moreThanErrorMsg($invalid_first_guardian_email)])]);
+        }
+
+    	if ($missing_first_guardian_contact_number) {
+            $this->deleteFile($uuid);
+    		throw ValidationException::withMessages(['message' => trans('student.missing_guardian_contact_number', ['name' => moreThanErrorMsg($missing_first_guardian_contact_number), 'type' => trans('list.first')])]);
     	}
+
+        if ($missing_second_guardian_relation) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('student.missing_guardian_relation', ['name' => moreThanErrorMsg($missing_second_guardian_relation), 'type' => trans('list.second')])]);
+        }
+
+        if ($unknown_second_guardian_relation) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('student.unknown_guardian_relation', ['name' => moreThanErrorMsg($unknown_second_guardian_relation), 'type' => trans('list.second')])]);
+        }
+
+        if ($invalid_second_guardian_email) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('validation.email', ['attribute' => moreThanErrorMsg($invalid_second_guardian_email)])]);
+        }
+
+        if ($duplicate_guardian_relation) {
+            $this->deleteFile($uuid);
+            throw ValidationException::withMessages(['message' => trans('student.duplicate_guardian_relation', ['name' => moreThanErrorMsg($duplicate_guardian_relation)])]);
+        }
 
     	if ($duplicate_admission_numbers) {
             $this->deleteFile($uuid);
-    		throw ValidationException::withMessages(['message' => trans('student.duplicate_admission_numbers', ['number' => implode(',', array_unique($duplicate_admission_numbers))])]);
+    		throw ValidationException::withMessages(['message' => trans('student.duplicate_admission_numbers', ['number' => moreThanErrorMsg($duplicate_admission_numbers)])]);
     	}
 
         activity()->disableLogging();
@@ -437,36 +552,39 @@ class StudentImportRepository
             if ($index == 0)
                 continue;
 
-            $first_name                   = gv($item, array_search('first_name', $columns));
-            $middle_name                  = gv($item, array_search('middle_name', $columns));
-            $last_name                    = gv($item, array_search('last_name', $columns));
-            $contact_number               = gv($item, array_search('contact_number', $columns));
-            $course                       = gv($item, array_search('course', $columns));
-            $batch                        = gv($item, array_search('batch', $columns));
-            $date_of_birth                = gv($item, array_search('date_of_birth', $columns));
-            $date_of_admission            = gv($item, array_search('date_of_admission', $columns));
-            $father_name                  = gv($item, array_search('father_name', $columns));
-            $mother_name                  = gv($item, array_search('mother_name', $columns));
-            $father_contact_number        = gv($item, array_search('father_contact_number', $columns));
-            $admission_number_prefix      = gv($item, array_search('admission_number_prefix', $columns));
-            $admission_number             = gv($item, array_search('admission_number', $columns));
-            $gender                       = gv($item, array_search('gender', $columns));
-            $nationality                  = gv($item, array_search('nationality', $columns));
-            $blood_group                  = gv($item, array_search('blood_group', $columns));
-            $religion                     = gv($item, array_search('religion', $columns));
-            $category                     = gv($item, array_search('category', $columns));
-            $caste                        = gv($item, array_search('caste', $columns));
-            $unique_identification_number = gv($item, array_search('unique_identification_number', $columns));
-            $emergency_contact_name       = gv($item, array_search('emergency_contact_name', $columns));
-            $emergency_contact_number     = gv($item, array_search('emergency_contact_number', $columns));
-            $present_address_line_1       = gv($item, array_search('present_address_line_1', $columns));
-            $present_address_line_2       = gv($item, array_search('present_address_line_2', $columns));
-            $present_city                 = gv($item, array_search('present_city', $columns));
-            $present_state                = gv($item, array_search('present_state', $columns));
-            $present_zipcode              = gv($item, array_search('present_zipcode', $columns));
-            $present_country              = gv($item, array_search('present_country', $columns));
-            $fee_concession               = gv($item, array_search('fee_concession', $columns));
-            $transport_circle             = gv($item, array_search('transport_circle', $columns));
+            $first_name                    = gv($item, array_search('first_name', $columns));
+            $middle_name                   = gv($item, array_search('middle_name', $columns));
+            $last_name                     = gv($item, array_search('last_name', $columns));
+            $contact_number                = gv($item, array_search('contact_number', $columns));
+            $email                         = gv($item, array_search('email', $columns));
+            $course                        = gv($item, array_search('course', $columns));
+            $batch                         = gv($item, array_search('batch', $columns));
+            $date_of_birth                 = gv($item, array_search('date_of_birth', $columns));
+            $date_of_admission             = gv($item, array_search('date_of_admission', $columns));
+            $first_guardian_name           = gv($item, array_search('first_guardian_name', $columns));
+            $first_guardian_relation       = strtolower(gv($item, array_search('first_guardian_relation', $columns)));
+            $second_guardian_name          = gv($item, array_search('second_guardian_name', $columns));
+            $second_guardian_relation      = strtolower(gv($item, array_search('second_guardian_relation', $columns)));
+            $first_guardian_contact_number = gv($item, array_search('first_guardian_contact_number', $columns));
+            $admission_number_prefix       = gv($item, array_search('admission_number_prefix', $columns));
+            $admission_number              = gv($item, array_search('admission_number', $columns));
+            $gender                        = gv($item, array_search('gender', $columns));
+            $nationality                   = gv($item, array_search('nationality', $columns));
+            $blood_group                   = gv($item, array_search('blood_group', $columns));
+            $religion                      = gv($item, array_search('religion', $columns));
+            $category                      = gv($item, array_search('category', $columns));
+            $caste                         = gv($item, array_search('caste', $columns));
+            $unique_identification_number  = gv($item, array_search('unique_identification_number', $columns));
+            $emergency_contact_name        = gv($item, array_search('emergency_contact_name', $columns));
+            $emergency_contact_number      = gv($item, array_search('emergency_contact_number', $columns));
+            $present_address_line_1        = gv($item, array_search('present_address_line_1', $columns));
+            $present_address_line_2        = gv($item, array_search('present_address_line_2', $columns));
+            $present_city                  = gv($item, array_search('present_city', $columns));
+            $present_state                 = gv($item, array_search('present_state', $columns));
+            $present_zipcode               = gv($item, array_search('present_zipcode', $columns));
+            $present_country               = gv($item, array_search('present_country', $columns));
+            $fee_concession                = gv($item, array_search('fee_concession', $columns));
+            $transport_circle              = gv($item, array_search('transport_circle', $columns));
 
             $course = $courses->firstWhere('name', $course);
 
@@ -478,22 +596,27 @@ class StudentImportRepository
                     return $fee_allocation->batch_id == $batch->id || $fee_allocation->course_id == $course->id;
                 })->first();
 
-            $existing_parent = $student_parents->where('father_name', $father_name)->where('father_contact_number_1', $father_contact_number)->first();
+            $existing_parent = $student_parents->where('first_guardian_name', $first_guardian_name)->where('first_guardian_relation', $first_guardian_relation)->where('first_guardian_contact_number_1', $first_guardian_contact_number)->first();
 
             if ($existing_parent) {
                 $parent = $existing_parent;
                 $parent_id = $parent['id'];
             } else {
                 $parent = $this->parent->forceCreate([
-                    'father_name'             => $father_name,
-                    'father_contact_number_1' => $father_contact_number,
-                    'mother_name'             => $mother_name
+                    'first_guardian_name'             => $first_guardian_name,
+                    'first_guardian_relation'         => $first_guardian_relation,
+                    'first_guardian_email'            => $first_guardian_email,
+                    'first_guardian_contact_number_1' => $first_guardian_contact_number,
+                    'second_guardian_name'            => $second_guardian_name,
+                    'second_guardian_relation'        => $second_guardian_relation,
+                    'second_guardian_email'           => $second_guardian_email
                 ]);
 
                 $student_parents->push([
-                    'id'                      => $parent->id,
-                    'father_name'             => $father_name,
-                    'father_contact_number_1' => $father_contact_number
+                    'id'                              => $parent->id,
+                    'first_guardian_name'             => $first_guardian_name,
+                    'first_guardian_relation'         => $first_guardian_relation,
+                    'first_guardian_contact_number_1' => $first_guardian_contact_number
                 ]);
 
                 $parent_id = $parent->id;
@@ -506,8 +629,9 @@ class StudentImportRepository
                 'middle_name'                  => $middle_name,
                 'last_name'                    => $last_name,
                 'date_of_birth'                => toDate($date_of_birth),
+                'email'                        => $email,
                 'contact_number'               => $contact_number,
-                'gender'                       => $gender,
+                'gender'                       => strtolower($gender),
                 'nationality'                  => $nationality,
                 'blood_group_id'               => optional($blood_groups->firstWhere('name', $blood_group))->id,
                 'religion_id'                  => optional($religions->firstWhere('name', $religion))->id,

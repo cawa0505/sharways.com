@@ -14,11 +14,10 @@ class CreateEventDepartmentTable extends Migration
     public function up()
     {
         Schema::create('event_department', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('event_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('event_id')->unsigned()->nullable();
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
-            $table->integer('department_id')->unsigned()->nullable();
+            $table->bigInteger('department_id')->unsigned()->nullable();
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
         });

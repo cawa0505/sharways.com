@@ -8,6 +8,7 @@ use App\Models\Student\StudentRecord;
 use Illuminate\Validation\ValidationException;
 use App\Models\Finance\Transaction\Transaction;
 use App\Repositories\Finance\AccountRepository;
+use App\Repositories\Configuration\Finance\Transaction\PaymentMethodRepository;
 
 class ReportRepository
 {
@@ -18,6 +19,7 @@ class ReportRepository
     protected $student_record;
     protected $employee;
     protected $student;
+    protected $payment_method;
 
     /**
      * Instantiate a new instance.
@@ -29,13 +31,15 @@ class ReportRepository
         AccountRepository $account,
         StudentRecord $student_record,
         Employee $employee,
-        Student $student
+        Student $student,
+        PaymentMethodRepository $payment_method
 	) {
         $this->transaction = $transaction;
         $this->account = $account;
         $this->student_record = $student_record;
         $this->employee = $employee;
         $this->student = $student;
+        $this->payment_method = $payment_method;
 	}
 
     /**
@@ -46,7 +50,8 @@ class ReportRepository
     public function getPreRequisite()
     {
         $accounts = $this->account->selectAll();
-        return compact('accounts');
+        $payment_methods = $this->payment_method->selectAll();
+        return compact('accounts','payment_methods');
     }
 
     /**
@@ -60,6 +65,7 @@ class ReportRepository
         $sort_by    = gv($params, 'sort_by', 'date');
         $order      = gv($params, 'order', 'asc');
         $account_id = gv($params, 'account_id');
+        $payment_method_id = gv($params, 'payment_method_id');
         $start_date = gv($params, 'start_date', config('config.default_academic_session.start_date'));
         $end_date   = gv($params, 'end_date', config('config.default_academic_session.end_date'));
 
@@ -71,7 +77,7 @@ class ReportRepository
             throw ValidationException::withMessages(['message' => trans('academic.invalid_session_date_range')]);
         }
 
-        $transactions = $this->transaction->dateBetween([
+        $query = $this->transaction->dateBetween([
             'start_date' => $start_date,
             'end_date' => $end_date
         ])->isNotCancelled()->where(function($q) use($account_id) {
@@ -80,7 +86,13 @@ class ReportRepository
                     $q2->where('from_account_id', $account_id)->orWhere('to_account_id', $account_id);
                 });
             });
-        })->get();
+        });
+
+        if ($payment_method_id) {
+          $query->where('payment_method_id', $payment_method_id);
+        }
+
+        $transactions = $query->orderBy('prefix', 'asc')->orderBy('number','asc')->get();
 
         $transactions->load($this->getTransactionRelation());
 
@@ -90,6 +102,9 @@ class ReportRepository
 
         $total_receipts = 0;
         $total_payments = 0;
+        $fee_summary = array();
+        $concession_amount = 0;
+        $i = 1;
         foreach ($transactions as $transaction) {
             $payment_method_detail = $this->getPaymentMethodDetail($transaction);
             $head = $this->getHeadDetail($transaction, [
@@ -100,29 +115,92 @@ class ReportRepository
 
             $employee = $this->getEntryByEmployee($transaction, $employees);
 
+            $total_receipts += ($transaction->type) ? $transaction->amount : 0;
+            $total_payments += (! $transaction->type) ? $transaction->amount : 0;
+
+            $installment_concession = 0;
+            if ($transaction->registration_id) {
+                $fee_summary[] = array('head' => trans('student.registration_fee'), 'amount' => $transaction->amount);
+            } else if($transaction->student_fee_record_id) {
+                $fee_concession = $transaction->studentFeeRecord->feeConcession;
+
+                foreach ($transaction->studentFeeRecordDetails as $student_fee_record_detail) {
+                    $optional = $transaction->studentFeeRecord->studentOptionalFeeRecords->firstWhere('fee_head_id', $student_fee_record_detail->fee_head_id);
+                    
+                    $fee_installment_detail = $transaction->studentFeeRecord->feeInstallment->feeInstallmentDetails->firstWhere('fee_head_id', $student_fee_record_detail->fee_head_id);
+                    
+                    $amount = $optional ? 0 : $student_fee_record_detail->amount;
+
+                    $fee_summary[] = array('head' => $student_fee_record_detail->feeHead->name, 'amount' => $amount);
+
+                    if ($fee_concession) {
+                        $fee_concession_detail = $fee_concession->feeConcessionDetails->firstWhere('fee_head_id', $student_fee_record_detail->fee_head_id);
+
+                        if ($fee_concession_detail) {
+                            if ($fee_concession_detail->type == 'percent') {
+                                $installment_concession += ($fee_installment_detail->amount * $fee_concession_detail->amount/100);
+                            } else {
+                                $installment_concession += $fee_concession_detail->amount;
+                            }
+                        }
+                    }
+                }
+
+                if ($transaction->getOption('transport_fee')) {
+                    $fee_summary[] = array('head' => trans('transport.fee'), 'amount' => $transaction->getOption('transport_fee'));
+                }
+
+                if ($transaction->getOption('late_fee')) {
+                    $fee_summary[] = array('head' => trans('finance.late_fee'), 'amount' => $transaction->getOption('late_fee'));
+                }
+
+                $additional_fee_charge = $transaction->getOption('additional_fee_charge');
+                if (gv($additional_fee_charge, 'amount', 0) > 0) {
+                    $fee_summary[] = array('head' => gv($additional_fee_charge, 'label'), 'amount' => gv($additional_fee_charge, 'amount', 0));
+                }
+
+                $additional_fee_discount = $transaction->getOption('additional_fee_discount');
+                if (gv($additional_fee_discount, 'amount', 0) > 0) {
+                    $fee_summary[] = array('head' => gv($additional_fee_discount, 'label'), 'amount' => gv($additional_fee_discount, 'amount', 0));
+                }
+            }
+
+            $concession_amount += $installment_concession;
+
             $list[] = array(
+                'sno'                   => $i,
                 'type'                  => $transaction->type ? 'receipt' : 'payment',
                 'account'               => $transaction->account->name,
                 'head'                  => $head,
                 'payment_method'        => $transaction->paymentMethod->name,
                 'payment_method_detail' => $payment_method_detail,
                 'amount'                => currency($transaction->amount, 1),
+                'fee_concession'        => $installment_concession ? currency($installment_concession, 1) : '-',
                 'date'                  => $transaction->date,
                 'voucher_number'        => ($transaction->prefix ? $transaction->prefix : '').$transaction->number,
                 'employee'              => $employee
             );
 
-            $total_receipts += ($transaction->type) ? $transaction->amount : 0;
-            $total_payments += (! $transaction->type) ? $transaction->amount : 0;
+            $i++;
         }
 
-        array_multisort(array_map(function($element) use($sort_by) {
-              return $element[$sort_by];
-        }, $list), $order == 'asc' ? SORT_ASC : SORT_DESC, $list);
+        $fee_summary[] = ['head' => trans('finance.fee_concession'), 'amount' => $concession_amount];
+
+        $collection = collect($fee_summary);
+
+        $fee_summary = $collection->groupBy('head')->map(function ($row) {
+            return currency($row->sum('amount'),1);
+        });
+
+        // array_multisort(array_map(function($element) use($sort_by) {
+        //       return $element[$sort_by];
+        // }, $list), $order == 'asc' ? SORT_ASC : SORT_DESC, $list);
 
         $footer = array(
             'total_payments' => currency($total_payments, 1),
-            'total_receipts' => currency($total_receipts, 1)
+            'total_receipts' => currency($total_receipts, 1),
+            'total_concessions' => currency($concession_amount, 1),
+            'fee_summary' => $fee_summary
         );
 
         return compact('list','footer');
@@ -244,9 +322,17 @@ class ReportRepository
             'accountTransfer',
             'accountTransfer.toAccount',
             'studentFeeRecord',
+            'studentFeeRecord.feeInstallment',
+            'studentFeeRecord.feeInstallment.feeInstallmentDetails',
+            'studentFeeRecord.feeConcession',
+            'studentFeeRecord.feeConcession.feeConcessionDetails',
             'payroll',
             'user',
-            'user.employee'
+            'user.employee',
+            'studentFeeRecordDetails',
+            'studentFeeRecordDetails.feeHead',
+            'studentFeeRecordDetails.studentFeeRecord',
+            'studentFeeRecordDetails.studentFeeRecord.studentOptionalFeeRecords',
         ];
     }
 
@@ -274,7 +360,7 @@ class ReportRepository
      */
     public function getDayBookData($params)
     {
-        $date = gv($params, 'date');
+        $date = toDate(gv($params, 'date'));
 
         if (! dateBetweenSession($date)) {
             throw ValidationException::withMessages(['message' => trans('academic.invalid_session_date_range')]);
@@ -292,6 +378,7 @@ class ReportRepository
         $footer = array();
         $total_payments = 0;
         $total_receipts = 0;
+        $i = 1;
         foreach ($transactions as $transaction) {
             $payment_method_detail = $this->getPaymentMethodDetail($transaction);
             $head = $this->getHeadDetail($transaction, [
@@ -303,6 +390,7 @@ class ReportRepository
             $employee = $this->getEntryByEmployee($transaction, $employees);
 
             $list[] = array(
+                'sno' => $i,
                 'type'                  => $transaction->type ? 'receipt' : 'payment',
                 'account'               => $transaction->account->name,
                 'head'                  => $head,
@@ -316,6 +404,7 @@ class ReportRepository
 
             $total_receipts += ($transaction->type) ? $transaction->amount : 0;
             $total_payments += (! $transaction->type) ? $transaction->amount : 0;
+            $i++;
         }
 
         $footer = array(

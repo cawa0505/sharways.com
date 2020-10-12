@@ -14,9 +14,8 @@ class CreateExamAssessmentsTable extends Migration
     public function up()
     {
         Schema::create('exam_assessments', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('academic_session_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('academic_session_id')->unsigned()->nullable();
             $table->foreign('academic_session_id','ea_academic_session_id_foreign')->references('id')->on('academic_sessions')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->text('description')->nullable();

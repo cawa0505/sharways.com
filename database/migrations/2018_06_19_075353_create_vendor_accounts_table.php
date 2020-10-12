@@ -14,9 +14,8 @@ class CreateVendorAccountsTable extends Migration
     public function up()
     {
         Schema::create('vendor_accounts', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('vendor_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('vendor_id')->unsigned()->nullable();
             $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('account_number')->nullable();

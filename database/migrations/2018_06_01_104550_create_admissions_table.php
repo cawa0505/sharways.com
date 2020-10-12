@@ -14,12 +14,11 @@ class CreateAdmissionsTable extends Migration
     public function up()
     {
         Schema::create('admissions', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->integer('number')->default(0);
-            $table->integer('registration_id')->unsigned()->nullable();
+            $table->bigInteger('registration_id')->unsigned()->nullable();
             $table->foreign('registration_id')->references('id')->on('registrations')->onDelete('cascade');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
             $table->date('date_of_admission')->nullable();
             $table->text('admission_remarks')->nullable();

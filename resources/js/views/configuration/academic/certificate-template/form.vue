@@ -57,7 +57,7 @@
 	            </div>	
 	        </div>
 	        <div class="card-footer text-right">
-	            <router-link to="/configuration/academic/certificate/type" class="btn btn-danger waves-effect waves-light " v-show="id">{{trans('general.cancel')}}</router-link>
+	            <router-link to="/configuration/academic/certificate/template" class="btn btn-danger waves-effect waves-light " v-show="id">{{trans('general.cancel')}}</router-link>
 	            <button v-if="!id" type="button" class="btn btn-danger waves-effect waves-light " @click="$emit('cancel')">{{trans('general.cancel')}}</button>
 	            <button type="submit" class="btn btn-info waves-effect waves-light">
 	                <span v-if="id">{{trans('general.update')}}</span>

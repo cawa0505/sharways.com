@@ -85,7 +85,6 @@
 
 
 <script>
-    import uuid from 'uuid/v4'
 
     export default {
         components: {},
@@ -115,7 +114,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.pageForm.upload_token = uuid();
+                this.pageForm.upload_token = this.$uuid.v4();
         },
         methods: {
             hasPermission(permission){
@@ -133,7 +132,7 @@
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.pageForm.upload_token = uuid();
+                        this.pageForm.upload_token = this.$uuid.v4();
                         this.$emit('completed');
                         loader.hide();
                     })

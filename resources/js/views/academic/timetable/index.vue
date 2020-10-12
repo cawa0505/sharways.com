@@ -155,12 +155,8 @@
 </template>
 
 <script>
-    import datepicker from 'vuejs-datepicker'
-    import vSelect from 'vue-multiselect'
-    import switches from 'vue-switches'
-
     export default {
-        components: {switches,vSelect,datepicker},
+        components: {},
         data(){
             return {
                 timetables: {
@@ -208,7 +204,8 @@
             },
             getTimetables(page){
                 let loader = this.$loading.show();
-                // this.filter.date_effective = moment().format('YYYY-MM-DD');
+                this.filter.date_effective = helper.toDate(this.filter.date_effective);
+                // this.filter.date_effective = helper.today();
                 if (typeof page !== 'number') {
                     page = 1;
                 }
@@ -326,7 +323,6 @@
             },
             printSelectedBatchTimetable(){
                 let loader = this.$loading.show();
-                this.filter.date_effective = moment(this.filter.date_effective).format('YYYY-MM-DD');
                 axios.post('/api/timetable/print/selected',{filter: this.filter})
                     .then(response => {
                         let print = window.open("/print");

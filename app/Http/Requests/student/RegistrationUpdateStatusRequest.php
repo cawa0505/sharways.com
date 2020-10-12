@@ -26,9 +26,7 @@ class RegistrationUpdateStatusRequest extends FormRequest
         $rules = [
             'status'            => 'required|in:rejected,allotted',
             'batch_id'          => 'required_if:status,allotted|integer',
-            'rejection_remarks' => 'optional_if:status,rejected|min:3',
-            'admission_remarks' => 'optional_if:status,allotted|min:3',
-            'admission_number'  => 'required_if:status,allotted|numeric|min:0'
+            'rejection_remarks' => 'required_if:status,rejected|min:20'
         ];
 
         if (request('status') == 'allotted') {

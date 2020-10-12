@@ -14,15 +14,14 @@ class CreateFrontendMenusTable extends Migration
     public function up()
     {
         Schema::create('frontend_menus', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('slug')->nullable();
             $table->string('type')->nullable();
             $table->integer('position')->default(0);
-            $table->integer('parent_id')->unsigned()->nullable();
+            $table->bigInteger('parent_id')->unsigned()->nullable();
             $table->foreign('parent_id')->references('id')->on('frontend_menus')->onDelete('set null');
-            $table->integer('frontend_page_id')->unsigned()->nullable();
+            $table->bigInteger('frontend_page_id')->unsigned()->nullable();
             $table->foreign('frontend_page_id')->references('id')->on('frontend_pages')->onDelete('set null');
             $table->text('options')->nullable();
             $table->timestamps();

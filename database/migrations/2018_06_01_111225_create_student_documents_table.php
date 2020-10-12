@@ -14,11 +14,10 @@ class CreateStudentDocumentsTable extends Migration
     public function up()
     {
         Schema::create('student_documents', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('student_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('student_id')->unsigned()->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->integer('student_document_type_id')->unsigned()->nullable();
+            $table->bigInteger('student_document_type_id')->unsigned()->nullable();
             $table->foreign('student_document_type_id')->references('id')->on('student_document_types')->onDelete('cascade');
             $table->string('title')->nullable();
             $table->text('description')->nullable();

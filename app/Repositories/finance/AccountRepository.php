@@ -197,29 +197,18 @@ class AccountRepository
      */
     private function formatParams($params, $account = null)
     {
-        $is_default = gbv($params, 'is_default');
-
-        if ($is_default) {
-            if ($account) {
-                $this->account->where('id', '!=', $account->id)->update(['is_default' => 0]);
-            } else {
-                $this->account->whereNotNull('id')->update(['is_default' => 0]);
-            }
-        }
-
         $type = gv($params, 'type');
 
         return [
             'name'                     => gv($params, 'name'),
             'prefix'                   => strtoupper(gv($params, 'prefix')),
             'type'                     => $type,
-            'bank_name'                => ($type == 'bank') ? gv($params, 'type') : null,
+            'bank_name'                => ($type == 'bank') ? gv($params, 'bank_name') : null,
             'branch_name'              => ($type == 'bank') ? gv($params, 'branch_name') : null,
             'bank_identification_code' => ($type == 'bank') ? gv($params, 'bank_identification_code') : null,
             'account_number'           => ($type == 'bank') ? gv($params, 'account_number') : null,
             'opening_balance'          => gv($params, 'opening_balance', 0),
-            'is_active'                => gbv($params, 'is_active'),
-            'is_default'               => $is_default,
+            'is_active'                => gbv($params, 'is_active')
         ];
     }
 

@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Upload;
 
-use JWTAuth;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\Upload\Upload;
 use App\Http\Controllers\Controller;
-use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UploadController extends Controller
 {

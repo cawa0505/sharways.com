@@ -14,11 +14,10 @@ class CreateEventBatchTable extends Migration
     public function up()
     {
         Schema::create('event_batch', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('event_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('event_id')->unsigned()->nullable();
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
-            $table->integer('batch_id')->unsigned()->nullable();
+            $table->bigInteger('batch_id')->unsigned()->nullable();
             $table->foreign('batch_id')->references('id')->on('batches')->onDelete('cascade');
             $table->timestamps();
         });

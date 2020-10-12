@@ -14,13 +14,12 @@ class CreateBillsTable extends Migration
     public function up()
     {
         Schema::create('bills', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid');
             $table->string('bill_number')->nullable();
-            $table->integer('vendor_id')->unsigned()->nullable();
+            $table->bigInteger('vendor_id')->unsigned()->nullable();
             $table->foreign('vendor_id')->references('id')->on('vehicles')->onDelete('cascade');
-            $table->integer('vehicle_id')->unsigned()->nullable();
+            $table->bigInteger('vehicle_id')->unsigned()->nullable();
             $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('cascade');
             $table->string('type')->nullable();
             $table->date('date')->nullable();
@@ -30,7 +29,7 @@ class CreateBillsTable extends Migration
             $table->text('description')->nullable();
             $table->text('tnc')->nullable();
             $table->text('memo')->nullable();
-            $table->integer('employee_id')->unsigned()->nullable();
+            $table->bigInteger('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->decimal('subtotal_discount',25,5)->default(0);
             $table->decimal('subtotal_tax',25,5)->default(0);

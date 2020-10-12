@@ -14,11 +14,10 @@ class CreateStockItemsTable extends Migration
     public function up()
     {
         Schema::create('stock_items', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('code')->nullable();
-            $table->integer('stock_category_id')->unsigned()->nullable();
+            $table->bigInteger('stock_category_id')->unsigned()->nullable();
             $table->foreign('stock_category_id')->references('id')->on('stock_categories')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->text('options')->nullable();

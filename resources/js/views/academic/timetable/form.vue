@@ -59,14 +59,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import switches from 'vue-switches'
-    import uuid from 'uuid/v4'
 
 	export default {
 		props: ['uuid'],
-        components: {switches,vSelect,datepicker},
+        components: {},
         data(){
             return {
                 timetableForm: new Form({
@@ -166,7 +162,6 @@
             },
             store(){
                 let loader = this.$loading.show();
-                this.timetableForm.date_effective = moment(this.timetableForm.date_effective).format('YYYY-MM-DD');
                 this.timetableForm.post('/api/timetable')
                     .then(response => {
                         this.timetableForm.days = [];
@@ -183,7 +178,6 @@
             },
             update(){
                 let loader = this.$loading.show();
-                this.timetableForm.date_effective = moment(this.timetableForm.date_effective).format('YYYY-MM-DD');
                 this.timetableForm.patch('/api/timetable/'+this.uuid)
                     .then(response => {
                         toastr.success(response.message);

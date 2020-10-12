@@ -14,10 +14,9 @@ class CreateEventsTable extends Migration
     public function up()
     {
         Schema::create('events', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('event_type_id')->unsigned()->nullable();
+            $table->bigInteger('event_type_id')->unsigned()->nullable();
             $table->foreign('event_type_id')->references('id')->on('event_types')->onDelete('cascade');
             $table->string('title')->nullable();
             $table->text('description')->nullable();
@@ -27,7 +26,7 @@ class CreateEventsTable extends Migration
             $table->time('end_time')->nullable();
             $table->string('venue')->nullable();
             $table->string('audience',50)->nullable();
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->uuid('upload_token')->nullable();
             $table->text('options')->nullable();

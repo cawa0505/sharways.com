@@ -86,12 +86,9 @@
 
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
 
     export default {
-        components: {datepicker,vSelect},
+        components: {},
         data() {
             return {
                 lessonPlanForm: new Form({
@@ -123,7 +120,7 @@
                 this.get();
             else {
                 this.addRow();
-                this.lessonPlanForm.upload_token = uuid();
+                this.lessonPlanForm.upload_token = this.$uuid.v4();
             }
 
             this.getPreRequisite();
@@ -186,14 +183,12 @@
                     this.store();
             },
             store(){
-                this.lessonPlanForm.start_date = helper.toDate(this.lessonPlanForm.start_date);
-                this.lessonPlanForm.end_date = helper.toDate(this.lessonPlanForm.end_date);
                 let loader = this.$loading.show();
                 this.lessonPlanForm.post('/api/lesson/plan')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
-                        this.lessonPlanForm.upload_token = uuid();
+                        this.lessonPlanForm.upload_token = this.$uuid.v4();
                         this.selected_batch = null;
                         this.selected_subject = null;
                         this.lessonPlanForm.details = [];
@@ -237,8 +232,6 @@
                     });
             },
             update(){
-                this.lessonPlanForm.start_date = helper.toDate(this.lessonPlanForm.start_date);
-                this.lessonPlanForm.end_date = helper.toDate(this.lessonPlanForm.end_date);
                 let loader = this.$loading.show();
                 this.lessonPlanForm.patch('/api/lesson/plan/'+this.uuid)
                     .then(response => {

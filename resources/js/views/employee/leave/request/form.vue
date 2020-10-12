@@ -119,11 +119,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
-    import uuid from 'uuid/v4'
     export default {
-        components : { vSelect,datepicker },
+        components : {},
         props:['uuid'],
         data() {
             return {
@@ -152,7 +149,7 @@
             if(this.uuid)
                 this.get();
             else
-                this.leaveRequestForm.upload_token = uuid();
+                this.leaveRequestForm.upload_token = this.$uuid.v4();
 
             if(!this.uuid)
                 this.getLeaveAllocation();
@@ -202,8 +199,6 @@
             },
             store(){
                 let loader = this.$loading.show();
-                this.leaveRequestForm.start_date = helper.toDate(this.leaveRequestForm.start_date);
-                this.leaveRequestForm.end_date = helper.toDate(this.leaveRequestForm.end_date);
                 this.leaveRequestForm.post('/api/employee/leave/request')
                     .then(response => {
                         toastr.success(response.message);
@@ -211,7 +206,7 @@
                         this.clearAttachment = !this.clearAttachment;
                         this.selected_employee = null;
                         this.selected_leave_type = null;
-                        this.leaveRequestForm.upload_token = uuid();
+                        this.leaveRequestForm.upload_token = this.$uuid.v4();
                         this.apply_leave_for_other = 0;
                         this.$emit('completed');
                     })
@@ -250,8 +245,6 @@
             },
             update(){
                 let loader = this.$loading.show();
-                this.leaveRequestForm.start_date = helper.toDate(this.leaveRequestForm.start_date);
-                this.leaveRequestForm.end_date = helper.toDate(this.leaveRequestForm.end_date);
                 this.leaveRequestForm.patch('/api/employee/leave/request/'+this.uuid)
                     .then(response => {
                         toastr.success(response.message);

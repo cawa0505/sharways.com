@@ -130,6 +130,7 @@
 	                </div>
 	            </div>
 	        </div>
+	        <custom-field :fields="custom_fields" :customValues="custom_values" :formErrors="customFieldFormErrors" @updateCustomValues="updateCustomValues"></custom-field>
             <div class="card-footer text-right">
         		<button type="submit" class="btn btn-info waves-effect waves-light">{{trans('general.save')}}</button>
             </div>
@@ -138,10 +139,8 @@
 </template>
 
 <script>
-    import switches from 'vue-switches'
-
 	export default {
-        components: {switches},
+        components: {},
 		props: ['student'],
 		data() {
 			return {
@@ -163,8 +162,12 @@
 					permanent_country: '',
 					emergency_contact_name: '',
 					emergency_contact_number: '',
+					custom_values: [],
 					type: 'contact'
-				},false)
+				},false),
+				custom_fields: [],
+				custom_values: [],
+				customFieldFormErrors: {}
 			}
 		},
 		mounted(){
@@ -173,9 +176,25 @@
                 this.$router.push('/dashboard');
             }
 
-            this.get(this.student);
+            this.getPreRequisite();
 		},
 		methods: {
+			getPreRequisite(){
+	            let loader = this.$loading.show();
+	            axios.get('/api/student/pre-requisite?form_type=student_contact')
+	            	.then(response => {
+	            		this.custom_fields = response.custom_fields;
+	            		this.get(this.student);
+	            		loader.hide();
+	            	})
+	            	.catch(error => {
+	            		loader.hide();
+	            		helper.showErrorMsg(error);
+	            	});	
+			},
+			updateCustomValues(value) {
+				this.contactForm.custom_values = value;
+			},
 			updatePermanentAddress(){
 	          	this.contactForm.permanent_address_line_1 = this.contactForm.present_address_line_1;
 	          	this.contactForm.permanent_address_line_2 = this.contactForm.present_address_line_2;
@@ -202,6 +221,7 @@
 	          	this.contactForm.permanent_country = student.permanent_country;
 	          	this.contactForm.emergency_contact_name = student.emergency_contact_name;
 	          	this.contactForm.emergency_contact_number = student.emergency_contact_number;
+	          	this.custom_values = student.options && student.options.hasOwnProperty('custom_values') ? student.options.custom_values : [];
 			},
 			submit(){
 				let loader = this.$loading.show();
@@ -213,6 +233,7 @@
 					})
 					.catch(error => {
 						loader.hide();
+						this.customFieldFormErrors = error;
 						helper.showErrorMsg(error);
 					})
 			}

@@ -14,8 +14,7 @@ class CreateAcademicSessionsTable extends Migration
     public function up()
     {
         Schema::create('academic_sessions', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

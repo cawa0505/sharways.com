@@ -14,10 +14,9 @@ class CreateFeeHeadsTable extends Migration
     public function up()
     {
         Schema::create('fee_heads', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
-            $table->integer('fee_group_id')->unsigned()->nullable();
+            $table->bigInteger('fee_group_id')->unsigned()->nullable();
             $table->foreign('fee_group_id')->references('id')->on('fee_groups')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->text('options')->nullable();

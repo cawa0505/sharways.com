@@ -13,6 +13,17 @@
                         <show-error :form-name="vehicleServiceRecordForm" prop-name="vehicle_id"></show-error>
                     </div>
                 </div>
+                <div class="col-12 col-sm-3">
+                    <div class="form-group">
+                        <label for="">{{trans('transport.vehicle_service_center')}}</label>
+                        <v-select label="name" v-model="selected_vehicle_service_center" name="vehicle_service_center_id" id="vehicle_service_center_id" :options="vehicle_service_centers" :placeholder="trans('general.select_one')" @select="onVehicleServiceCenterSelect" @close="vehicleServiceRecordForm.errors.clear('vehicle_service_center_id')" @remove="vehicleServiceRecordForm.vehicle_service_center_id = ''">
+                            <div class="multiselect__option" slot="afterList" v-if="!vehicles.length">
+                                {{trans('general.no_option_found')}}
+                            </div>
+                        </v-select>
+                        <show-error :form-name="vehicleServiceRecordForm" prop-name="vehicle_service_center_id"></show-error>
+                    </div>
+                </div>
 	            <div class="col-12 col-sm-3">
 	                <div class="form-group">
 	                    <label for="">{{trans('transport.date_of_service')}}</label>
@@ -69,12 +80,9 @@
 
 
 <script>
-    import uuid from 'uuid/v4'
-    import vSelect from 'vue-multiselect'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components:{vSelect,datepicker},
+        components:{},
         props: ['id'],
         data() {
             return {
@@ -83,23 +91,27 @@
                     log: '',
                     next_due_date: '',
                     vehicle_id: '',
+                    vehicle_service_center_id: '',
                     date_of_service: '',
                     description : '',
                     upload_token: ''
                 }),
                 default_currency: helper.getConfig('default_currency'),
                 vehicles: [],
+                vehicle_service_centers: [],
                 selected_vehicle: null,
+                selected_vehicle_service_center: null,
                 clearAttachment: false
             };
         },
         mounted() {
-            this.vehicleServiceRecordForm.upload_token = uuid();
+            this.vehicleServiceRecordForm.upload_token = this.$uuid.v4();
 
             let loader = this.$loading.show();
             axios.get('/api/vehicle/service/record/pre-requisite')
             	.then(response => {
             		this.vehicles = response.vehicles;
+                    this.vehicle_service_centers = response.vehicle_service_centers;
                     loader.hide();
             	})
             	.catch(error => {
@@ -119,16 +131,14 @@
             },
             storeServiceRecord(){
                 let loader = this.$loading.show();
-                this.vehicleServiceRecordForm.date_of_service = helper.toDate(this.vehicleServiceRecordForm.date_of_service);
-                this.vehicleServiceRecordForm.next_due_date = helper.toDate(this.vehicleServiceRecordForm.next_due_date);
-
                 this.vehicleServiceRecordForm.post('/api/vehicle/service/record')
                     .then(response => {
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
                         this.$emit('completed');
-                        this.vehicleServiceRecordForm.upload_token = uuid();
+                        this.vehicleServiceRecordForm.upload_token = this.$uuid.v4();
                         this.selected_vehicle = null;
+                        this.selected_vehicle_service_center = null;
                         loader.hide();
                     })
                     .catch(error => {
@@ -143,16 +153,18 @@
                         this.vehicleServiceRecordForm.amount = response.vehicle_service_record.amount;
                         this.vehicleServiceRecordForm.log = response.vehicle_service_record.log;
                         this.vehicleServiceRecordForm.vehicle_id = response.vehicle_service_record.vehicle_id;
+                        this.vehicleServiceRecordForm.vehicle_service_center_id = response.vehicle_service_record.vehicle_service_center_id;
                         this.vehicleServiceRecordForm.date_of_service = response.vehicle_service_record.date_of_service;
                         this.vehicleServiceRecordForm.next_due_date = response.vehicle_service_record.next_due_date;
                         this.selected_vehicle = {id: response.vehicle_service_record.vehicle_id, name: response.vehicle_service_record.vehicle.name};
+                        this.selected_vehicle_service_center = response.vehicle_service_record.vehicle_service_center_id ?  {id: response.vehicle_service_record.vehicle_service_center_id, name: response.vehicle_service_record.vehicle_service_center.name} : null;
                         this.vehicleServiceRecordForm.description = response.vehicle_service_record.description;
                         this.vehicleServiceRecordForm.upload_token = response.vehicle_service_record.upload_token;
                         loader.hide();
                     })
                     .catch(error => {
                         loader.hide();
-                        this.$router.push('/vehicle/service/record');
+                        this.$router.push('/transport/vehicle/service/record');
                     });
             },
             updateServiceRecord(){
@@ -171,6 +183,9 @@
             },
             onVehicleSelect(selectedOption){
             	this.vehicleServiceRecordForm.vehicle_id = selectedOption.id;
+            },
+            onVehicleServiceCenterSelect(selectedOption){
+                this.vehicleServiceRecordForm.vehicle_service_center_id = selectedOption.id;
             }
         }
     }

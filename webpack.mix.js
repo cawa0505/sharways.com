@@ -16,6 +16,10 @@ var plugin =  'resources/plugins/';
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CompressionPlugin = require('compression-webpack-plugin');
 
+mix.babelConfig({
+  plugins: ['@babel/plugin-syntax-dynamic-import'],
+});
+
 mix.js('resources/js/app.js', 'public/js/app.js')
   .combine([
     plugin + 'sidebarmenu.js',
@@ -34,13 +38,13 @@ mix.js('resources/js/app.js', 'public/js/app.js')
     .sass('resources/sass/colors/megna.scss', 'public/css/colors')
     .sass('resources/sass/colors/purple.scss', 'public/css/colors')
     .sass('resources/sass/colors/red.scss', 'public/css/colors')
-    .browserSync('school')                     // this is the alias/virtual host which will be called to load http://localhost:3000
+    .browserSync('instikit.test')                     // this is the alias/virtual host which will be called to load http://localhost:3000
     .webpackConfig({
         devtool: "cheap-module-source-map",     // "eval-source-map" or "inline-source-map" or "cheap-module-source-map" or "eval"
         plugins: [
             // new BundleAnalyzerPlugin(),      // load this package to see which plugins with its size detail
             new CompressionPlugin({             // very import to compress the assets
-                asset: "[path].gz[query]",
+                filename: "[path].gz[query]",
                 algorithm: "gzip",
                 test: /\.js$|\.css$|\.html$|\.svg$/,
                 threshold: 10240,
@@ -60,7 +64,10 @@ mix.js('resources/js/app.js', 'public/js/app.js')
                 '@views': path.resolve(__dirname, 'resources', 'js', 'views'),
                 '@widgets': path.resolve(__dirname, 'resources', 'js', 'widgets')
             }
-        }
+        },
+        output: {
+            chunkFilename: '[name].js?id=[chunkhash]',
+        },
     });
 
 if (mix.inProduction()) {                       // In production environtment use versioning

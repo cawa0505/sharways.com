@@ -14,10 +14,9 @@ class CreateClassTimingSessionsTable extends Migration
     public function up()
     {
         Schema::create('class_timing_sessions', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
-            $table->integer('class_timing_id')->unsigned()->nullable();
+            $table->bigInteger('class_timing_id')->unsigned()->nullable();
             $table->foreign('class_timing_id')->references('id')->on('class_timings')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->time('start')->nullable();

@@ -50,7 +50,6 @@
 		                                    <th>{{trans('academic.course')}}</th>
 		                                    <th>{{trans('academic.batch')}}</th>
 		                                    <th>{{trans('transport.route')}}</th>
-                                            <th></th>
 		                                </tr>
 		                            </thead>
 		                            <tbody>
@@ -60,13 +59,6 @@
 		                                    <td v-text="transport_route_student.student_record.batch.course.name"></td>
 		                                    <td v-text="transport_route_student.student_record.batch.name"></td>
 		                                    <td v-text="transport_route_student.transport_route_detail.transport_route.name"></td>
-                                            <td>
-                                                <ul style="list-style-type: none; padding-left: 0px">
-                                                    <li v-for="student_fee_record in transport_route_student.student_record.student_fee_records" v-if="student_fee_record.fee_installment.transport_fee_id">
-                                                        {{student_fee_record.fee_installment.title}} {{formatCurrency(student_fee_record.transport_fee)}} / {{getTransportFee(student_fee_record)}}
-                                                    </li>
-                                                </ul>
-                                            </td>
 		                                </tr>
 		                            </tbody>
 		                        </table>
@@ -84,10 +76,8 @@
 </template>
 
 <script>
-	import vSelect from 'vue-multiselect'
-
 	export default {
-		components: {vSelect},
+		components: {},
 		data(){
 			return {
 				transport_stoppages: [],
@@ -120,16 +110,8 @@
             getConfig(config){
                 return helper.getConfig(config);
             },
-            formatCurrency(price) {
-                return helper.formatCurrency(price);
-            },
             getAdmissionNumber(admission){
             	return helper.getAdmissionNumber(admission)
-            },
-            getTransportFee(student_fee_record) {
-                let transport_fee_detail = student_fee_record.fee_installment.transport_fee.transport_fee_details.find(o => o.transport_circle_id == student_fee_record.transport_circle_id);
-
-                return helper.formatCurrency(transport_fee_detail.amount);
             },
 			getPreRequisite(){
 				let loader = this.$loading.show();

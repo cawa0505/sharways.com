@@ -166,20 +166,9 @@ class PaymentMethodRepository
      */
     private function formatParams($params, $payment_method_id = null)
     {
-        $is_default = gbv($params, 'is_default');
-
-        if ($is_default) {
-            if ($payment_method_id) {
-                $this->payment_method->where('id', '!=', $payment_method_id)->update(['is_default' => 0]);
-            } else {
-                $this->payment_method->whereNotNull('id')->update(['is_default' => 0]);
-            }
-        }
-
         $formatted = [
             'name'        => gv($params, 'name'),
-            'description' => gv($params, 'description'),
-            'is_default'  => $is_default,
+            'description' => gv($params, 'description')
         ];
 
         $options['requires_instrument_number']        = gbv($params, 'requires_instrument_number');

@@ -71,7 +71,7 @@
                                     <th>{{trans('student.admission_number_short')}}</th>
                                     <th>{{trans('student.name')}}</th>
                                     <th>{{trans('academic.batch')}}</th>
-                                    <th>{{trans('student.father_name')}}</th>
+                                    <th>{{trans('student.first_guardian_name')}}</th>
                                     <th>{{trans('student.contact_number')}}</th>
                                     <th>{{trans('finance.fee_installment')}}</th>
                                     <th>{{trans('finance.fee_concession')}}</th>
@@ -83,7 +83,7 @@
                                     <td v-text="item.admission_number"></td>
                                     <td v-text="item.name"></td>
                                     <td v-text="item.batch"></td>
-                                    <td v-text="item.father_name"></td>
+                                    <td v-text="item.first_guardian_name"></td>
                                     <td v-text="item.contact_number"></td>
                                     <td v-text="item.fee_installment"></td>
                                     <td>
@@ -100,6 +100,15 @@
                                     </td>
                                 </tr>
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th>{{trans('general.total')}}</th>
+                                    <th colspan="4"></th>
+                                    <th>{{footer.total_concession}}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                     <module-info v-if="!list.total" module="finance" title="fee_concession_report_module_title" description="fee_concession_report_module_description" icon="list">
@@ -113,10 +122,8 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components : { vSelect },
+        components : {  },
         data() {
             return {
                 list: {
@@ -144,8 +151,8 @@
                         translation: i18n.student.name
                     },
                     {
-                        value: 'father_name',
-                        translation: i18n.student.father_name
+                        value: 'first_guardian_name',
+                        translation: i18n.student.first_guardian_name
                     }
                 ],
                 showFilterPanel: false,

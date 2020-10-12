@@ -101,13 +101,11 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import syllabusForm from './form'
     import syllabusDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { syllabusForm,datepicker,syllabusDetail,vSelect},
+        components : { syllabusForm,syllabusDetail},
         data() {
             return {
                 syllabuses: {

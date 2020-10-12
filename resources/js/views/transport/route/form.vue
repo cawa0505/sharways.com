@@ -50,11 +50,8 @@
 
 
 <script>
-    import switches from 'vue-switches'
-    import vSelect from 'vue-multiselect'
-
     export default {
-        components: {switches, vSelect},
+        components: {},
         data() {
             return {
                 transportRouteForm: new Form({
@@ -125,6 +122,9 @@
                         this.transportRouteForm.name = response.transport_route.name;
                         this.transportRouteForm.description = response.transport_route.description;
                         this.selected_transport_stoppages = response.selected_transport_stoppages;
+                        response.selected_transport_stoppages.forEach(transport_route => {
+                            this.transportRouteForm.transport_stoppages.push(transport_route.id);
+                        });
                         loader.hide();
                     })
                     .catch(error => {

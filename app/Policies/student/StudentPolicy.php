@@ -76,7 +76,7 @@ class StudentPolicy
      */
     public function search(User $user)
     {
-        return $user->hasAnyPermission(['issue-book']);
+        return $user->hasAnyPermission(['issue-book','create-certificate']);
     }
 
     /**

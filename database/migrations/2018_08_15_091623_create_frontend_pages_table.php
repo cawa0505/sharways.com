@@ -14,8 +14,7 @@ class CreateFrontendPagesTable extends Migration
     public function up()
     {
         Schema::create('frontend_pages', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->uuid('uuid')->nullable();
             $table->text('title')->nullable();
             $table->longText('body')->nullable();

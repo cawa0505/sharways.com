@@ -46,9 +46,32 @@
                                     </div>
                                     <div class="col-12 col-sm-6">
                                         <div class="form-group">
+                                            <label for="">{{trans('auth.login_with_otp')}}</label>
+                                            <div>
+                                                <switches v-model="configForm.login_with_otp" theme="bootstrap" color="success"></switches>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group">
                                             <label for="">{{trans('auth.two_factor_security')}}</label>
                                             <div>
                                                 <switches v-model="configForm.two_factor_security" theme="bootstrap" color="success"></switches>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group" v-if="configForm.two_factor_security">
+                                            <label for="">{{trans('auth.two_factor_security_method')}}</label>
+                                            <div class="radio radio-info p-l-0">
+                                                <div class="form-check form-check-inline ">
+                                                    <input class="form-check-input" type="radio" value="sms" id="two_factor_security_via_sms" v-model="configForm.two_factor_security_method" :checked="configForm.two_factor_security_method == 'sms'" name="two_factor_security_method" @click="configForm.errors.clear('two_factor_security_method')">
+                                                    <label class="form-check-label" for="two_factor_security_via_sms"> {{trans('auth.two_factor_security_via_sms')}}</label>
+                                                </div>
+                                                <div class="form-check form-check-inline ">
+                                                    <input class="form-check-input" type="radio" value="email" id="two_factor_security_via_email" v-model="configForm.two_factor_security_method" :checked="configForm.two_factor_security_method == 'email'" name="two_factor_security_method" @click="configForm.errors.clear('two_factor_security_method')">
+                                                    <label class="form-check-label" for="two_factor_security_via_email"> {{trans('auth.two_factor_security_via_email')}}</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -111,10 +134,8 @@
 
 
 <script>
-    import switches from 'vue-switches'
-
     export default {
-        components : { switches },
+        components : {  },
         data() {
             return {
                 configForm: new Form({
@@ -122,7 +143,9 @@
                     token_lifetime: '',
                     reset_password_token_lifetime: '',
                     reset_password: 0,
+                    login_with_otp: 0,
                     two_factor_security: 0,
+                    two_factor_security_method: '',
                     reset_password_recaptcha: 0,
                     lock_screen: 0,
                     lock_screen_timeout: '',

@@ -39,11 +39,9 @@
 
 
 <script>
-    import uuid from 'uuid/v4'
-    import vSelect from 'vue-multiselect'
 
     export default {
-        components:{vSelect},
+        components:{},
         data() {
             return {
                 documentForm: new Form({
@@ -60,7 +58,7 @@
         },
         props: ['uuid','did'],
         mounted() {
-            this.documentForm.upload_token = uuid();
+            this.documentForm.upload_token = this.$uuid.v4();
 
             this.getPreRequisite();
 
@@ -93,7 +91,7 @@
                         toastr.success(response.message);
                         this.clearAttachment = !this.clearAttachment;
                         this.$emit('completed');
-                        this.documentForm.upload_token = uuid();
+                        this.documentForm.upload_token = this.$uuid.v4();
                         this.selected_student_document_type = null;
                         loader.hide();
                     })

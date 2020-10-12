@@ -32,7 +32,7 @@ class VisitorLogRequest extends FormRequest
             'address'               => 'required_if:type,other',
             'visitor_count'         => 'required|numeric|min:1',
             'student_id'            => 'required_if:type,parent',
-            'date_of_visit'         => 'required|date_format:Y-m-d'
+            'date_of_visit'         => 'required'
         ];
     }
 

@@ -132,10 +132,9 @@
 <script>
     import blockForm from './form'
     import blockDetail from './show'
-    import draggable from 'vuedraggable'
 
     export default {
-        components : { blockForm,blockDetail,draggable},
+        components : { blockForm,blockDetail},
         data() {
             return {
                 blocks: {

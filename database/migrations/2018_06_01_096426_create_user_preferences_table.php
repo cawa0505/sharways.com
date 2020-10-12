@@ -14,15 +14,14 @@ class CreateUserPreferencesTable extends Migration
     public function up()
     {
         Schema::create('user_preferences', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('locale',10)->nullable();
             $table->string('sidebar',20)->nullable();
             $table->string('direction',10)->nullable();
             $table->string('color_theme',20)->nullable();
-            $table->integer('academic_session_id')->unsigned()->nullable();
+            $table->bigInteger('academic_session_id')->unsigned()->nullable();
             $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('set null');
             $table->text('options')->nullable();
             $table->timestamps();

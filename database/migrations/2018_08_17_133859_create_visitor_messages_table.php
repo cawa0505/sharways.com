@@ -14,8 +14,7 @@ class CreateVisitorMessagesTable extends Migration
     public function up()
     {
         Schema::create('visitor_messages', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('contact_number')->nullable();

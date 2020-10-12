@@ -129,10 +129,9 @@
 
 <script>
     import transportRouteForm from './form'
-    import draggable from 'vuedraggable'
 
     export default {
-        components : { transportRouteForm,draggable },
+        components : { transportRouteForm },
         data() {
             return {
                 transport_routes: {

@@ -11,6 +11,7 @@ class VehicleServiceRecord extends Model
 
     protected $fillable = [
                             'vehicle_id',
+                            'vehicle_service_center_id',
                             'log',
                             'amount',
                             'date_of_service',
@@ -20,7 +21,7 @@ class VehicleServiceRecord extends Model
                             'description',
                             'options'
                         ];
-    protected $casts = ['options' => 'array'];
+    protected $casts = ['options' => 'array', 'date_of_service' => 'date', 'next_due_date' => 'date'];
     protected $primaryKey = 'id';
     protected $table = 'vehicle_service_records';
     protected static $logName = 'vehicle_service_record';
@@ -31,6 +32,11 @@ class VehicleServiceRecord extends Model
     public function vehicle()
     {
         return $this->belongsTo('App\Models\Transport\Vehicle\Vehicle');
+    }
+
+    public function vehicleServiceCenter()
+    {
+        return $this->belongsTo('App\Models\Configuration\Transport\Vehicle\VehicleServiceCenter');
     }
 
     public function employee()
@@ -45,7 +51,7 @@ class VehicleServiceRecord extends Model
 
     public function scopeInfo($q)
     {
-        return $q->with('vehicle', 'employee');
+        return $q->with('vehicle', 'vehicleServiceCenter', 'employee');
     }
     
     public function scopeFilterById($q, $id)
@@ -64,6 +70,15 @@ class VehicleServiceRecord extends Model
         }
 
         return $q->where('vehicle_id', '=', $vehicle_id);
+    }
+    
+    public function scopeFilterByVehicleServiceCenterId($q, $vehicle_service_center_id)
+    {
+        if (! $vehicle_service_center_id) {
+            return $q;
+        }
+
+        return $q->where('vehicle_service_center_id', '=', $vehicle_service_center_id);
     }
 
     public function scopeDateOfServiceBetween($q, $dates)

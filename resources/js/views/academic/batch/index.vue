@@ -105,12 +105,10 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
-    import switches from 'vue-switches'
     import batchForm from './form'
 
     export default {
-        components : { batchForm,vSelect,switches },
+        components : { batchForm },
         data() {
             return {
                 batches: {

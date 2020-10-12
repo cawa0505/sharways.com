@@ -112,13 +112,11 @@
 </template>
 
 <script>
-    import vSelect from 'vue-multiselect'
     import notesForm from './form'
     import notesDetail from './show'
-    import datepicker from 'vuejs-datepicker'
 
     export default {
-        components : { notesForm,datepicker,notesDetail,vSelect},
+        components : { notesForm,notesDetail},
         data() {
             return {
                 notes: {
